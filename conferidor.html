@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Conferidor — Na Mosca</title>
+  <meta name="description" content="Confira suas apostas do jogo do bicho contra os resultados.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><circle cx='20' cy='20' r='18' fill='%230e5a3a'/><circle cx='20' cy='20' r='11' fill='none' stroke='white' stroke-width='2.5'/><circle cx='20' cy='20' r='4.5' fill='%23e8a400'/></svg>">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<main class="wrap">
+  <div class="page-head">
+    <h1>Conferidor</h1>
+    <p>Digite suas apostas (uma por linha) e escolha a extração. Para grupos use o número (ex.: <span class="mono">16</span>) ou o nome (<span class="mono">leão</span>); para duque/terno separe com espaço ou traço.</p>
+  </div>
+  <div class="grid g2">
+    <div class="card">
+      <div class="toolbar" style="flex-direction:column;align-items:stretch">
+        <div id="banca-bar"></div>
+        <label class="field"><span>Extração</span><select id="extracao"></select></label>
+        <label class="field"><span>Modalidade</span><select id="modalidade">
+          <option value="grupo">Grupo</option><option value="dezena">Dezena</option><option value="centena">Centena</option><option value="milhar">Milhar</option>
+          <option value="duque-gp">Duque de grupo</option><option value="terno-gp">Terno de grupo</option>
+          <option value="duque-dz">Duque de dezena</option><option value="terno-dz">Terno de dezena</option></select></label>
+        <div class="field"><span>Prêmios</span><div class="seg" id="ate"><button data-v="1" class="on">Cabeça</button><button data-v="5">1º ao 5º</button></div></div>
+        <label class="field"><span>Apostas</span><textarea id="apostas" rows="8" placeholder="16&#10;leão&#10;05 12"></textarea></label>
+        <button class="btn btn-primary" id="btn">Conferir</button>
+      </div>
+    </div>
+    <div>
+      <div id="ext"></div>
+      <div class="card" style="margin-top:16px"><h3>Resultado da conferência</h3><div id="saida"><p class="empty">Aguardando apostas.</p></div></div>
+    </div>
+  </div>
+</main>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/stats.js"></script>
+<script src="assets/js/ui.js"></script>
+<script src="assets/js/pages/conferidor.js"></script>
+</body>
+</html>

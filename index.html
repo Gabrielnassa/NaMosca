@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Na Mosca — Estatísticas e análises do jogo do bicho</title>
+  <meta name="description" content="Resultados, estatísticas, bichos atrasados, gerador de palpites e análises do jogo do bicho.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><circle cx='20' cy='20' r='18' fill='%230e5a3a'/><circle cx='20' cy='20' r='11' fill='none' stroke='white' stroke-width='2.5'/><circle cx='20' cy='20' r='4.5' fill='%23e8a400'/></svg>">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<main>
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <span class="kicker">Estatística aplicada ao bicho</span>
+        <h1>Analise antes de jogar.<br>Acerte <span style="color:var(--accent)">na mosca</span>.</h1>
+        <p>Resultados atualizados, bichos quentes e atrasados, bicho que puxa bicho, gerador de palpites
+           com filtros e conferidor automático — tudo em um só lugar.</p>
+        <div class="btn-row">
+          <a class="btn btn-primary" href="gerador.html">Gerar palpites</a>
+          <a class="btn btn-ghost" href="estatisticas.html">Ver estatísticas</a>
+        </div>
+      </div>
+      <div class="hero-card" id="hero-last" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="toolbar" id="banca-bar"></div>
+      <div class="grid g4" id="tiles"></div>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:0">
+    <div class="wrap">
+      <div class="section-title">
+        <h2>Últimos resultados</h2>
+        <a href="resultados.html">Todos os resultados →</a>
+      </div>
+      <div class="grid g4" id="ultimos"></div>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:0">
+    <div class="wrap grid g2">
+      <div class="card">
+        <header><h3>Frequência na cabeça — últimos 60 dias</h3><a class="small" href="estatisticas.html">Detalhes</a></header>
+        <div id="freq-chart"></div>
+        <p class="muted small" style="margin:8px 0 0">Linha tracejada = frequência esperada se todos os bichos saíssem igualmente. Destaque = acima da média.</p>
+      </div>
+      <div class="card">
+        <header><h3>Mais atrasados na cabeça</h3><span class="muted small">extrações sem sair</span></header>
+        <div id="atrasados"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:0">
+    <div class="wrap">
+      <div class="section-title"><h2>Ferramentas</h2></div>
+      <div class="grid g4">
+        <a class="card" href="gerador.html"><h3>🎯 Gerador de palpites</h3><p class="muted small">Grupo, dezena, centena, milhar, duque e terno com estratégias baseadas em estatística.</p></a>
+        <a class="card" href="conferidor.html"><h3>✅ Conferidor</h3><p class="muted small">Cole suas apostas e confira contra qualquer extração do histórico.</p></a>
+        <a class="card" href="estatisticas.html"><h3>📊 Estatísticas</h3><p class="muted small">Frequências, atrasos, mapa de calor por dia da semana, dezenas e dígitos.</p></a>
+        <a class="card" href="sonhos.html"><h3>🌙 Sonhos</h3><p class="muted small">Sonhou com algo? Descubra o bicho e as dezenas tradicionais.</p></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:0">
+    <div class="wrap">
+      <div class="section-title"><h2>Análises</h2><a href="analises.html">Todas as análises →</a></div>
+      <div class="grid g3" id="home-analises"></div>
+    </div>
+  </section>
+</main>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/stats.js"></script>
+<script src="assets/js/ui.js"></script>
+<script src="assets/js/artigos.js"></script>
+<script>
+(function () {
+  const { $ } = NM;
+  function render(bancaId) {
+    const res = NM.loadResults(bancaId, 180);
+    const last = res[res.length - 1];
+    const cab = last.premios[0];
+    const b = NM.bicho(cab.grupo);
+    $('#hero-last').innerHTML = `
+      <div class="label">Último resultado · ${NM.esc(last.bancaNome)}</div>
+      <div style="display:flex;justify-content:space-between;align-items:end;gap:10px;margin-top:6px;flex-wrap:wrap">
+        <div><div class="hero-milhar">${cab.milhar}</div>
+          <div class="hero-bicho"><span class="big">${b.emoji}</span>Grupo ${NM.pad(b.grupo, 2)} · ${b.nome}</div></div>
+        <div style="text-align:right;color:#cfe3d7">${last.extracaoNome}<br>${NM.fmtDate(last.data)} · ${last.hora}</div>
+      </div>
+      <div style="margin-top:12px;display:flex;gap:6px;flex-wrap:wrap">${last.premios.slice(1, 5).map((p) =>
+        `<span class="chip" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);color:#fff">${p.posicao}º <b class="mono">${p.milhar}</b> ${NM.bicho(p.grupo).emoji}</span>`).join('')}</div>`;
+
+    const r60 = res.filter((e) => e.data >= NM.isoDate(new Date(Date.now() - 60 * 864e5)));
+    const st = NM.stats(r60, { ate: 1 });
+    const stAll = NM.stats(res, { ate: 1 });
+    const quente = [...st.grupos].sort((a, b) => b.freq - a.freq)[0];
+    const atrasado = [...stAll.grupos].sort((a, b) => b.atraso - a.atraso)[0];
+    const pux = NM.puxada(stAll, cab.grupo, 1)[0];
+    $('#tiles').innerHTML = `
+      <div class="card tile"><div class="label">Bicho mais quente (60d)</div><div class="value">${quente.emoji} ${quente.nome}</div><div class="sub">${quente.freq} vezes na cabeça · esperado ${st.grupos[0].esperado.toFixed(1).replace('.', ',')}</div></div>
+      <div class="card tile"><div class="label">Mais atrasado</div><div class="value">${atrasado.emoji} ${atrasado.nome}</div><div class="sub">${atrasado.atraso} extrações sem sair na cabeça</div></div>
+      <div class="card tile"><div class="label">${b.nome} costuma puxar</div><div class="value">${NM.bicho(pux.g).emoji} ${NM.bicho(pux.g).nome}</div><div class="sub">${NM.pct(pux.pct)} das vezes na extração seguinte</div></div>
+      <div class="card tile"><div class="label">Extrações analisadas</div><div class="value">${NM.num(res.length)}</div><div class="sub">últimos 180 dias · ${NM.esc(NM.banca(bancaId).nome)}</div></div>`;
+
+    $('#ultimos').innerHTML = res.slice(-4).reverse().map((e) => NM.extracaoCard(e, { compact: true })).join('');
+
+    NM.barChart($('#freq-chart'), st.grupos.map((g) => ({
+      label: g.emoji, value: g.freq, highlight: g.freq > g.esperado,
+      tip: `<b>${NM.pad(g.grupo, 2)} ${g.nome}</b><br>${g.freq} vezes · esperado ${g.esperado.toFixed(1)}`,
+    })), { ref: st.grupos[0].esperado, refLabel: 'média' });
+
+    const top = [...stAll.grupos].sort((a, b) => b.atraso - a.atraso).slice(0, 8);
+    NM.hbars($('#atrasados'), top.map((g) => ({
+      label: `${g.emoji} ${g.nome}`, value: g.atraso, highlight: g.atraso > g.mediaAtraso * 2,
+      tip: `Atraso atual ${g.atraso} · média ${g.mediaAtraso.toFixed(1)} · recorde ${g.maxAtraso}`,
+    })));
+
+    $('#home-analises').innerHTML = NM.artigoCards(NM.ARTIGOS.slice(0, 3));
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    NM.bancaSelect($('#banca-bar'), render);
+    render(NM.getBanca());
+  });
+})();
+</script>
+</body>
+</html>
