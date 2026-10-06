@@ -24,33 +24,39 @@
   NM.bicho = (grupo) => NM.BICHOS[grupo - 1];
   NM.bichoDaMilhar = (m) => NM.bicho(NM.grupoDaDezena(Number(m) % 100));
 
-  /* ---------- Bancas (horários de referência; com dados reais as extrações vêm da fonte) ---------- */
-  const T = [0, 1, 2, 3, 4, 5, 6], SEG_SAB = [1, 2, 3, 4, 5, 6];
-  const ext = (id, nome, hora, dias = SEG_SAB, limite) => ({ id, nome, hora, dias, limite });
+  /* ---------- Sorteios (a grade da banca) ----------
+   * Cada sorteio tem um código curto (o mesmo da máquina da banca), horário, dias e a fonte dos dados.
+   * status 'novo' = sorteio recém-criado, ainda sem resultados automáticos.
+   */
+  const T = [0, 1, 2, 3, 4, 5, 6], SEG_SAB = [1, 2, 3, 4, 5, 6], DOM = [0], SAB = [6];
+  const ext = (id, nome, hora, dias = SEG_SAB, limite, extra = {}) => ({ id, nome, hora, dias, limite, ...extra });
+  const SP = [8, 9, 10, 11, 12, 13, 14, 16, 17, 18, 19, 20].map((h) => ext(`SP${NM.pad(h, 2)}`, `SP ${NM.pad(h, 2)}h`, `${NM.pad(h, 2)}:20`, SEG_SAB));
   NM.BANCAS = [
-    { id: 'rj', sigla: 'RJ', nome: 'PT Rio (RJ)', extracoes: [
-      ext('PPT', 'PPT', '09:20'), ext('PTM', 'PTM', '11:20', T, '11:15'), ext('PT', 'PT', '14:20', T, '14:15'),
-      ext('PTV', 'PTV', '16:20', T, '16:15'), ext('PTN', 'PTN', '18:20', SEG_SAB, '18:15'), ext('COR', 'Corujinha', '21:20', SEG_SAB, '21:15')] },
-    { id: 'sp', sigla: 'SP', nome: 'PT-SP (SP)', extracoes: [
-      ext('SP08', 'SP 08h', '08:20'), ext('SP10', 'SP 10h', '10:20'), ext('SP12', 'SP 12h', '12:20', T), ext('BAND', 'Bandeirantes', '13:20'),
-      ext('SP15', 'SP 15h', '15:20', T), ext('SP17', 'SP 17h', '17:20', T), ext('SP19', 'SP 19h', '19:20'), ext('SP20', 'SP 20h', '20:20')] },
-    { id: 'go', sigla: 'GO', nome: 'Look (GO)', extracoes: [
-      ext('L07', 'Look 07h', '07:20'), ext('L09', 'Look 09h', '09:20'), ext('L11', 'Look 11h', '11:20', T), ext('L14', 'Look 14h', '14:20', T),
-      ext('L16', 'Look 16h', '16:20'), ext('L18', 'Look 18h', '18:20'), ext('L21', 'Look 21h', '21:20')] },
-    { id: 'ba', sigla: 'BA', nome: 'Bahia (BA)', extracoes: [
-      ext('BA10', 'Bahia 10h', '10:00'), ext('BA12', 'Bahia 12h', '12:00', T), ext('BA15', 'Bahia 15h', '15:00'), ext('BA19', 'Bahia 19h', '19:00'), ext('BA21', 'Bahia 21h', '21:00')] },
-    { id: 'pb', sigla: 'PB', nome: 'Paraíba (PB)', extracoes: [
-      ext('PB09', 'PB 09h45', '09:45'), ext('PB10', 'PB 10h45', '10:45'), ext('PB12', 'PB 12h45', '12:45', T), ext('PB15', 'PB 15h45', '15:45'), ext('PB18', 'PB 18h', '18:00'), ext('PB19', 'PB 19h', '19:00')] },
-    { id: 'pe', sigla: 'PE', nome: 'Pernambuco (PE)', extracoes: [
-      ext('PE09', 'PE 09h30', '09:30'), ext('PE11', 'PE 11h', '11:00'), ext('PE12', 'PE 12h30', '12:30'), ext('PE14', 'PE 14h', '14:00', T), ext('PE15', 'PE 15h30', '15:30'), ext('PE17', 'PE 17h', '17:00'), ext('PE19', 'PE 19h', '19:00')] },
-    { id: 'ce', sigla: 'CE', nome: 'Lotece (CE)', extracoes: [
-      ext('CE11', 'Lotece 11h', '11:00'), ext('CE14', 'Lotece 14h', '14:00', T), ext('CE17', 'Lotece 17h', '17:00'), ext('CE19', 'Lotece 19h', '19:00')] },
-    { id: 'mg', sigla: 'MG', nome: 'Minas Gerais (MG)', extracoes: [
-      ext('MG12', 'Minas 12h', '12:00'), ext('MG15', 'Minas 15h', '15:00', T), ext('MG19', 'Minas 19h', '19:00'), ext('MG21', 'Minas 21h', '21:00')] },
-    { id: 'df', sigla: 'DF', nome: 'Brasília (DF)', extracoes: [
-      ext('DF10', 'LBR 10h', '10:00'), ext('DF12', 'LBR 12h40', '12:40'), ext('DF15', 'LBR 15h', '15:00', T), ext('DF17', 'LBR 17h', '17:00'), ext('DF19', 'LBR 19h', '19:00'), ext('DF20', 'LBR 20h40', '20:40')] },
-    { id: 'fed', sigla: 'FED', nome: 'Federal', extracoes: [ext('FED', 'Federal', '19:00', [3, 6], '18:50')] },
+    { id: 'rj', sigla: 'RJ', nome: 'Rio de Janeiro', extracoes: [
+      ext('RJ09', 'Rio 09h', '09:20'),
+      ext('CTG', 'CTG', '11:20', T, '11:15'),
+      ext('PT', 'PT', '14:20', T, '14:15'),
+      ext('BAN', 'BAN', '16:20', SEG_SAB, '16:15'),
+      ext('PTV', 'PTV', '16:20', T, '16:15'),
+      ext('PTN', 'PTN', '18:20', SEG_SAB, '18:15'),
+      ext('PTN-SB', 'PTN Sábado', '18:20', SAB, '18:15', { status: 'novo' }),
+      ext('COR', 'Corujinha', '21:20', SEG_SAB, '21:15')] },
+    { id: 'sp', sigla: 'SP', nome: 'São Paulo', extracoes: SP },
+    { id: 'fed', sigla: 'FED', nome: 'Federal', extracoes: [
+      ext('FED', 'Federal', '19:00', [3, 6], '18:50'),
+      ext('FED-DM', 'Federal Domingo', '19:00', DOM, '18:50', { status: 'novo' })] },
   ];
+
+  /** Grade completa, na ordem de horário (inclui Quininha e Seninha). */
+  NM.SORTEIOS = [
+    ...NM.BANCAS.flatMap((b) => b.extracoes.map((e) => ({ ...e, banca: b.id, tipo: 'bicho' }))),
+    { id: 'QN', nome: 'Quininha', hora: '20:00', dias: SEG_SAB, banca: null, tipo: 'quininha', link: 'quininha.html' },
+    { id: 'SN', nome: 'Seninha', hora: '20:00', dias: SEG_SAB, banca: null, tipo: 'seninha', link: 'seninha.html' },
+    { id: 'QN-DM', nome: 'Quininha Domingo', hora: '20:00', dias: DOM, banca: null, tipo: 'quininha', link: 'quininha.html', status: 'novo' },
+    { id: 'SN-DM', nome: 'Seninha Domingo', hora: '20:00', dias: DOM, banca: null, tipo: 'seninha', link: 'seninha.html', status: 'novo' },
+  ].sort((a, b) => a.hora.localeCompare(b.hora) || a.id.localeCompare(b.id));
+  NM.sorteio = (id) => NM.SORTEIOS.find((s) => s.id === id);
+
   NM.banca = (id) => NM.BANCAS.find((b) => b.id === id) || NM.BANCAS[0];
 
   /* ---------- Modalidades e cotações (valores pagos por R$ 1,00) ---------- */
@@ -169,10 +175,23 @@
       if (!j.extracoes || !j.extracoes.length) return;
       live[b.id] = {
         fonte: j.fonte, atualizado: j.atualizado,
-        extracoes: j.extracoes.map((e) => montar(b, e, e.data, e.premios)),
+        extracoes: j.extracoes.map((e) => montar(b, { ...e, ...codigo(b, e) }, e.data, e.premios)),
       };
     }));
   })();
+
+  /* Converte o rótulo/horário vindo da fonte para o código do sorteio na grade. */
+  const ALIAS = { PPT: 'RJ09', PTM: 'CTG', CORUJA: 'COR', FEDERAL: 'FED' };
+  function codigo(b, e) {
+    const lbl = ALIAS[e.id] || e.id;
+    let x = b.extracoes.find((s) => s.id === lbl);
+    if (!x && e.hora) {
+      const mesmoHorario = b.extracoes.filter((s) => s.hora === e.hora && s.status !== 'novo');
+      x = mesmoHorario.length === 1 ? mesmoHorario[0] : null;
+      if (!x && b.id === 'sp') x = b.extracoes.find((s) => s.id === 'SP' + e.hora.slice(0, 2));
+    }
+    return x ? { id: x.id, nome: x.nome, hora: x.hora } : { id: e.id, nome: e.nome || e.id, hora: e.hora };
+  }
 
   NM.isLive = (bancaId) => !!live[bancaId];
   NM.fonte = (bancaId) => live[bancaId] || null;
@@ -193,7 +212,7 @@
         const day = new Date(now.getFullYear(), now.getMonth(), now.getDate() - d);
         const iso = NM.isoDate(day);
         for (const e of banca.extracoes) {
-          if (!e.dias.includes(day.getDay())) continue;
+          if (!e.dias.includes(day.getDay()) || e.status === 'novo') continue;
           if (d === 0) {
             const [h, m] = e.hora.split(':').map(Number);
             if (now.getHours() * 60 + now.getMinutes() < h * 60 + m + 10) continue;

@@ -47,10 +47,19 @@ function completar(premios) {
   return p;
 }
 
+/** Código do sorteio na grade da banca (ex.: PTM → CTG, 17:20 em SP → SP17). */
+function codigo(b, e) {
+  const m = b.mapa || {};
+  if (e.label && m[e.label]) return m[e.label];
+  if (e.hora && m[e.hora]) return m[e.hora];
+  if (b.prefixoHora && e.hora) return b.prefixoHora + e.hora.slice(0, 2);
+  return e.label || `H${(e.hora || '').replace(':', '')}`;
+}
+
 async function coletarBanca(b) {
   const arq = join(ROOT, 'data/bicho', `${b.id}.json`);
   const atual = await readJSON(arq, { banca: b.id, nome: b.nome, extracoes: [] });
-  const porChave = new Map(atual.extracoes.map((e) => [`${e.data}|${e.hora || e.id}`, e]));
+  const porChave = new Map(atual.extracoes.map((e) => [`${e.data}|${e.id}`, e]));
   let novos = 0, fonteOk = null;
 
   for (const url of b.urls) {
@@ -59,9 +68,9 @@ async function coletarBanca(b) {
       const lidas = parsePage(html, { hoje: hojeBRT() });
       if (!lidas.length) { console.log(`  ${b.id}: nenhuma extração reconhecida em ${url}`); continue; }
       for (const e of lidas) {
-        const id = e.label || `H${(e.hora || '').replace(':', '')}`;
-        const chave = `${e.data}|${e.hora || id}`;
-        const reg = { data: e.data, id, nome: e.label && e.hora ? `${e.label} ${e.hora}` : e.label || e.hora, hora: e.hora, premios: completar(e.premios) };
+        const id = codigo(b, e);
+        const chave = `${e.data}|${id}`;
+        const reg = { data: e.data, id, nome: id, hora: e.hora, premios: completar(e.premios) };
         const antes = porChave.get(chave);
         if (!antes || JSON.stringify(antes.premios) !== JSON.stringify(reg.premios)) novos++;
         porChave.set(chave, reg);

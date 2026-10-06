@@ -23,11 +23,13 @@ estatísticas, fechamentos com garantia e retorno esperado de cada aposta. É um
 
 `scripts/atualizar-resultados.mjs` (Node 20, sem dependências) grava:
 
-- `data/bicho/<banca>.json` — RJ, SP (inclui SP 17h20), GO, BA, PB, PE, CE, MG, DF;
+- `data/bicho/<banca>.json` — Rio (RJ09, CTG, PT, BAN, PTV, PTN, COR) e São Paulo (SP08 a SP20);
 - `data/loterias/{megasena,quina,federal}.json` — API oficial da Caixa, com uma API comunitária como reserva;
 - `data/bicho/fed.json` — a Federal convertida para o bicho (últimos 4 dígitos dos 5 bilhetes).
 
-As fontes de cada banca ficam em `scripts/fontes.json`. O coletor tenta as URLs em ordem e usa um leitor
+A grade de sorteios (26 códigos, igual à máquina da banca) fica em `NM.BANCAS`/`NM.SORTEIOS` em `assets/js/data.js`.
+Sorteios novos (PTN-SB, FED-DM, QN-DM, SN-DM) aparecem como "em breve" até terem resultados.
+As fontes de cada banca ficam em `scripts/fontes.json`: portalbrasil.net primeiro, deunoposte.app.br e resultadofacil como reserva. O coletor tenta as URLs em ordem e usa um leitor
 genérico de tabelas (`scripts/parser.mjs`) que reconhece os dois layouts mais comuns: uma tabela por extração,
 ou extrações em colunas. Só aceita uma extração com o 1º ao 5º prêmio completos. Teste: `node scripts/test/parser.test.mjs`.
 

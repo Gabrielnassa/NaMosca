@@ -1,6 +1,5 @@
 (function () {
   const { $, $$ } = NM;
-  let filtro = 'hoje';
 
   const TOOLS = [
     ['fechamento.html', 'grid', 'Fechamento do bicho', 'Terno, dupla, dezenas, quina de grupo, passe e lotinho com custo e chance.'],
@@ -11,13 +10,13 @@
     ['tabela.html', 'book', 'Cotações', 'Quanto paga cada modalidade e a chance real.'],
   ];
 
-  function resultados(bancaId) {
-    const res = NM.loadResults(bancaId, 4);
-    const ds = [...new Set(res.map((e) => e.data))];
-    const dia = filtro === 'hoje' ? ds[ds.length - 1] : ds[ds.length - 2];
-    const list = res.filter((e) => e.data === dia).reverse().slice(0, 4);
-    $('#res-title').textContent = filtro === 'hoje' ? (dia === NM.isoDate(new Date()) ? 'Resultados de hoje' : `Últimos resultados · ${NM.fmtDate(dia)}`) : `Resultados de ${NM.fmtDate(dia || '')}`;
-    $('#ultimos').innerHTML = list.length ? list.map((e) => NM.extracaoCard(e)).join('') : '<div class="card empty">Sem resultados.</div>';
+  function sorteios() {
+    const todos = ['rj', 'sp', 'fed'].flatMap((b) => NM.loadResults(b, 4));
+    const hoje = NM.isoDate(new Date());
+    $('#hoje-txt').textContent = `${NM.DIAS[new Date().getDay()]}, ${NM.fmtDate(hoje)}`;
+    NM.grade($('#grade'), hoje, { link: (id) => `resultados.html?s=${id}` });
+    const ult = todos.sort((a, b) => (b.data + b.hora).localeCompare(a.data + a.hora)).slice(0, 4);
+    $('#ultimos').innerHTML = ult.map((e) => NM.extracaoCard(e)).join('');
   }
 
   function destaques(bancaId) {
@@ -47,15 +46,12 @@
     })));
   }
 
-  function render(id) { resultados(id); destaques(id); }
+  function render(id) { destaques(id); }
 
   NM.onReady(() => {
     NM.bancaSelect($('#banca-bar'), render);
-    $$('#pills button[data-f]').forEach((b) => b.addEventListener('click', () => {
-      filtro = b.dataset.f;
-      $$('#pills button[data-f]').forEach((x) => x.classList.toggle('on', x === b));
-      resultados(NM.getBanca());
-    }));
+    $('#legenda').innerHTML = NM.gradeLegenda;
+    sorteios();
     render(NM.getBanca());
     $('#tools').innerHTML = TOOLS.map(([href, ic, t, d]) => `<a class="card shortcut" href="${href}"><span class="ic">${NM.icon(ic)}</span><div><h3>${t}</h3><p class="muted small" style="margin:0">${d}</p></div></a>`).join('');
     $('#news').innerHTML = NM.ARTIGOS.slice(0, 4).map((a) => `<li><time>${NM.fmtDateCurta(a.data)}</time><div><a href="analises.html?id=${a.id}">${a.titulo}</a><p>${a.resumo}</p></div></li>`).join('');

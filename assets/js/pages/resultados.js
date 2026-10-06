@@ -1,64 +1,67 @@
 (function () {
   const { $, $$ } = NM;
-  let banca = NM.getBanca();
-  let res = [];
-  let filtro = 'hoje';
+  const st = { dia: null, sel: null };
 
-  const datas = () => [...new Set(res.map((e) => e.data))];
+  const todos = () => ['rj', 'sp', 'fed'].flatMap((b) => NM.loadResults(b, 180));
+  const ultimoDia = () => todos().reduce((m, e) => (e.data > m ? e.data : m), '');
+  const doDia = (d) => todos().filter((e) => e.data === d).sort((a, b) => b.hora.localeCompare(a.hora));
 
   function render() {
-    const ds = datas();
-    const ultimo = ds[ds.length - 1];
-    let list, titulo = '';
-    if (filtro === 'hoje') list = res.filter((e) => e.data === ultimo);
-    else if (filtro === 'ontem') list = res.filter((e) => e.data === ds[ds.length - 2]);
-    else if (filtro === '7') list = res.filter((e) => ds.slice(-7).includes(e.data));
-    else list = res.filter((e) => e.data === filtro);
-    list = list.slice().reverse();
-    if (filtro === 'hoje' && ultimo !== NM.isoDate(new Date())) titulo = `<p class="note">Ainda não há resultados hoje. Mostrando ${NM.fmtDate(ultimo)}.</p>`;
-    let html = titulo, dia = '';
-    list.forEach((e) => {
-      if (filtro === '7' && e.data !== dia) { dia = e.data; html += `<h2 style="margin:8px 0 0">${NM.DIAS[new Date(e.data + 'T12:00').getDay()]}, ${NM.fmtDate(e.data)}</h2>`; }
-      html += NM.extracaoCard(e);
-    });
-    $('#lista').innerHTML = list.length ? html : '<div class="card empty">Sem extrações nesta data para esta banca.</div>';
+    const d = st.dia;
+    $('#dia-txt').textContent = `${NM.DIAS[new Date(d + 'T12:00').getDay()]}, ${NM.fmtDate(d)} · toque em um sorteio para ver o resultado`;
+    const lista = doDia(d);
+    if (!st.sel || !NM.sorteio(st.sel)) st.sel = lista[0] ? lista[0].extracao : 'PT';
+    NM.grade($('#grade'), d, { sel: st.sel, onSelect: (id) => { st.sel = id; history.replaceState(null, '', `?s=${id}`); render(); } });
+    detalhe(lista);
+    $('#lista').innerHTML = lista.length ? lista.map((e) => NM.extracaoCard(e)).join('') : '<div class="card empty">Nenhum resultado neste dia.</div>';
   }
 
-  function setFiltro(f) {
-    filtro = f;
-    $$('#pills > *').forEach((b) => b.classList.toggle('on', b.dataset.f === f || (b.id === 'cal-lbl' && !['hoje', 'ontem', '7'].includes(f))));
-    render();
+  function detalhe(lista) {
+    const s = NM.sorteio(st.sel);
+    const e = lista.find((x) => x.extracao === st.sel);
+    let html;
+    if (e) html = NM.extracaoCard(e);
+    else {
+      const msg = s.status === 'novo' ? 'Sorteio novo: os resultados aparecem aqui assim que começarem a ser publicados.'
+        : !s.dias.includes(new Date(st.dia + 'T12:00').getDay()) ? 'Este sorteio não corre neste dia da semana.'
+        : 'Resultado ainda não publicado.';
+      html = `<article class="card"><header><h3>${s.hora.replace(':', 'h')} · ${NM.esc(s.nome)}</h3><span class="muted small">${NM.fmtDate(st.dia)}</span></header><p class="empty" style="margin:0">${msg}</p></article>`;
+    }
+    $('#detalhe').innerHTML = html;
+    const hist = s.banca ? NM.loadResults(s.banca, 180).filter((x) => x.extracao === s.id).slice(-15).reverse() : [];
+    $('#hist-title').textContent = `Últimos resultados · ${s.id}`;
+    $('#hist').innerHTML = hist.length ? `<table class="data-table dense"><thead><tr><th>Data</th><th class="n">1º</th><th>Bicho</th><th class="n">2º</th><th class="n">3º</th></tr></thead><tbody>${hist.map((x) =>
+      `<tr${x.data === st.dia ? ' class="hl"' : ''}><td>${NM.fmtDateCurta(x.data)}</td><td class="n"><b>${x.premios[0].milhar}</b></td><td>${NM.chip(x.premios[0].grupo)}</td><td class="n">${x.premios[1].milhar}</td><td class="n">${x.premios[2].milhar}</td></tr>`).join('')}</tbody></table>`
+      : '<p class="empty">Sem histórico para este sorteio.</p>';
   }
 
-  function load() {
-    res = NM.loadResults(banca, 180);
-    const ds = datas();
-    $('#data').min = ds[0];
-    $('#data').max = ds[ds.length - 1];
+  function setDia(f) {
+    const ud = ultimoDia();
+    if (f === 'hoje') st.dia = ud;
+    else if (f === 'ontem') { const ds = [...new Set(todos().map((e) => e.data))].sort(); st.dia = ds[ds.indexOf(ud) - 1] || ud; }
+    else st.dia = f;
+    $$('#pills > *').forEach((b) => b.classList.toggle('on', b.dataset.f === f || (b.id === 'cal-lbl' && !['hoje', 'ontem'].includes(f))));
     render();
-    busca();
   }
 
   function busca() {
     const q = $('#busca').value.replace(/\D/g, '');
     if (q.length < 2) { $('#busca-res').innerHTML = ''; return; }
+    const res = todos().sort((a, b) => (b.data + b.hora).localeCompare(a.data + a.hora));
     const hits = [];
-    for (let i = res.length - 1; i >= 0 && hits.length < 30; i--) {
-      res[i].premios.slice(0, 5).forEach((p) => { if (p.milhar.endsWith(q)) hits.push({ e: res[i], p }); });
-    }
-    const g = NM.grupoDaDezena(Number(q.slice(-2)));
-    $('#busca-res').innerHTML = `<div class="card" style="margin-bottom:16px">
-      <header><h3>Onde saiu “${q}” (1º ao 5º)</h3><span>${NM.chip(g)}</span></header>
-      ${hits.length ? `<div class="table-wrap"><table class="data-table"><thead><tr><th>Data</th><th>Extração</th><th>Prêmio</th><th class="n">Milhar</th></tr></thead><tbody>
-      ${hits.map(({ e, p }) => `<tr><td>${NM.fmtDate(e.data)}</td><td>${NM.esc(e.extracaoNome)}</td><td>${p.posicao}º</td><td class="n"><b>${p.milhar}</b></td></tr>`).join('')}
-      </tbody></table></div>` : '<p class="empty">Nenhuma ocorrência nos últimos 180 dias.</p>'}</div>`;
+    for (const e of res) { if (hits.length >= 30) break; e.premios.slice(0, 5).forEach((p) => { if (p.milhar.endsWith(q)) hits.push({ e, p }); }); }
+    $('#busca-res').innerHTML = `<div class="card" style="margin-bottom:14px"><header><h3>Onde saiu “${q}” (1º ao 5º)</h3><span>${NM.chip(NM.grupoDaDezena(Number(q.slice(-2))))}</span></header>
+      ${hits.length ? `<div class="table-wrap"><table class="data-table dense"><thead><tr><th>Data</th><th>Sorteio</th><th>Prêmio</th><th class="n">Milhar</th></tr></thead><tbody>${hits.map(({ e, p }) =>
+        `<tr><td>${NM.fmtDate(e.data)}</td><td><b>${e.extracao}</b></td><td>${p.posicao}º</td><td class="n"><b>${p.milhar}</b></td></tr>`).join('')}</tbody></table></div>` : '<p class="empty">Nenhuma ocorrência nos últimos 180 dias.</p>'}</div>`;
   }
 
   NM.onReady(() => {
-    NM.bancaSelect($('#banca-bar'), (id) => { banca = id; load(); });
-    $$('#pills button').forEach((b) => b.addEventListener('click', () => setFiltro(b.dataset.f)));
-    $('#data').addEventListener('change', (e) => e.target.value && setFiltro(e.target.value));
+    st.sel = new URLSearchParams(location.search).get('s');
+    $('#legenda').innerHTML = NM.gradeLegenda;
+    $$('#pills button').forEach((b) => b.addEventListener('click', () => setDia(b.dataset.f)));
+    $('#data').max = NM.isoDate(new Date());
+    $('#data').addEventListener('change', (e) => e.target.value && setDia(e.target.value));
     $('#busca').addEventListener('input', busca);
-    load();
+    setDia('hoje');
   });
 })();

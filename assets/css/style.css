@@ -316,3 +316,39 @@ select:focus, input:focus, textarea:focus { outline: 2px solid var(--primary-100
 .empty { text-align: center; color: var(--muted); padding: 28px; font-size: .9rem; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 @media (max-width: 640px) { .hb-row { grid-template-columns: 110px 1fr 46px; } .numgrid { grid-template-columns: repeat(8, minmax(0, 1fr)); } .kpi .value { font-size: 1.25rem; } }
+
+/* ---------- Grade de sorteios (como na máquina da banca) ---------- */
+.grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 10px; }
+.sorteio {
+  position: relative; background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 12px 10px 10px; text-align: center;
+  cursor: pointer; font: inherit; color: var(--text); box-shadow: 0 1px 2px rgba(0,0,0,.05); transition: transform .15s, box-shadow .15s, border-color .15s;
+  display: flex; flex-direction: column; align-items: center; gap: 2px; min-height: 96px; text-decoration: none !important;
+}
+.sorteio:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(19, 78, 102, .12); border-color: #93c5fd; }
+.sorteio .cod { font-size: 1.15rem; font-weight: 900; letter-spacing: .02em; }
+.sorteio .hr { font-size: .74rem; color: var(--muted); font-weight: 500; }
+.sorteio .val { font-size: .95rem; font-weight: 700; color: var(--head-1); margin-top: 4px; }
+.sorteio .bx { font-size: .72rem; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.sorteio .st { position: absolute; top: 8px; right: 8px; width: 8px; height: 8px; border-radius: 50%; background: var(--line-2); }
+.sorteio.saiu .st { background: #22c55e; }
+.sorteio.aguardando .st { background: #f59e0b; box-shadow: 0 0 0 3px #fef3c7; }
+.sorteio.novo { border-style: dashed; background: #fafafa; }
+.sorteio.novo .cod { color: var(--muted); }
+.sorteio.folga { opacity: .55; }
+.sorteio.loto .cod { color: #7c3aed; }
+.sorteio.sel { background: linear-gradient(180deg, var(--head-1), var(--head-2)); border-color: var(--head-2); color: #fff; box-shadow: 0 8px 20px rgba(19, 78, 102, .3); }
+.sorteio.sel .hr, .sorteio.sel .bx { color: #cfe7f0; }
+.sorteio.sel .val { color: #fff; }
+.grade-legenda { display: flex; flex-wrap: wrap; gap: 14px; font-size: .78rem; color: var(--text-2); margin-top: 10px; }
+.grade-legenda i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; vertical-align: 1px; }
+@media (max-width: 640px) { .grade { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; } .sorteio { min-height: 84px; padding: 10px 6px 8px; } .sorteio .cod { font-size: 1rem; } }
+
+/* ---------- Faixa de destaque ---------- */
+.hero { background: linear-gradient(180deg, var(--head-2) 0%, #0f3f53 100%); color: #fff; padding: 22px 0 70px; margin-bottom: -52px; }
+.hero h1 { color: #fff; margin: 0 0 4px; }
+.hero p { color: #b9dbe7; margin: 0; }
+.hero .eyebrow { color: var(--clover); }
+.hero-row { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; }
+.hero .pills button, .hero .pills a, .hero .pills label { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.18); color: #e6f3f8; }
+.hero .pills .on { background: #fff; color: var(--head-2); border-color: #fff; }
+.panel-float { position: relative; z-index: 2; }

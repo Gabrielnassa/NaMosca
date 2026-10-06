@@ -90,6 +90,38 @@
       <div class="premios${compact ? ' compact' : ''}">${p.slice(0, 5).map(box).join('')}</div>${extra}</article>`;
   };
 
+  /**
+   * Grade de sorteios do dia `dia` (ISO). opts: { sel, onSelect(id), link(id) }
+   */
+  NM.grade = (el, dia, opts = {}) => {
+    const hoje = NM.isoDate(new Date());
+    const agora = new Date();
+    const mins = agora.getHours() * 60 + agora.getMinutes();
+    const dow = new Date(dia + 'T12:00').getDay();
+    const porBanca = {};
+    const res = (b) => (porBanca[b] = porBanca[b] || NM.loadResults(b, 180));
+    el.innerHTML = NM.SORTEIOS.map((s) => {
+      let cls = '', val = '', bx = '';
+      const [h, m] = s.hora.split(':').map(Number);
+      if (s.status === 'novo') { cls = 'novo'; bx = 'em breve'; }
+      else if (!s.dias.includes(dow)) { cls = 'folga'; bx = 'não corre'; }
+      else if (s.banca) {
+        const e = res(s.banca).find((x) => x.data === dia && x.extracao === s.id);
+        if (e) { cls = 'saiu'; val = e.premios[0].milhar; bx = NM.bicho(e.premios[0].grupo).nome; }
+        else if (dia === hoje && mins < h * 60 + m + 10) { cls = 'aguardando'; bx = 'aguardando'; }
+        else bx = 'sem resultado';
+      } else { cls = 'loto'; bx = s.nome; }
+      if (s.tipo !== 'bicho') cls += ' loto';
+      if (opts.sel === s.id) cls += ' sel';
+      const href = s.link || (opts.link ? opts.link(s.id) : null);
+      const tag = href ? `a href="${href}"` : 'button type="button"';
+      return `<${tag} class="sorteio ${cls}" data-id="${s.id}" title="${NM.esc(s.nome)} · ${s.hora}"><span class="st"></span>
+        <span class="cod">${s.id}</span><span class="hr">${s.hora.replace(':', 'h')}</span>${val ? `<span class="val">${val}</span>` : ''}<span class="bx">${bx}</span></${href ? 'a' : 'button'}>`;
+    }).join('');
+    if (opts.onSelect) el.onclick = (e) => { const b = e.target.closest('button.sorteio'); if (b) opts.onSelect(b.dataset.id); };
+  };
+  NM.gradeLegenda = '<div class="grade-legenda"><span><i style="background:#22c55e"></i>saiu</span><span><i style="background:#f59e0b"></i>aguardando</span><span><i style="background:#d1d5db"></i>sem resultado</span><span><i style="background:#fff;border:1px dashed #9ca3af"></i>novo · em breve</span></div>';
+
   /* ---------- Tooltip ---------- */
   let tip;
   NM.tooltip = (root) => {

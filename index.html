@@ -9,19 +9,19 @@
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
-<main class="wrap">
-  <div class="stack" style="padding-top:16px">
-    <div id="banca-bar"></div>
-    <div class="pills" id="pills">
-      <button data-f="hoje" class="on">Hoje</button>
-      <button data-f="ontem">Ontem</button>
-      <a href="resultados.html">Todos os resultados</a>
+<main>
+  <section class="hero">
+    <div class="wrap hero-row">
+      <div><span class="eyebrow" id="hoje-txt"></span><h1>Sorteios de hoje</h1><p>Toque em um sorteio para ver todos os prêmios.</p></div>
+      <div class="pills"><a href="resultados.html">Ver todos os resultados</a></div>
     </div>
-  </div>
+  </section>
+  <div class="wrap panel-float">
+  <div class="card"><div class="grade" id="grade"></div><div id="legenda"></div></div>
 
   <section class="section">
-    <div class="section-title"><h2 id="res-title">Resultados de hoje</h2><a href="resultados.html">Ver todos</a></div>
-    <div class="stack" id="ultimos"></div>
+    <div class="section-title"><h2>Últimos resultados</h2><a href="resultados.html">Ver todos</a></div>
+    <div class="grid g2" id="ultimos"></div>
   </section>
 
   <section class="section" style="padding-top:0">
@@ -30,7 +30,8 @@
   </section>
 
   <section class="section" style="padding-top:0">
-    <div class="section-title"><h2>Destaques da banca</h2><a href="estatisticas.html">Estatísticas completas</a></div>
+    <div class="section-title"><h2>Destaques</h2><a href="estatisticas.html">Estatísticas completas</a></div>
+    <div id="banca-bar" style="margin-bottom:12px"></div>
     <div class="kpis" id="kpis"></div>
   </section>
 
@@ -47,6 +48,7 @@
     <div class="section-title"><h2>Análises</h2><a href="analises.html">Ver todas</a></div>
     <ul class="newsfeed card" id="news" style="padding:4px 16px"></ul>
   </section>
+  </div>
 </main>
 <script src="assets/js/data.js"></script>
 <script src="assets/js/stats.js"></script>
