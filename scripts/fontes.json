@@ -31,7 +31,10 @@
         "16:20": "PTV",
         "18:20": "PTN",
         "21:20": "COR"
-      }
+      },
+      "ignorar": [
+        "FED"
+      ]
     },
     {
       "id": "sp",
@@ -41,7 +44,10 @@
         "https://deunoposte.app.br/sao-paulo/",
         "https://www.resultadofacil.com.br/resultado-do-jogo-do-bicho/sp"
       ],
-      "prefixoHora": "SP"
+      "prefixoHora": "SP",
+      "ignorar": [
+        "SP15"
+      ]
     }
   ],
   "loterias": [

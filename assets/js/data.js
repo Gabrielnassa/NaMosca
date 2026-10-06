@@ -173,7 +173,9 @@
       if (!j.extracoes || !j.extracoes.length) return;
       live[b.id] = {
         fonte: j.fonte, atualizado: j.atualizado,
-        extracoes: j.extracoes.map((e) => montar(b, { ...e, ...codigo(b, e) }, e.data, e.premios)),
+        extracoes: j.extracoes.map((e) => ({ e, c: codigo(b, e) }))
+          .filter(({ c }) => b.extracoes.some((s) => s.id === c.id))  // só sorteios da grade
+          .map(({ e, c }) => montar(b, { ...e, ...c }, e.data, e.premios)),
       };
     }));
   })();

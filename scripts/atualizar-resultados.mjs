@@ -70,7 +70,9 @@ async function coletarBanca(b) {
       for (const e of lidas) {
         const id = codigo(b, e);
         const chave = `${e.data}|${id}`;
-        const reg = { data: e.data, id, nome: id, hora: e.hora, premios: completar(e.premios) };
+        if ((b.ignorar || []).includes(id)) continue;
+        // 6º (soma) e 7º (multiplicação) sempre calculados pela regra da banca
+        const reg = { data: e.data, id, nome: id, hora: e.hora, premios: completar(e.premios.slice(0, 5)) };
         const antes = porChave.get(chave);
         if (!antes || JSON.stringify(antes.premios) !== JSON.stringify(reg.premios)) novos++;
         porChave.set(chave, reg);
