@@ -82,6 +82,25 @@ async function coletarBanca(b) {
       console.log(`  ${b.id}: falha em ${url} (${err.message})`);
     }
   }
+  // histórico: páginas por dia (ex.: --dias-bicho=60)
+  const diasHist = Number(args['dias-bicho'] || 0);
+  if (b.historico && diasHist > 0) {
+    for (let d = 1; d <= diasHist; d++) {
+      const dia = new Date(Date.now() - 3 * 3600e3 - d * 864e5).toISOString().slice(0, 10);
+      if ([...porChave.keys()].some((k) => k.startsWith(dia + '|'))) continue;
+      try {
+        const lidas = parsePage(await get(b.historico.replace('{data}', dia)), { hoje: dia }).filter((e) => e.data === dia);
+        for (const e of lidas) {
+          const id = codigo(b, e);
+          porChave.set(`${e.data}|${id}`, { data: e.data, id, nome: id, hora: e.hora, premios: completar(e.premios) });
+          novos++;
+        }
+        console.log(`  ${b.id} ${dia}: ${lidas.length} extrações (histórico)`);
+        fonteOk = fonteOk || b.historico;
+        await sleep(400);
+      } catch (err) { console.log(`  ${b.id} ${dia}: falha no histórico (${err.message})`); }
+    }
+  }
   if (!fonteOk) return 0;
   const limite = new Date(Date.now() - MANTER_DIAS * 864e5).toISOString().slice(0, 10);
   const extracoes = [...porChave.values()]

@@ -10,6 +10,9 @@ on:
       backfill:
         description: 'Quantos concursos anteriores das loterias buscar'
         default: '60'
+      dias_bicho:
+        description: 'Quantos dias anteriores do bicho importar (0 = só hoje)'
+        default: '0'
 
 permissions:
   contents: write
@@ -28,7 +31,7 @@ jobs:
         with:
           node-version: 20
       - name: Coletar resultados
-        run: node scripts/atualizar-resultados.mjs --backfill=${{ github.event.inputs.backfill || '60' }}
+        run: node scripts/atualizar-resultados.mjs --backfill=${{ github.event.inputs.backfill || '60' }} --dias-bicho=${{ github.event.inputs.dias_bicho || '0' }}
       - name: Publicar dados
         run: |
           git config user.name "na-mosca-bot"
