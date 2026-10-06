@@ -14,7 +14,8 @@
     { id: 'mm', sig: 'MM', nome: 'Milhar/Centena Comb.', tipo: 'milhar', subs: [['MM', 4, 'milhar'], ['CC', 3, 'centena'], ['MCC', 4, 'mc']] },
   ];
 
-  const st = { modo: MODOS[0], sel: new Set(), valor: 1, janela: 0, sub: 0, maxJogos: 300, jogos: [], texto: '' };
+  const REDUZ = ['tg', 'dg', 'tdz', 'ddz'];
+  const st = { red: 'completo', mGar: 0, tempo: 10000, redJogos: null, redSig: '', redInfo: null, modo: MODOS[0], sel: new Set(), valor: 1, janela: 0, sub: 0, maxJogos: 300, jogos: [], texto: '' };
 
   function modoFromHash() {
     const h = location.hash.slice(1);
@@ -49,6 +50,20 @@
     }
     html += `<div class="grid g2"><label class="field"><span>${m.tipo === 'milhar' ? 'Valor por milhar (R$)' : 'Valor por jogo (R$)'}</span><input type="number" id="valor" min="0.1" step="0.5" value="${st.valor}"></label>
       <label class="field"><span>Cotação (×)</span><input type="number" id="cot" step="0.5" value="${NM.cot(cotId()) ?? ''}"></label></div>`;
+    if (REDUZ.includes(m.id)) {
+      const ms = []; for (let x = m.r + 1; x <= 5; x++) ms.push(x);
+      if (!ms.includes(st.mGar)) st.mGar = ms[0];
+      const alvo = m.tipo === 'grupo' ? 'bichos' : 'dezenas';
+      html += `<div class="field"><span>Fechamento</span><div class="seg" id="red">
+          <button data-v="completo" class="${st.red === 'completo' ? 'on' : ''}">Completo</button>
+          <button data-v="reduzido" class="${st.red === 'reduzido' ? 'on' : ''}">Reduzido</button>
+          <button data-v="otim" class="${st.red === 'otim' ? 'on' : ''}">Otimizador PRO</button></div></div>`;
+      if (st.red !== 'completo') html += `<div class="grid g2">
+          <label class="field"><span>Garantia</span><select id="mgar">${ms.map((x) => `<option value="${x}"${x === st.mGar ? ' selected' : ''}>${m.r === 3 ? 'Terno' : 'Duque'} se ${x} saírem</option>`).join('')}</select></label>
+          ${st.red === 'otim' ? `<label class="field"><span>Tempo</span><select id="tempo">${[[5000, '5 s'], [10000, '10 s'], [30000, '30 s'], [60000, '1 min']].map(([v, l]) => `<option value="${v}"${v === st.tempo ? ' selected' : ''}>${l}</option>`).join('')}</select></label>` : '<span></span>'}</div>
+        <button class="btn btn-primary" id="gerar-red">${st.red === 'otim' ? 'Otimizar fechamento' : 'Gerar fechamento reduzido'}</button>
+        <div class="progress" id="prog" hidden><div></div></div><p class="note" id="prog-txt" style="margin:0"></p>`;
+    }
     if (m.lotinho) html += `<label class="field"><span>Máximo de jogos</span><input type="number" id="maxj" min="1" max="2000" value="${st.maxJogos}"></label>
       <button class="btn btn-primary" id="gerar-lt">Calcular fechamento</button><div class="progress" id="prog" hidden><div></div></div>`;
     html += `<p class="note" id="regra" style="margin:0"></p>`;
@@ -61,6 +76,10 @@
     if ($('#milhares')) $('#milhares').addEventListener('input', (e) => { st.milhares = e.target.value; calc(); });
     if ($('#maxj')) $('#maxj').addEventListener('input', (e) => (st.maxJogos = Math.max(1, Math.min(2000, Number(e.target.value) || 1))));
     if ($('#gerar-lt')) $('#gerar-lt').addEventListener('click', gerarLotinho);
+    $$('#red button').forEach((b) => b.addEventListener('click', () => { st.red = b.dataset.v; st.redJogos = null; form(); calc(); }));
+    if ($('#mgar')) $('#mgar').addEventListener('change', (e) => { st.mGar = Number(e.target.value); st.redJogos = null; calc(); });
+    if ($('#tempo')) $('#tempo').addEventListener('change', (e) => (st.tempo = Number(e.target.value)));
+    if ($('#gerar-red')) $('#gerar-red').addEventListener('click', gerarReduzido);
     if ($('#pick')) picker();
     const mm = NM.mod(cotId());
     $('#regra').innerHTML = mm ? `<b class="acc">${mm.sig}</b> ${mm.desc}` : '';
@@ -168,6 +187,7 @@
       render(jogos, fmtG, pvv ? ' × ' : ' → ');
     } else {
       const w = m.janelas[st.janela][1];
+      if (REDUZ.includes(m.id) && st.red !== 'completo') return calcReduzido(sel, cot, v, univ, w);
       jogos = N >= m.r ? NM.combos(sel, m.r, 50000) : [];
       const total = NM.comb(N, m.r), custo = total * v;
       dist = NM.distDistintos(N, univ, w);
@@ -183,6 +203,76 @@
     }
     cenarios(rows, head);
     $('#cen-meta').textContent = `${m.sig} · cotação ${NM.num(cot, cot % 1 ? 1 : 0)}× · R$ ${NM.num(v, 2)} por jogo`;
+  }
+
+  /* ---------- Fechamento reduzido / Otimizador PRO ---------- */
+  function calcReduzido(sel, cot, v, univ, w) {
+    const m = st.modo, N = sel.length, r = m.r, M = st.mGar;
+    const sig = `${m.id}|${sel.join(',')}|${M}`;
+    if (sig !== st.redSig) { st.redJogos = null; st.redSig = sig; }
+    const completo = NM.comb(N, r);
+    const dist = NM.distDistintos(N, univ, w);
+    const alvo = m.tipo === 'grupo' ? 'bichos' : 'dezenas';
+    $('#cen-meta').textContent = `${m.sig} · ${r === 3 ? 'terno' : 'duque'} garantido se ${M} dos seus ${alvo} saírem`;
+    if (!st.redJogos) {
+      kpis([['Completo', NM.num(completo), 'jogos sem redução'], ['Garantia', `${r === 3 ? 'Terno' : 'Duque'} se ${M}`, `${alvo} entre o 1º e o 5º`]]);
+      cenarios([], ['Clique em gerar']);
+      $('#cenarios').innerHTML = `<p class="empty">${N <= r ? `Escolha mais de ${r} ${alvo}.` : `Clique em “${st.red === 'otim' ? 'Otimizar fechamento' : 'Gerar fechamento reduzido'}”.`}</p>`;
+      $('#jogos').innerHTML = '<p class="empty">O fechamento reduzido aparece aqui</p>';
+      st.texto = '';
+      return;
+    }
+    const jogos = st.redJogos, n = jogos.length, custo = n * v;
+    // para cada quantidade x de acertos no conjunto: média de jogos premiados (exata) e mínimo (por enumeração quando viável)
+    const idx = new Map(sel.map((x, i) => [x, i]));
+    const jIdx = jogos.map((j) => j.map((x) => idx.get(x)));
+    let ev = 0, pAlgum = 0; const rows = [];
+    dist.forEach((p, x) => {
+      const media = x >= r ? n * NM.comb(N - r, x - r) / NM.comb(N, x) : 0;
+      let minimo = x >= M ? '≥ 1' : '0';
+      if (x >= r && NM.comb(N, x) * n <= 3e6) {
+        let mn = Infinity;
+        NM.combos([...Array(N).keys()], x, 1e6).forEach((sub) => {
+          const S = new Set(sub); let c = 0;
+          for (const j of jIdx) if (j.every((e) => S.has(e))) c++;
+          if (c < mn) mn = c;
+        });
+        minimo = String(mn);
+      }
+      const prem = media * cot * v; ev += p * prem;
+      if (x >= M) pAlgum += p; else if (x >= r) pAlgum += p * Math.min(1, media);
+      rows.push({ cells: [`${x} de ${N}`, NM.pct(p, p < 0.001 ? 4 : 2), minimo, NM.num(media, 2), NM.brl(prem), liq(prem - custo)], hl: x >= M });
+    });
+    cenarios(rows, [`Seus ${alvo} no 1º–5º`, 'Chance', 'Mín. premiados', 'Média', 'Prêmio médio', 'Líquido']);
+    const i = st.redInfo || {};
+    kpis([
+      ['Jogos', NM.num(n), i.tentativas ? `melhor de ${i.tentativas} tentativas` : `de ${NM.num(completo)} no completo`],
+      ['Economia', NM.pct(1 - n / completo, 1), `${NM.num(completo - n)} jogos a menos`],
+      ['Custo total', NM.brl(custo), `${NM.brl(v)} por jogo`],
+      ['Garantia', `${r === 3 ? 'Terno' : 'Duque'} se ${M}`, `cobertura ${NM.pct(i.cobertura ?? 1, 1)}`],
+      ['Retorno esperado', NM.brl(ev), NM.signed((ev / custo - 1) * 100, 1, '%') + ' sobre o custo'],
+    ]);
+    render(jogos, m.tipo === 'grupo' ? (g) => NM.pad(g, 2) : (d) => NM.pad(d, 2));
+  }
+
+  async function gerarReduzido() {
+    const m = st.modo;
+    const sel = [...st.sel].sort(NM.ordDz);
+    if (sel.length <= m.r) { calc(); return; }
+    const M = Math.min(st.mGar, sel.length);
+    $('#prog').hidden = false; $('#gerar-red').disabled = true;
+    const bar = $('#prog').firstChild;
+    try {
+      const r = await NM.pro({ cmd: st.red === 'otim' ? 'otimizar' : 'cobrir', v: sel.length, k: m.r, t: m.r, m: M, maxJogos: 50000, tempo: st.tempo, seed: Date.now() % 100000 },
+        (p) => { bar.style.width = (p.f * 100).toFixed(1) + '%'; $('#prog-txt').textContent = `${p.jogos || 0} jogos${p.tentativas ? ` · ${p.tentativas} tentativas` : ''}`; });
+      st.redJogos = r.jogos.map((j) => j.map((i) => sel[i]).sort(NM.ordDz));
+      st.redInfo = { tentativas: r.tentativas, cobertura: r.cobertura };
+      st.redSig = `${m.id}|${sel.join(',')}|${st.mGar}`;
+    } catch (e) {
+      $('#prog-txt').textContent = e.message === 'cancelado' ? 'Cancelado.' : `Não foi possível: ${e.message}`;
+    }
+    $('#prog').hidden = true; $('#gerar-red').disabled = false; bar.style.width = 0;
+    calc();
   }
 
   function kpis5(total, custo, premioJogo, pAlgum, ev, custoTotal) {
