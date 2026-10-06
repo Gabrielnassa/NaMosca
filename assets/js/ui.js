@@ -7,11 +7,11 @@
     ['resultados.html', 'Resultados'],
     ['estatisticas.html', 'Estatísticas'],
     ['fechamento.html', 'Fechamento'],
+    ['fechamento-pro.html', 'Fechamento PRO'],
     ['quininha.html', 'Quininha'],
     ['seninha.html', 'Seninha'],
     ['gerador.html', 'Gerador'],
     ['conferidor.html', 'Conferidor'],
-    ['analises.html', 'Análises'],
     ['tabela.html', 'Cotações'],
   ];
 
@@ -29,7 +29,7 @@
   };
   NM.icon = (n) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[n]}</svg>`;
 
-  const BOTTOM = [['index.html', 'Início', 'home'], ['resultados.html', 'Resultados', 'list'], ['fechamento.html', 'Fechamento', 'grid'], ['quininha.html', 'Quininha', 'ticket'], ['estatisticas.html', 'Estatísticas', 'chart']];
+  const BOTTOM = [['index.html', 'Início', 'home'], ['resultados.html', 'Resultados', 'list'], ['fechamento.html', 'Fechamento', 'grid'], ['fechamento-pro.html', 'PRO', 'ticket'], ['estatisticas.html', 'Estatísticas', 'chart']];
 
   const LOGO = `<svg class="logo-mark" viewBox="0 0 32 32" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4">
     <circle cx="16" cy="16" r="13"/><circle cx="16" cy="16" r="7"/><circle cx="16" cy="16" r="2.5" fill="currentColor" stroke="none"/></svg>`;
@@ -192,7 +192,7 @@
     f.innerHTML = `<div class="wrap">
         <div class="footer-grid">
           <div>${BRAND}<p class="muted" style="margin-top:10px">Resultados, estatística e fechamentos para o jogo do bicho, Quininha e Seninha.</p></div>
-          <div><h4>Ferramentas</h4><a href="fechamento.html">Fechamento do bicho</a><a href="quininha.html">Quininha</a><a href="seninha.html">Seninha</a><a href="gerador.html">Gerador</a><a href="conferidor.html">Conferidor</a></div>
+          <div><h4>Ferramentas</h4><a href="fechamento-pro.html">Fechamento PRO</a><a href="fechamento.html">Fechamento do bicho</a><a href="quininha.html">Quininha</a><a href="seninha.html">Seninha</a><a href="gerador.html">Gerador</a><a href="conferidor.html">Conferidor</a></div>
           <div><h4>Dados</h4><a href="resultados.html">Resultados</a><a href="estatisticas.html">Estatísticas</a><a href="analises.html">Análises</a></div>
           <div><h4>Referência</h4><a href="tabela.html">Cotações e modalidades</a><a href="sonhos.html">Dicionário dos sonhos</a></div>
         </div>

@@ -2,6 +2,7 @@
   const { $, $$ } = NM;
 
   const TOOLS = [
+    ['fechamento-pro.html', 'grid', 'Fechamento PRO', 'Desdobramento, fechamento com garantia e otimizador para bicho, Quininha e Seninha.'],
     ['fechamento.html', 'grid', 'Fechamento do bicho', 'Terno, dupla, dezenas, quina de grupo, passe e lotinho com custo e chance.'],
     ['quininha.html', 'ticket', 'Quininha', '13 a 45 dezenas na Quina, com fechamento e conferência.'],
     ['seninha.html', 'ticket', 'Seninha', '14 a 40 dezenas na Mega-Sena, com fechamento e conferência.'],

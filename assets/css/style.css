@@ -165,7 +165,7 @@ select:focus, input:focus, textarea:focus { outline: 2px solid var(--primary-100
 .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
 .kpi { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; box-shadow: var(--shadow); }
 .kpi .label, .tile .label { font-size: .72rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
-.kpi .value, .tile .value { font-size: 1.45rem; font-weight: 900; color: var(--text); margin: 2px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kpi .value, .tile .value { font-size: 1.35rem; font-weight: 900; color: var(--text); margin: 2px 0; line-height: 1.2; overflow-wrap: anywhere; }
 .kpi .sub, .tile .sub { font-size: .84rem; color: var(--text-2); }
 
 /* ---------- Grupo (bicho) ---------- */
@@ -352,3 +352,16 @@ select:focus, input:focus, textarea:focus { outline: 2px solid var(--primary-100
 .hero .pills button, .hero .pills a, .hero .pills label { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.18); color: #e6f3f8; }
 .hero .pills .on { background: #fff; color: var(--head-2); border-color: #fff; }
 .panel-float { position: relative; z-index: 2; }
+
+/* ---------- Fechamento PRO ---------- */
+.numgrid button.fix { background: #16a34a; border-color: #16a34a; color: #fff; }
+.steps { display: grid; gap: 14px; }
+.step-n { display: inline-flex; width: 22px; height: 22px; border-radius: 999px; background: var(--primary); color: #fff; font-size: .75rem; font-weight: 700; align-items: center; justify-content: center; margin-right: 8px; }
+.bichos-mini { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 4px; margin-top: 10px; }
+.bichos-mini button { border: 1px solid var(--line); background: #fff; border-radius: 8px; padding: 4px 6px; font: 500 .74rem var(--font); cursor: pointer; color: var(--text-2); text-align: left; }
+.bichos-mini button b { color: var(--primary); margin-right: 4px; }
+.bichos-mini button.on { background: var(--primary-50); border-color: var(--primary); color: var(--text); }
+.pro-badge { display: inline-block; background: linear-gradient(90deg, #f59e0b, #ef4444); color: #fff; font-size: .68rem; font-weight: 900; padding: 2px 7px; border-radius: 6px; letter-spacing: .06em; vertical-align: 3px; margin-left: 6px; }
+.sim-bar { height: 8px; background: var(--bg); border-radius: 999px; overflow: hidden; min-width: 60px; }
+.sim-bar > div { height: 100%; background: var(--up); }
+.jogo .tag { margin-left: auto; }
