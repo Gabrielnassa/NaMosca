@@ -1,54 +1,61 @@
-# Na Mosca 🎯
+# Na Mosca
 
-Site de estatísticas, análises e ferramentas para o jogo do bicho, inspirado no estilo de portais de
-análise de loterias como o MegaCover.
+Terminal de dados para o jogo do bicho, a Quininha e a Seninha: resultados de todas as bancas,
+estatísticas, fechamentos com garantia e retorno esperado de cada aposta. É um site estático
+(HTML, CSS e JavaScript, sem build), alimentado por um coletor que roda no GitHub Actions.
 
 ## Páginas
 
-| Página | O que faz |
+| Página | Conteúdo |
 |---|---|
-| `index.html` | Último resultado, destaques (quente, atrasado, puxada), últimos resultados, gráficos |
-| `resultados.html` | Resultados do 1º ao 7º prêmio por banca/data + busca de milhar/dezena |
-| `estatisticas.html` | Frequência por grupo, atrasos (atual, médio, recorde), tendência, bicho puxa bicho, mapa de calor por dia da semana, dezenas 00–99, dígitos por posição, par/ímpar |
-| `analises.html` | Análise do dia (gerada dos dados) + artigos (retorno esperado, falácia do apostador etc.) |
-| `gerador.html` | Palpites de grupo, duque/terno, dezena, centena, milhar com estratégias (quentes, frios, vencidos, puxada…), fixar/excluir bichos |
-| `conferidor.html` | Confere apostas contra qualquer extração (cabeça ou 1º ao 5º) |
-| `tabela.html` | Tabela dos 25 bichos, busca “qual o bicho do número”, modalidades e cotações |
-| `sonhos.html` | Dicionário dos sonhos |
+| `index.html` | Painel: último resultado, quadro de todas as bancas, em alta/em baixa, atrasos, frequência, retorno por modalidade |
+| `resultados.html` | 1º ao 7º prêmio por banca e data, busca de milhar/dezena |
+| `estatisticas.html` | Frequência, atraso atual/médio/recorde, tendência, puxada, mapa de calor, dezenas, dígitos |
+| `fechamento.html` | Fechamento do bicho: TG, TGC, DG, DGC, TDZ, DDZ, Quina de Grupo (5/10/15), Passe/PVV, Lotinho, MM/CC/MCC |
+| `quininha.html` | Quininha (13–45 de 80, base Quina): calculadora, fechamento com garantia, conferência, frequência |
+| `seninha.html` | Seninha (14–40 de 60, base Mega-Sena): idem |
+| `gerador.html` | Palpites por frequência, atraso, vencimento ou puxada |
+| `conferidor.html` | Confere apostas contra qualquer extração |
+| `tabela.html` | As 24 modalidades com código, colocações, cotação (editável), chance e retorno; horários limite |
+| `analises.html`, `sonhos.html` | Artigos e dicionário dos sonhos |
 
-## Como rodar
+## Resultados reais
 
-É um site estático, sem build. Abra `index.html` no navegador ou sirva a pasta:
+`scripts/atualizar-resultados.mjs` (Node 20, sem dependências) grava:
 
-```bash
-python3 -m http.server 8000
-```
+- `data/bicho/<banca>.json` — RJ, SP (inclui SP 17h20), GO, BA, PB, PE, CE, MG, DF;
+- `data/loterias/{megasena,quina,federal}.json` — API oficial da Caixa, com uma API comunitária como reserva;
+- `data/bicho/fed.json` — a Federal convertida para o bicho (últimos 4 dígitos dos 5 bilhetes).
 
-Funciona direto no GitHub Pages.
+As fontes de cada banca ficam em `scripts/fontes.json`. O coletor tenta as URLs em ordem e usa um leitor
+genérico de tabelas (`scripts/parser.mjs`) que reconhece os dois layouts mais comuns: uma tabela por extração,
+ou extrações em colunas. Só aceita uma extração com o 1º ao 5º prêmio completos. Teste: `node scripts/test/parser.test.mjs`.
 
-## Dados
+O workflow `.github/workflows/resultados.yml` roda a cada 15 minutos, das 8h às 22h45 (horário de Brasília), e faz
+commit em `data/` quando há novidade. Para rodar na hora: **Actions → Atualizar resultados → Run workflow**.
+Rodando localmente: `node scripts/atualizar-resultados.mjs`.
 
-Nesta versão os resultados são **dados de demonstração** gerados de forma determinística em
-`assets/js/data.js` (`NM.loadResults`). Para usar resultados reais, substitua essa função por uma leitura
-da sua fonte mantendo o formato:
+Enquanto uma banca não tem arquivo, o site mostra dados de demonstração para ela, com o selo **DEMO**.
+Bancas com dados reais aparecem como **AO VIVO**.
 
-```js
-{ banca, bancaNome, extracao, extracaoNome, hora, data: 'AAAA-MM-DD',
-  premios: [{ posicao: 1, milhar: '4532', grupo: 8 }, …] }
-```
+## Publicar
 
-## Estrutura
+Ative o GitHub Pages (Settings → Pages → branch principal, pasta `/`). Abrindo o `index.html` direto do disco,
+o site funciona apenas em modo demonstração, porque o navegador bloqueia a leitura de `data/` via `file://`.
+Para testar localmente: `python3 -m http.server 8000`.
 
-```
-assets/css/style.css     tema claro/escuro, componentes
-assets/js/data.js        bichos, bancas, extrações, cotações
-assets/js/stats.js       estatísticas, gerador, conferidor
-assets/js/ui.js          cabeçalho, rodapé, gráficos, tooltip
-assets/js/artigos.js     análises e probabilidades
-assets/js/pages/*.js     script de cada página
-```
+## Fechamentos
+
+- **Bicho:** gera todas as combinações e calcula a distribuição exata de quantos dos seus bichos/dezenas saem no
+  1º–5º (ou na colocação escolhida). Para cada cenário mostra os jogos premiados, o prêmio e o líquido, além do retorno esperado.
+- **Quininha, Seninha e Lotinho:** fechamento com garantia (covering design guloso, num Web Worker). Exemplo: 18 dezenas
+  fechadas em jogos de 13 dão 23 jogos, e se as 5 da Quina estiverem entre as 18, pelo menos um jogo acerta. Com
+  "máximo de jogos" menor, a página mostra a cobertura parcial obtida.
+
+As cotações padrão seguem a tabela da banca (Milhar 3000, Centena 500, Dezena 50, Unidade 5, Grupo 15, Passe 75,
+TDZ 3000, DDZ 200, TG 100, TGC 1000, DG 16, DGC 160, Lotinho 10/100/1000, QG 500/100/10). Podem ser alteradas na
+página Cotações e ficam salvas no navegador de quem alterou. O PVV usa a metade do Passe como padrão.
 
 ## Aviso
 
-Site informativo e de entretenimento. Não vende nem intermedeia apostas. Nenhuma estatística garante acerto.
-Proibido para menores de 18 anos.
+Site informativo. Não vende nem intermedeia apostas. Probabilidade e fechamento não garantem prêmio. Proibido para menores de 18 anos.

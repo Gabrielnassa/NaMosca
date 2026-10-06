@@ -46,7 +46,7 @@
       if (erro) return `<tr><td class="mono">${NM.esc(l)}</td><td colspan="2"><span class="tag neutral">${erro}</span></td></tr>`;
       const r = NM.conferir(aposta, mod, e, efAte);
       if (r.ganhou) ganhos++;
-      const desc = mod === 'grupo' || mod.endsWith('-gp') ? aposta.map((g) => NM.bicho(g).emoji + ' ' + NM.bicho(g).nome).join(', ') : aposta.join(' - ');
+      const desc = mod === 'grupo' || mod.endsWith('-gp') ? aposta.map((g) => NM.pad(g, 2) + ' ' + NM.bicho(g).nome).join(', ') : aposta.join(' - ');
       return `<tr><td>${desc}</td><td>${r.ganhou ? '<span class="tag ok">Acertou</span>' : '<span class="tag neutral">Não foi</span>'}</td>
         <td class="small">${r.acertos.map((p) => `${p.posicao}º <b class="mono">${p.milhar}</b>`).join(', ') || '—'}</td></tr>`;
     }).join('');
@@ -54,7 +54,7 @@
       <div class="table-wrap"><table class="data-table"><thead><tr><th>Aposta</th><th>Status</th><th>Prêmios</th></tr></thead><tbody>${rows}</tbody></table></div>`;
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
+  NM.onReady(() => {
     NM.bancaSelect($('#banca-bar'), extracoes);
     $('#extracao').addEventListener('change', mostraExt);
     $$('#ate button').forEach((b) => b.addEventListener('click', () => {

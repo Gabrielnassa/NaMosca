@@ -14,14 +14,14 @@
 
   function picker() {
     $('#picker').innerHTML = NM.BICHOS.map((b) => `<button type="button" data-g="${b.grupo}" class="${sel[b.grupo] || ''}"
-      title="${b.nome}: ${b.dezenas.join(', ')}"><span class="e">${b.emoji}</span>${NM.pad(b.grupo, 2)} ${b.nome}</button>`).join('');
+      title="${b.nome}: ${b.dezenas.join(', ')}"><b>${NM.pad(b.grupo, 2)}</b>${b.nome}</button>`).join('');
   }
 
   function fmtJogo(j) {
     if (j.tipo === 'grupos') {
-      return `<div class="nums">${j.grupos.map((g) => NM.pad(g, 2)).join(' - ')}</div><div class="small">${j.grupos.map((g) => NM.bicho(g).emoji + ' ' + NM.bicho(g).nome).join(', ')}</div>`;
+      return `<div class="nums">${j.grupos.map((g) => NM.pad(g, 2)).join(' - ')}</div><div class="small">${j.grupos.map((g) => NM.pad(g, 2) + ' ' + NM.bicho(g).nome).join(', ')}</div>`;
     }
-    return `<div class="nums">${j.numeros.join(' - ')}</div><div class="small">${[...new Set(j.grupos)].map((g) => NM.bicho(g).emoji + ' ' + NM.bicho(g).nome).join(', ')}</div>`;
+    return `<div class="nums">${j.numeros.join(' - ')}</div><div class="small">${[...new Set(j.grupos)].map((g) => NM.pad(g, 2) + ' ' + NM.bicho(g).nome).join(', ')}</div>`;
   }
   const texto = (j) => (j.tipo === 'grupos' ? j.grupos.map((g) => NM.pad(g, 2)).join(' ') : j.numeros.join(' '));
 
@@ -43,13 +43,13 @@
     const p = NM.PROB[modalidade];
     const alguma = 1 - Math.pow(1 - p, jogos.length);
     $('#resumo').innerHTML = `<div class="callout small" style="margin:0">
-      <b>${m.nome}</b> paga cerca de <b>${NM.num(m.cotacao, m.cotacao % 1 ? 1 : 0)}×</b>. Chance de cada jogo: ${NM.pct(p, p < 0.001 ? 3 : 2)}${jogos.length > 1 ? ` · chance de acertar ao menos um dos ${jogos.length}: <b>${NM.pct(alguma, 2)}</b>` : ''}.
+      <b>${m.nome}</b> paga <b>${NM.num(NM.cot(modalidade), NM.cot(modalidade) % 1 ? 1 : 0)}×</b>. Chance de cada jogo: ${NM.pct(p, p < 0.001 ? 3 : 2)}${jogos.length > 1 ? ` · chance de acertar ao menos um dos ${jogos.length}: <b>${NM.pct(alguma, 2)}</b>` : ''}.
       Estratégias organizam suas escolhas, mas não alteram a probabilidade do sorteio.</div>`;
 
     try { sessionStorage.setItem('nm-jogos', JSON.stringify({ modalidade, linhas: jogos.map(texto) })); } catch (e) {}
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
+  NM.onReady(() => {
     NM.bancaSelect($('#banca-bar'), () => {});
     picker();
     $('#estrategia-desc').textContent = DESC[$('#estrategia').value];

@@ -14,18 +14,18 @@
     const pux = NM.puxada(st, last.premios[0].grupo, 3);
     const recorde = st.grupos.filter((g) => g.atraso > 0 && g.atraso === g.maxAtraso);
 
-    return `<article class="card" style="margin-bottom:24px">
+    return `<article class="card" style="margin-bottom:18px">
       <div class="meta muted small"><span class="tag hot">Análise do dia</span> · ${NM.fmtDate(last.data)} · ${NM.esc(NM.banca(bancaId).nome)} · gerada automaticamente</div>
       <h2 style="margin-top:8px">O dia em ${hoje.length} extrações: ${hoje.map((e) => NM.bicho(e.premios[0].grupo).emoji).join(' ')}</h2>
       <p>A cabeça de hoje trouxe ${hoje.map((e) => `<b>${NM.bicho(e.premios[0].grupo).nome}</b> no ${e.extracaoNome}`).join(', ')}.
       ${repetidos.length ? `Destaque para a repetição de <b>${[...new Set(repetidos)].map((g) => NM.bicho(g).nome).join(' e ')}</b> no mesmo dia.` : 'Nenhum bicho se repetiu na cabeça.'}</p>
       <div class="grid g3">
-        <div><h3>🔥 Quentes (1º ao 5º, últimas 60)</h3><div class="chips">${quentes.map((g) => NM.chip(g.grupo, 'hot')).join('')}</div>
+        <div><h3>Quentes (1º ao 5º, últimas 60)</h3><div class="chips">${quentes.map((g) => NM.chip(g.grupo, 'hot')).join('')}</div>
           <p class="muted small">${quentes.map((g) => `${g.nome}: ${g.freq}×`).join(' · ')} — esperado ${st5.grupos[0].esperado.toFixed(0)}×.</p></div>
-        <div><h3>🧊 Atrasados na cabeça</h3><div class="chips">${atras.map((g) => NM.chip(g.grupo, 'cold')).join('')}</div>
+        <div><h3>Atrasados na cabeça</h3><div class="chips">${atras.map((g) => NM.chip(g.grupo, 'cold')).join('')}</div>
           <p class="muted small">${atras.map((g) => `${g.nome}: ${g.atraso}`).join(' · ')} extrações.
           ${recorde.length ? `${recorde.map((g) => g.nome).join(', ')} ${recorde.length > 1 ? 'estão' : 'está'} no maior atraso do período.` : ''}</p></div>
-        <div><h3>🔗 Depois de ${NM.bicho(last.premios[0].grupo).nome}</h3><div class="chips">${pux.map((p) => NM.chip(p.g)).join('')}</div>
+        <div><h3>Depois de ${NM.bicho(last.premios[0].grupo).nome}</h3><div class="chips">${pux.map((p) => NM.chip(p.g)).join('')}</div>
           <p class="muted small">Grupos que mais vieram na cabeça após ${NM.bicho(last.premios[0].grupo).nome} (${pux.map((p) => p.c + '×').join(', ')}).</p></div>
       </div>
       <p class="muted small" style="margin:12px 0 0">Lembre-se: resultados passados não influenciam sorteios futuros. <a href="analises.html?id=falacia-atraso">Entenda por quê.</a></p>
@@ -34,8 +34,8 @@
 
   function lista() {
     const banca = NM.getBanca();
-    $('#conteudo').innerHTML = `<div class="page-head"><h1>Análises</h1>
-      <p>Leituras dos dados, guias e matemática do jogo — escritas para quem gosta de entender antes de jogar.</p></div>
+    $('#conteudo').innerHTML = `<div class="page-head"><div><span class="eyebrow">ANL · Análises</span><h1>Análises</h1>
+      <p>Leituras dos dados, guias e a matemática de cada aposta.</p></div></div>
       <div id="dia">${analiseDoDia(banca)}</div>
       <div class="grid g3">${NM.artigoCards(NM.ARTIGOS)}</div>`;
   }
@@ -53,7 +53,7 @@
       <section class="section"><h2>Continue lendo</h2><div class="grid g3">${NM.artigoCards(outros)}</div></section>`;
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
+  NM.onReady(() => {
     const id = new URLSearchParams(location.search).get('id');
     const a = NM.ARTIGOS.find((x) => x.id === id);
     a ? artigo(a) : lista();

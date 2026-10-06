@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Tabela do jogo do bicho — Na Mosca</title>
+  <title>Cotações e modalidades — Na Mosca</title>
   <meta name="description" content="Os 25 grupos do jogo do bicho com suas dezenas e cotações de referência.">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><circle cx='20' cy='20' r='18' fill='%230e5a3a'/><circle cx='20' cy='20' r='11' fill='none' stroke='white' stroke-width='2.5'/><circle cx='20' cy='20' r='4.5' fill='%23e8a400'/></svg>">
   <link rel="stylesheet" href="assets/css/style.css">
@@ -11,24 +11,43 @@
 <body>
 <main class="wrap">
   <div class="page-head">
-    <h1>Tabela do jogo do bicho</h1>
-    <p>Os 25 grupos e suas 4 dezenas. Para descobrir o bicho de uma milhar, olhe os dois últimos dígitos.</p>
+    <div><span class="eyebrow">TAB · Referência</span>
+      <h1>Cotações e modalidades</h1>
+      <p>As 24 modalidades com código, quanto pagam por R$ 1,00, onde valem e a chance real de acerto. As cotações são editáveis: ajuste para a tabela da sua banca e todas as calculadoras do site passam a usá-las.</p></div>
+    <div class="btn-row" style="margin:0"><button class="btn btn-soft" id="reset">Restaurar padrão</button></div>
   </div>
-  <div class="toolbar">
-    <label class="field"><span>Qual o bicho do número?</span><input type="search" id="num" placeholder="ex.: 4532" inputmode="numeric" maxlength="4"></label>
-    <div id="num-res" style="padding-bottom:8px"></div>
+
+  <div class="card" style="padding-bottom:4px">
+    <header><h3>Tabela de modalidades</h3><span class="muted small">retorno = cotação × probabilidade</span></header>
+    <div class="table-wrap" id="modalidades"></div>
+    <p class="note" style="margin:10px 0">Probabilidades por aposta simples. Grupo, dezena, centena e milhar: na cabeça (1º prêmio). Combinadas (MM, CC, MCC) dependem dos dígitos repetidos — use o <a href="fechamento.html#mm">fechamento</a>.</p>
   </div>
-  <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))" id="bichos"></div>
+
   <section class="section">
-    <h2>Modalidades e cotações de referência</h2>
-    <p class="muted">Quanto cada modalidade paga por R$ 1,00 apostado. Valores variam entre bancas.</p>
-    <div class="card table-wrap" id="modalidades"></div>
+    <div class="grid g2">
+      <div class="card"><header><h3>Horários limite de aposta</h3><span class="muted small">referência</span></header>
+        <div class="table-wrap"><table class="data-table dense" id="horarios"></table></div></div>
+      <div class="card"><header><h3>Qual o bicho do número?</h3></header>
+        <label class="field"><span>Milhar, centena ou dezena</span><input type="search" id="num" placeholder="4532" inputmode="numeric" maxlength="4"></label>
+        <div id="num-res" style="margin-top:12px" class="mono"></div></div>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:0">
+    <div class="card"><header><h3>Grupos e dezenas</h3><span class="muted small">25 grupos · 4 dezenas cada · 00 = Vaca</span></header>
+      <div class="table-wrap"><table class="data-table dense" id="bichos"></table></div></div>
+  </section>
+
+  <section class="section" style="padding-top:0">
+    <div class="grid g2">
+      <div class="card"><header><h3>Quininha · base Quina</h3><a class="small" href="quininha.html">Abrir</a></header><div class="table-wrap"><table class="data-table dense" id="qnh"></table></div></div>
+      <div class="card"><header><h3>Seninha · base Mega-Sena</h3><a class="small" href="seninha.html">Abrir</a></header><div class="table-wrap"><table class="data-table dense" id="snh"></table></div></div>
+    </div>
   </section>
 </main>
 <script src="assets/js/data.js"></script>
 <script src="assets/js/stats.js"></script>
 <script src="assets/js/ui.js"></script>
-<script src="assets/js/artigos.js"></script>
 <script src="assets/js/pages/tabela.js"></script>
 </body>
 </html>

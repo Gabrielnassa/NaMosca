@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Quininha — Na Mosca</title>
+  <meta name="description" content="Quininha: escolha de 13 a 45 dezenas entre 01 e 80 e ganhe se as 5 dezenas da Quina estiverem entre elas. Calculadora, fechamento com garantia e conferência.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><circle cx='20' cy='20' r='18' fill='%230e5a3a'/><circle cx='20' cy='20' r='11' fill='none' stroke='white' stroke-width='2.5'/><circle cx='20' cy='20' r='4.5' fill='%23e8a400'/></svg>">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<main class="wrap" data-loto="quininha">
+  <div class="page-head">
+    <div><span class="eyebrow">QNH · Quininha · base Quina</span>
+      <h1>Quininha</h1>
+      <p id="regra"></p></div>
+    <div id="ult" class="mono small"></div>
+  </div>
+
+  <div class="kpis" id="kpis"></div>
+
+  <section class="section">
+    <div class="grid g-side">
+      <div class="stack">
+        <div class="card">
+          <header><h3>Volante</h3><span class="sel-count" id="cnt"></span></header>
+          <div class="numgrid" id="vol"></div>
+          <div class="btn-row">
+            <button class="btn btn-soft" id="limpar">Limpar</button>
+            <button class="btn btn-soft" id="surpresa">Surpresinha</button>
+            <button class="btn btn-soft" id="quentes" title="Dezenas mais sorteadas nos concursos carregados">Mais sorteadas</button>
+          </div>
+        </div>
+        <div class="card stack">
+          <header><h3>Aposta</h3></header>
+          <div class="field"><span>Modo</span><div class="seg" id="modo"><button data-v="unica" class="on">Aposta única</button><button data-v="fech">Fechamento</button></div></div>
+          <label class="field"><span>Valor por jogo (R$)</span><input type="number" id="valor" min="0.5" step="0.5" value="1"></label>
+          <div id="fech-opts" class="stack" hidden>
+            <div class="grid g2">
+              <label class="field"><span>Dezenas por jogo</span><select id="k"></select></label>
+              <label class="field"><span>Máximo de jogos</span><input type="number" id="maxj" min="1" max="3000" value="500"></label>
+            </div>
+            <button class="btn btn-primary" id="calc">Calcular fechamento</button>
+            <div class="progress" id="prog" hidden><div></div></div>
+          </div>
+          <p class="note" id="aviso" style="margin:0"></p>
+        </div>
+      </div>
+      <div class="stack">
+        <div class="card"><header><h3>Análise da aposta</h3><span class="muted small" id="an-meta"></span></header><div class="table-wrap" id="analise"></div></div>
+        <div class="card"><header><h3>Jogos</h3>
+          <div class="btn-row" style="margin:0"><button class="btn btn-soft" id="copiar">Copiar</button><button class="btn btn-soft" id="txt">Baixar .txt</button></div></header>
+          <div id="jogos"><p class="empty">Marque as dezenas no volante</p></div></div>
+        <div class="card"><header><h3>Concursos</h3><label class="field" style="flex-direction:row;align-items:center;gap:8px"><span>Conferir com</span><select id="conc"></select></label></header>
+          <div class="table-wrap scroll-y" id="concursos" style="max-height:300px"></div></div>
+        <div class="card"><header><h3>Frequência das dezenas</h3><span class="muted small" id="freq-meta"></span></header><div id="freq"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:0">
+    <div class="card"><header><h3>Tabela de cotação</h3><span class="muted small">por R$ 1,00 apostado</span></header><div class="table-wrap" id="tabela"></div></div>
+  </section>
+</main>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/stats.js"></script>
+<script src="assets/js/ui.js"></script>
+<script src="assets/js/fechamento.js"></script>
+<script src="assets/js/pages/loto.js"></script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+{
+  "_comentario": "Fontes de resultados por banca. O coletor tenta cada URL em ordem até conseguir extrair resultados. Para incluir uma banca nova, adicione um item com o mesmo id usado em assets/js/data.js (NM.BANCAS).",
+  "bancas": [
+    { "id": "rj",  "nome": "PT Rio (RJ)",        "urls": ["https://www.resultadofacil.com.br/resultado-do-jogo-do-bicho/rj", "https://www.ojogodobicho.com/deu_no_poste.htm", "https://www.eojogodobicho.com/deu-no-poste.html"] },
+    { "id": "sp",  "nome": "PT-SP (SP)",         "urls": ["https://www.resultadofacil.com.br/resultado-do-jogo-do-bicho/sp", "https://deunoposte.com.br/resultado-jogo-do-bicho-sao-paulo/", "https://www.resultadosnahora.com.br/banca-pt-sp/"] },
+    { "id": "go",  "nome": "Look (GO)",          "urls": ["https://www.resultadofacil.com.br/resultado-do-jogo-do-bicho/go", "https://www.resultadosnahora.com.br/look-goias/"] },
+    { "id": "ba",  "nome": "Bahia (BA)",         "urls": ["https://www.resultadofacil.com.br/resultado-do-jogo-do-bicho/ba", "https://www.resultadosnahora.com.br/bahia-ba/"] },
+    { "id": "pb",  "nome": "Paraíba (PB)",       "urls": ["https://www.resultadofacil.com.br/resultado-do-jogo-do-bicho/pb"] },
+    { "id": "pe",  "nome": "Pernambuco (PE)",    "urls": ["https://www.resultadofacil.com.br/resultado-do-jogo-do-bicho/pe", "https://portalbrasil.net/jogodobicho/pernambuco/"] },
+    { "id": "ce",  "nome": "Lotece (CE)",        "urls": ["https://www.resultadofacil.com.br/resultado-do-jogo-do-bicho/ce"] },
+    { "id": "mg",  "nome": "Minas Gerais (MG)",  "urls": ["https://www.resultadofacil.com.br/resultado-do-jogo-do-bicho/mg"] },
+    { "id": "df",  "nome": "Brasília (DF)",      "urls": ["https://www.resultadofacil.com.br/resultado-do-jogo-do-bicho/df"] }
+  ],
+  "loterias": ["megasena", "quina", "federal"],
+  "caixa": "https://servicebus2.caixa.gov.br/portaldeloterias/api",
+  "caixaAlternativa": "https://loteriascaixa-api.herokuapp.com/api"
+}

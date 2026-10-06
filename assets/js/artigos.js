@@ -2,28 +2,14 @@
 (function () {
   const NM = window.NM;
 
-  // Probabilidade de acerto, na cabeça ou do 1º ao 5º, para cada modalidade
-  const q = (x) => Math.pow(x, 5);
-  NM.PROB = {
-    grupo: 1 / 25,
-    dezena: 1 / 100,
-    centena: 1 / 1000,
-    milhar: 1 / 10000,
-    mc: 1 / 10000,
-    'duque-gp': 1 - 2 * q(24 / 25) + q(23 / 25),
-    'terno-gp': 1 - 3 * q(24 / 25) + 3 * q(23 / 25) - q(22 / 25),
-    'duque-dz': 1 - 2 * q(99 / 100) + q(98 / 100),
-    'terno-dz': 1 - 3 * q(99 / 100) + 3 * q(98 / 100) - q(97 / 100),
-    passe: (1 / 25) * (1 - Math.pow(24 / 25, 4)),
-  };
-
   function tabelaRetorno() {
     return `<div class="table-wrap"><table class="data-table">
       <thead><tr><th>Modalidade</th><th class="n">Paga (x)</th><th class="n">Chance</th><th class="n">1 em…</th><th class="n">Retorno por R$ 100</th></tr></thead>
-      <tbody>${NM.MODALIDADES.map((m) => {
+      <tbody>${NM.MODALIDADES.filter((m) => NM.ev(m.id) != null).map((m) => {
         const p = NM.PROB[m.id];
-        const ev = m.id === 'mc' ? (4000 * p + 600 * (1 / 1000)) / 2 : m.cotacao * p;
-        return `<tr><td>${m.nome}</td><td class="n">${NM.num(m.cotacao, m.cotacao % 1 ? 1 : 0)}</td>
+        const ev = NM.ev(m.id);
+        const c = NM.cot(m.id);
+        return `<tr><td><span class="gtag">${m.sig}</span> ${m.nome}</td><td class="n">${NM.num(c, c % 1 ? 1 : 0)}</td>
           <td class="n">${NM.pct(p, p < 0.001 ? 3 : 2)}</td><td class="n">${NM.num(1 / p)}</td>
           <td class="n"><b>R$ ${NM.num(ev * 100, 2)}</b></td></tr>`;
       }).join('')}</tbody></table></div>`;
@@ -42,12 +28,12 @@
         (a cotação) e <b>qual a chance real de acerto</b>. Multiplicando uma pela outra chegamos ao
         <i>retorno esperado</i> — quanto, em média, volta para o apostador a cada R$ 100 jogados no longo prazo.</p>
         ${tabelaRetorno()}
-        <p class="muted small">Cotações de referência, na cabeça (1º prêmio) para grupo, dezena, centena e milhar, e do 1º ao 5º para duque/terno.
+        <p class="muted small">Cotações em vigor (editáveis na página Cotações), na cabeça (1º prêmio) para grupo, dezena, centena e milhar, e do 1º ao 5º para duque/terno.
         Cada banca pratica valores próprios.</p>
         <h2>O que a tabela mostra</h2>
         <p>Nenhuma modalidade devolve R$ 100. A diferença é a margem da banca. O <b>grupo</b>, que parece a aposta
-        "mais fácil", devolve cerca de R$ 72; a <b>milhar</b>, apesar do prêmio alto, devolve R$ 40.
-        Quanto mais rara a combinação, maior costuma ser a margem.</p>
+        "mais fácil", devolve cerca de ${NM.brl(NM.ev('grupo') * 100)}; a <b>milhar</b>, apesar do prêmio alto, devolve ${NM.brl(NM.ev('milhar') * 100)}.
+        Quanto mais rara a combinação, maior costuma ser a margem — a quina de grupo com 5 bichos é o caso extremo.</p>
         <div class="callout">Use a tabela para comparar modalidades — não para esperar lucro. Estatística ajuda a
         escolher com consciência, mas não muda a matemática do jogo.</div>`,
     },
@@ -101,7 +87,7 @@
         const st = NM.stats(res, { ate: 1 });
         const linhas = NM.BICHOS.slice(0, 25).map((b) => {
           const p = NM.puxada(st, b.grupo, 3);
-          return `<tr><td>${b.emoji} ${b.nome}</td><td>${p.map((x) => `${NM.bicho(x.g).emoji} ${NM.bicho(x.g).nome} <span class="muted">(${x.c})</span>`).join(', ')}</td></tr>`;
+          return `<tr><td>${NM.chip(b.grupo)}</td><td>${p.map((x) => `${NM.chip(x.g)} <span class="muted mono">${x.c}×</span>`).join(' ')}</td></tr>`;
         }).join('');
         return `
         <p>A "puxada" é uma das tradições mais antigas do bicho: depois que um animal sai na cabeça, outro viria em seguida.

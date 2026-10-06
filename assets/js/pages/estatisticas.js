@@ -6,9 +6,9 @@
   // Rampa sequencial (um único tom, claro → escuro) em rgba da cor da marca
   function heatColor(t) {
     const a = 0.08 + 0.85 * Math.max(0, Math.min(1, t));
-    return `color-mix(in srgb, var(--bar) ${Math.round(a * 100)}%, var(--surface))`;
+    return `color-mix(in srgb, var(--bar) ${Math.round(a * 100)}%, var(--panel))`;
   }
-  function inkFor(t) { return t > 0.55 ? 'var(--brand-ink)' : 'var(--text)'; }
+  function inkFor(t) { return t > 0.55 ? '#fff' : 'var(--text)'; }
 
   function compute() {
     const all = NM.loadResults(state.banca, 180);
@@ -28,13 +28,13 @@
       ['Menos frequente', frio, `${frio.freq} vezes (${NM.pct(frio.freq / st.total)})`],
       ['Maior atraso', atras, `${atras.atraso} extrações · recorde ${atras.maxAtraso}`],
       ['Mais “vencido”', venc, `atraso ${venc.vencimento.toFixed(1).replace('.', ',')}× a média`],
-    ].map(([l, b, s]) => `<div class="card tile"><div class="label">${l}</div><div class="value">${b.emoji} ${b.nome}</div><div class="sub">${s}</div></div>`).join('');
+    ].map(([l, b, s]) => `<div class="card tile"><div class="label">${l}</div><div class="value">${NM.pad(b.grupo, 2)} ${b.nome}</div><div class="sub">${s}</div></div>`).join('');
   }
 
   function freq() {
     $('#freq-sub').textContent = `${NM.num(st.n)} extrações · ${NM.num(st.total)} prêmios`;
     NM.barChart($('#freq'), st.grupos.map((g) => ({
-      label: `<span title="${g.nome}">${g.emoji}</span>`, value: g.freq, highlight: g.freq > g.esperado,
+      label: `<span title="${g.nome}">${NM.pad(g.grupo, 2)}</span>`, value: g.freq, highlight: g.freq > g.esperado,
       tip: `<b>${NM.pad(g.grupo, 2)} ${g.nome}</b><br>${g.freq} vezes (${NM.pct(g.freq / st.total)})<br>Esperado: ${g.esperado.toFixed(1)}`,
     })), { ref: st.grupos[0].esperado, refLabel: 'esperado' });
   }
@@ -44,7 +44,7 @@
       ['grupo', 'Grupo', (g) => NM.chip(g.grupo)],
       ['freq', 'Freq.', (g) => g.freq, true],
       ['pct', '%', (g) => NM.pct(g.freq / st.total), true],
-      ['desvio', 'vs. esperado', (g) => `<span style="color:${g.desvio >= 0 ? 'var(--good)' : 'var(--bad)'}">${g.desvio >= 0 ? '▲' : '▼'} ${NM.pct(Math.abs(g.desvio), 0)}</span>`, true],
+      ['desvio', 'vs. esperado', (g) => `<span style="color:${g.desvio >= 0 ? 'var(--up)' : 'var(--down)'}">${g.desvio >= 0 ? '▲' : '▼'} ${NM.pct(Math.abs(g.desvio), 0)}</span>`, true],
       ['atraso', 'Atraso', (g) => g.atraso, true],
       ['mediaAtraso', 'Atraso médio', (g) => g.mediaAtraso.toFixed(1).replace('.', ','), true],
       ['maxAtraso', 'Recorde', (g) => g.maxAtraso, true],
@@ -72,8 +72,8 @@
     const sel = [...t.slice(0, 5), ...t.slice(-5)];
     $('#tendencia').innerHTML = `<div class="table-wrap"><table class="data-table"><thead><tr><th>Bicho</th><th class="n">Últ. 30</th><th class="n">Período</th><th class="n">Variação</th></tr></thead><tbody>
       ${sel.map((x, i) => `${i === 5 ? '<tr><td colspan="4" class="muted small" style="text-align:center">esfriando ↓</td></tr>' : ''}
-      <tr><td>${x.emoji} ${x.nome}</td><td class="n">${NM.pct(x.recente)}</td><td class="n">${NM.pct(x.historico)}</td>
-      <td class="n" style="color:${x.delta >= 0 ? 'var(--good)' : 'var(--bad)'}">${x.delta >= 0 ? '+' : '−'}${(Math.abs(x.delta) * 100).toFixed(1).replace('.', ',')} p.p.</td></tr>`).join('')}
+      <tr><td>${NM.pad(x.grupo, 2)} ${x.nome}</td><td class="n">${NM.pct(x.recente)}</td><td class="n">${NM.pct(x.historico)}</td>
+      <td class="n" style="color:${x.delta >= 0 ? 'var(--up)' : 'var(--down)'}">${x.delta >= 0 ? '+' : '−'}${(Math.abs(x.delta) * 100).toFixed(1).replace('.', ',')} p.p.</td></tr>`).join('')}
       </tbody></table></div><p class="muted small" style="margin:8px 0 0">Esquentando no topo; esfriando embaixo.</p>`;
   }
 
@@ -82,7 +82,7 @@
     const stCab = NM.stats(res, { ate: 1 });
     const p = NM.puxada(stCab, g, 8);
     NM.hbars($('#puxada'), p.map((x) => ({
-      label: `${NM.bicho(x.g).emoji} ${NM.bicho(x.g).nome}`, value: x.c,
+      label: `${NM.pad(x.g, 2)} ${NM.bicho(x.g).nome}`, value: x.c,
       tip: `${NM.pct(x.pct)} das vezes após ${NM.bicho(g).nome}`,
     })), { fmt: (v) => `${v}×` });
   }
@@ -94,7 +94,7 @@
     pct.forEach((r) => r.forEach((v) => (max = Math.max(max, v))));
     let html = `<div class="heat" style="grid-template-columns:130px repeat(7, minmax(44px,1fr));min-width:520px"><div></div>${cols.map((d) => `<div class="hh">${NM.DIAS[d].slice(0, 3)}</div>`).join('')}`;
     NM.BICHOS.forEach((b) => {
-      html += `<div class="hh" style="justify-content:flex-start">${b.emoji} ${b.nome}</div>`;
+      html += `<div class="hh" style="justify-content:flex-start">${NM.pad(b.grupo, 2)} ${b.nome}</div>`;
       cols.forEach((d) => {
         const v = pct[d][b.grupo], t = max ? v / max : 0;
         html += `<div class="hc" style="background:${heatColor(t)};color:${inkFor(t)}" data-tip="<b>${b.nome}</b> · ${NM.DIAS[d]}<br>${st.porDia[d][b.grupo]} vezes (${NM.pct(v)})">${st.porDia[d][b.grupo] || ''}</div>`;
@@ -111,7 +111,7 @@
     $('#dezenas').innerHTML = `<div class="dz-grid">${st.dezenas.map((d) => {
       const t = (d.freq - min) / (max - min || 1);
       const b = NM.bicho(NM.grupoDaDezena(Number(d.dezena)));
-      return `<div class="dz" style="background:${heatColor(t)};color:${inkFor(t)}" data-tip="<b>Dezena ${d.dezena}</b> · ${b.emoji} ${b.nome}<br>${d.freq} vezes · atraso ${d.atraso}">${d.dezena}</div>`;
+      return `<div class="dz" style="background:${heatColor(t)};color:${inkFor(t)}" data-tip="<b>Dezena ${d.dezena}</b> · ${NM.pad(b.grupo, 2)} ${b.nome}<br>${d.freq} vezes · atraso ${d.atraso}">${d.dezena}</div>`;
     }).join('')}</div><div class="legend-scale">${min}× <span class="ramp" style="background:linear-gradient(90deg, ${heatColor(0)}, ${heatColor(1)})"></span> ${max}×</div>`;
     NM.tooltip($('#dezenas'));
   }
@@ -121,7 +121,7 @@
     $('#digitos').innerHTML = `<div class="table-wrap"><table class="data-table"><thead><tr><th>Posição</th>${[...Array(10).keys()].map((d) => `<th class="n">${d}</th>`).join('')}</tr></thead><tbody>
       ${st.digitos.map((row, i) => {
         const mx = Math.max(...row), mn = Math.min(...row);
-        return `<tr><td>${nomes[i]}</td>${row.map((c) => `<td class="n" style="${c === mx ? 'color:var(--good);font-weight:700' : c === mn ? 'color:var(--bad)' : ''}">${c}</td>`).join('')}</tr>`;
+        return `<tr><td>${nomes[i]}</td>${row.map((c) => `<td class="n" style="${c === mx ? 'color:var(--up);font-weight:700' : c === mn ? 'color:var(--down)' : ''}">${c}</td>`).join('')}</tr>`;
       }).join('')}</tbody></table></div><p class="muted small" style="margin:6px 0 0">Verde = dígito mais sorteado na posição; vermelho = menos sorteado.</p>`;
     const t = st.pares + st.impares || 1;
     NM.hbars($('#parimpar'), [
@@ -134,7 +134,7 @@
     compute(); tiles(); freq(); tabela(); tendencia(); puxada(); heat(); dezenas(); digitos();
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
+  NM.onReady(() => {
     NM.bancaSelect($('#banca-bar'), (id) => { state.banca = id; renderAll(); });
     $('#periodo').addEventListener('change', (e) => { state.dias = Number(e.target.value); renderAll(); });
     $$('#ate button').forEach((b) => b.addEventListener('click', () => {
@@ -142,7 +142,7 @@
       state.ate = Number(b.dataset.v);
       renderAll();
     }));
-    $('#pux-sel').innerHTML = NM.BICHOS.map((b) => `<option value="${b.grupo}">${b.emoji} ${b.nome}</option>`).join('');
+    $('#pux-sel').innerHTML = NM.BICHOS.map((b) => `<option value="${b.grupo}">${NM.pad(b.grupo, 2)} ${b.nome}</option>`).join('');
     const all = NM.loadResults(state.banca, 180);
     $('#pux-sel').value = all[all.length - 1].premios[0].grupo;
     $('#pux-sel').addEventListener('change', puxada);

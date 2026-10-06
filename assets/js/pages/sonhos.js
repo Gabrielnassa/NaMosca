@@ -45,16 +45,11 @@
   function render() {
     const q = norm($('#q').value.trim());
     const list = SONHOS.filter(([s]) => !q || norm(s).includes(q));
-    $('#lista').innerHTML = list.length ? list.map(([s, g, d]) => {
-      const b = NM.bicho(g);
-      return `<div class="card" style="display:flex;gap:14px;align-items:center">
-        <div style="font-size:2.2rem">${b.emoji}</div>
-        <div style="min-width:0"><h3 style="margin:0">${s}</h3>
-          <div class="small"><b>Grupo ${NM.pad(g, 2)} · ${b.nome}</b> · dezenas <span class="mono">${b.dezenas.join(' ')}</span></div>
-          <div class="muted small">${d}</div></div></div>`;
-    }).join('') : '<p class="empty">Nenhum sonho encontrado. Tente outra palavra.</p>';
+    $('#lista').innerHTML = list.length ? `<table class="data-table"><thead><tr><th>Sonho</th><th>Grupo</th><th>Dezenas</th><th>Leitura popular</th></tr></thead><tbody>${list.map(([s, g, d]) =>
+      `<tr><td><b>${s}</b></td><td>${NM.chip(g)}</td><td class="mono">${NM.bicho(g).dezenas.join(' ')}</td><td class="muted">${d}</td></tr>`).join('')}</tbody></table>`
+      : '<p class="empty">Nenhum sonho encontrado</p>';
   }
-  document.addEventListener('DOMContentLoaded', () => {
+  NM.onReady(() => {
     $('#q').addEventListener('input', render);
     render();
   });

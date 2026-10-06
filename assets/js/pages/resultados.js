@@ -49,7 +49,7 @@
       </tbody></table></div>` : '<p class="empty">Nenhuma ocorrência nos últimos 180 dias.</p>'}</div>`;
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
+  NM.onReady(() => {
     NM.bancaSelect($('#banca-bar'), (id) => { banca = id; load(); });
     $('#data').addEventListener('change', render);
     $('#prev').addEventListener('click', () => shift(-1));

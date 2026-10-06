@@ -1,90 +1,135 @@
-/* Na Mosca — base de dados: tabela dos bichos, bancas e resultados.
- * Os resultados aqui são gerados de forma determinística (dados de demonstração).
- * Para usar dados reais, substitua NM.loadResults() por uma chamada à sua API
- * mantendo o mesmo formato de objeto de extração.
+/* Na Mosca — base de dados: tabela dos bichos, bancas, modalidades/cotações e carregamento de resultados.
+ *
+ * Resultados reais: o coletor (scripts/atualizar-resultados.mjs, rodando no GitHub Actions) grava
+ * data/bicho/<banca>.json e data/loterias/<jogo>.json. Quando um arquivo não existe (ou o site é aberto
+ * direto do disco), a banca usa dados de demonstração gerados de forma determinística — e a interface
+ * sinaliza isso com o selo DEMO.
  */
 (function () {
   const NM = (window.NM = window.NM || {});
 
-  NM.BICHOS = [
-    ['Avestruz', '🦤'], ['Águia', '🦅'], ['Burro', '🫏'], ['Borboleta', '🦋'], ['Cachorro', '🐕'],
-    ['Cabra', '🐐'], ['Carneiro', '🐏'], ['Camelo', '🐫'], ['Cobra', '🐍'], ['Coelho', '🐇'],
-    ['Cavalo', '🐎'], ['Elefante', '🐘'], ['Galo', '🐓'], ['Gato', '🐈'], ['Jacaré', '🐊'],
-    ['Leão', '🦁'], ['Macaco', '🐒'], ['Porco', '🐖'], ['Pavão', '🦚'], ['Peru', '🦃'],
-    ['Touro', '🐂'], ['Tigre', '🐅'], ['Urso', '🐻'], ['Veado', '🦌'], ['Vaca', '🐄'],
-  ].map(([nome, emoji], i) => {
+  function pad(n, len) { return String(n).padStart(len, '0'); }
+  NM.pad = pad;
+
+  NM.BICHOS = ['Avestruz', 'Águia', 'Burro', 'Borboleta', 'Cachorro', 'Cabra', 'Carneiro', 'Camelo', 'Cobra', 'Coelho',
+    'Cavalo', 'Elefante', 'Galo', 'Gato', 'Jacaré', 'Leão', 'Macaco', 'Porco', 'Pavão', 'Peru',
+    'Touro', 'Tigre', 'Urso', 'Veado', 'Vaca'].map((nome, i) => {
     const grupo = i + 1;
-    const dezenas = [0, 1, 2, 3].map((k) => pad((grupo - 1) * 4 + 1 + k === 100 ? 0 : (grupo - 1) * 4 + 1 + k, 2));
-    return { grupo, nome, emoji, dezenas };
+    const dezenas = [0, 1, 2, 3].map((k) => pad(((grupo - 1) * 4 + 1 + k) % 100, 2));
+    return { grupo, nome, dezenas };
   });
 
   /** Grupo (1–25) a partir de uma dezena (0–99). 00 pertence à Vaca (25). */
-  NM.grupoDaDezena = function (dz) {
-    dz = Number(dz) % 100;
-    return dz === 0 ? 25 : Math.ceil(dz / 4);
-  };
+  NM.grupoDaDezena = (dz) => { dz = Number(dz) % 100; return dz === 0 ? 25 : Math.ceil(dz / 4); };
   NM.bicho = (grupo) => NM.BICHOS[grupo - 1];
   NM.bichoDaMilhar = (m) => NM.bicho(NM.grupoDaDezena(Number(m) % 100));
 
-  function pad(n, len) {
-    return String(n).padStart(len, '0');
-  }
-  NM.pad = pad;
-
-  /* Bancas e extrações. dias: 0=dom … 6=sáb */
+  /* ---------- Bancas (horários de referência; com dados reais as extrações vêm da fonte) ---------- */
+  const T = [0, 1, 2, 3, 4, 5, 6], SEG_SAB = [1, 2, 3, 4, 5, 6];
+  const ext = (id, nome, hora, dias = SEG_SAB, limite) => ({ id, nome, hora, dias, limite });
   NM.BANCAS = [
-    {
-      id: 'rj', nome: 'PT Rio (RJ)',
-      extracoes: [
-        { id: 'PPT', nome: 'PPT', hora: '09:20', dias: [1, 2, 3, 4, 5, 6] },
-        { id: 'PTM', nome: 'PTM', hora: '11:20', dias: [0, 1, 2, 3, 4, 5, 6] },
-        { id: 'PT', nome: 'PT', hora: '14:20', dias: [0, 1, 2, 3, 4, 5, 6] },
-        { id: 'PTV', nome: 'PTV', hora: '16:20', dias: [0, 1, 2, 3, 4, 5, 6] },
-        { id: 'PTN', nome: 'PTN', hora: '18:20', dias: [1, 2, 3, 4, 5, 6] },
-        { id: 'COR', nome: 'Corujinha', hora: '21:20', dias: [1, 2, 3, 4, 5, 6] },
-      ],
-    },
-    {
-      id: 'look', nome: 'Look (GO)',
-      extracoes: [
-        { id: 'L09', nome: 'Look 09h', hora: '09:20', dias: [1, 2, 3, 4, 5, 6] },
-        { id: 'L11', nome: 'Look 11h', hora: '11:20', dias: [0, 1, 2, 3, 4, 5, 6] },
-        { id: 'L14', nome: 'Look 14h', hora: '14:20', dias: [0, 1, 2, 3, 4, 5, 6] },
-        { id: 'L16', nome: 'Look 16h', hora: '16:20', dias: [1, 2, 3, 4, 5, 6] },
-        { id: 'L18', nome: 'Look 18h', hora: '18:20', dias: [1, 2, 3, 4, 5, 6] },
-      ],
-    },
-    {
-      id: 'ba', nome: 'Bahia (BA)',
-      extracoes: [
-        { id: 'BA10', nome: 'Bahia 10h', hora: '10:00', dias: [1, 2, 3, 4, 5, 6] },
-        { id: 'BA12', nome: 'Bahia 12h', hora: '12:00', dias: [0, 1, 2, 3, 4, 5, 6] },
-        { id: 'BA15', nome: 'Bahia 15h', hora: '15:00', dias: [1, 2, 3, 4, 5, 6] },
-        { id: 'BA19', nome: 'Bahia 19h', hora: '19:00', dias: [1, 2, 3, 4, 5, 6] },
-      ],
-    },
-    {
-      id: 'fed', nome: 'Federal',
-      extracoes: [{ id: 'FED', nome: 'Federal', hora: '19:00', dias: [3, 6] }],
-    },
+    { id: 'rj', sigla: 'RJ', nome: 'PT Rio (RJ)', extracoes: [
+      ext('PPT', 'PPT', '09:20'), ext('PTM', 'PTM', '11:20', T, '11:15'), ext('PT', 'PT', '14:20', T, '14:15'),
+      ext('PTV', 'PTV', '16:20', T, '16:15'), ext('PTN', 'PTN', '18:20', SEG_SAB, '18:15'), ext('COR', 'Corujinha', '21:20', SEG_SAB, '21:15')] },
+    { id: 'sp', sigla: 'SP', nome: 'PT-SP (SP)', extracoes: [
+      ext('SP08', 'SP 08h', '08:20'), ext('SP10', 'SP 10h', '10:20'), ext('SP12', 'SP 12h', '12:20', T), ext('BAND', 'Bandeirantes', '13:20'),
+      ext('SP15', 'SP 15h', '15:20', T), ext('SP17', 'SP 17h', '17:20', T), ext('SP19', 'SP 19h', '19:20'), ext('SP20', 'SP 20h', '20:20')] },
+    { id: 'go', sigla: 'GO', nome: 'Look (GO)', extracoes: [
+      ext('L07', 'Look 07h', '07:20'), ext('L09', 'Look 09h', '09:20'), ext('L11', 'Look 11h', '11:20', T), ext('L14', 'Look 14h', '14:20', T),
+      ext('L16', 'Look 16h', '16:20'), ext('L18', 'Look 18h', '18:20'), ext('L21', 'Look 21h', '21:20')] },
+    { id: 'ba', sigla: 'BA', nome: 'Bahia (BA)', extracoes: [
+      ext('BA10', 'Bahia 10h', '10:00'), ext('BA12', 'Bahia 12h', '12:00', T), ext('BA15', 'Bahia 15h', '15:00'), ext('BA19', 'Bahia 19h', '19:00'), ext('BA21', 'Bahia 21h', '21:00')] },
+    { id: 'pb', sigla: 'PB', nome: 'Paraíba (PB)', extracoes: [
+      ext('PB09', 'PB 09h45', '09:45'), ext('PB10', 'PB 10h45', '10:45'), ext('PB12', 'PB 12h45', '12:45', T), ext('PB15', 'PB 15h45', '15:45'), ext('PB18', 'PB 18h', '18:00'), ext('PB19', 'PB 19h', '19:00')] },
+    { id: 'pe', sigla: 'PE', nome: 'Pernambuco (PE)', extracoes: [
+      ext('PE09', 'PE 09h30', '09:30'), ext('PE11', 'PE 11h', '11:00'), ext('PE12', 'PE 12h30', '12:30'), ext('PE14', 'PE 14h', '14:00', T), ext('PE15', 'PE 15h30', '15:30'), ext('PE17', 'PE 17h', '17:00'), ext('PE19', 'PE 19h', '19:00')] },
+    { id: 'ce', sigla: 'CE', nome: 'Lotece (CE)', extracoes: [
+      ext('CE11', 'Lotece 11h', '11:00'), ext('CE14', 'Lotece 14h', '14:00', T), ext('CE17', 'Lotece 17h', '17:00'), ext('CE19', 'Lotece 19h', '19:00')] },
+    { id: 'mg', sigla: 'MG', nome: 'Minas Gerais (MG)', extracoes: [
+      ext('MG12', 'Minas 12h', '12:00'), ext('MG15', 'Minas 15h', '15:00', T), ext('MG19', 'Minas 19h', '19:00'), ext('MG21', 'Minas 21h', '21:00')] },
+    { id: 'df', sigla: 'DF', nome: 'Brasília (DF)', extracoes: [
+      ext('DF10', 'LBR 10h', '10:00'), ext('DF12', 'LBR 12h40', '12:40'), ext('DF15', 'LBR 15h', '15:00', T), ext('DF17', 'LBR 17h', '17:00'), ext('DF19', 'LBR 19h', '19:00'), ext('DF20', 'LBR 20h40', '20:40')] },
+    { id: 'fed', sigla: 'FED', nome: 'Federal', extracoes: [ext('FED', 'Federal', '19:00', [3, 6], '18:50')] },
   ];
   NM.banca = (id) => NM.BANCAS.find((b) => b.id === id) || NM.BANCAS[0];
 
-  /* PRNG determinístico (mulberry32) semeado por hash de string. */
+  /* ---------- Modalidades e cotações (valores pagos por R$ 1,00) ---------- */
+  const q = (x) => Math.pow(x, 5);
+  const P5 = Math.pow(25, 5);
+  const binomGE = (k) => { let s = 0; for (let j = k; j <= 5; j++) s += comb(5, j) * Math.pow(0.2, j) * Math.pow(0.8, 5 - j); return s; };
+  function comb(n, k) { if (k < 0 || k > n) return 0; let r = 1; for (let i = 1; i <= k; i++) r = (r * (n - k + i)) / i; return Math.round(r); }
+  NM.comb = comb;
+  const passe = (1 / 25) * (1 - Math.pow(24 / 25, 4));
+
+  NM.MODALIDADES = [
+    { cod: 1, sig: 'M', id: 'milhar', nome: 'Milhar', cotacao: 3000, prob: 1e-4, col: '1º ao 6º', desc: 'Acertar os 4 números do prêmio.' },
+    { cod: 2, sig: 'MC', id: 'mc', nome: 'Milhar e Centena', cotacao: 1750, prob: 1e-4, col: '1º ao 6º', desc: 'Metade do valor na milhar e metade na centena. Cotação efetiva na milhar = (milhar + centena) ÷ 2.' },
+    { cod: 3, sig: 'MM', id: 'mm', nome: 'Milhar Combinada', cotacao: 3000, prob: null, col: '1º ao 6º', desc: 'A milhar em todas as ordens possíveis; o valor é dividido entre as permutações.' },
+    { cod: 4, sig: 'MCC', id: 'mcc', nome: 'Milhar e Centena Combinada', cotacao: 1750, prob: null, col: '1º ao 6º', desc: 'Milhar e centena combinadas (invertidas).' },
+    { cod: 5, sig: 'C', id: 'centena', nome: 'Centena', cotacao: 500, prob: 1e-3, col: '1º ao 7º', desc: 'Acertar os 3 últimos números.' },
+    { cod: 6, sig: 'CC', id: 'cc', nome: 'Centena Combinada', cotacao: 500, prob: null, col: '1º ao 7º', desc: 'A centena em todas as ordens; valor dividido entre as permutações.' },
+    { cod: 7, sig: 'DZ', id: 'dezena', nome: 'Dezena', cotacao: 50, prob: 1e-2, col: '1º ao 7º', desc: 'Acertar os 2 últimos números.' },
+    { cod: 8, sig: 'U', id: 'unidade', nome: 'Unidade', cotacao: 5, prob: 0.1, col: '1º ao 7º', desc: 'Acertar o último número.' },
+    { cod: 9, sig: 'TDZ', id: 'terno-dz', nome: 'Terno de Dezena', cotacao: 3000, prob: 1 - 3 * q(0.99) + 3 * q(0.98) - q(0.97), col: 'Somente 1º ao 5º', desc: '3 dezenas entre o 1º e o 5º prêmio.' },
+    { cod: 10, sig: 'DDZ', id: 'duque-dz', nome: 'Duque de Dezena', cotacao: 200, prob: 1 - 2 * q(0.99) + q(0.98), col: 'Somente 1º ao 5º', desc: '2 dezenas entre o 1º e o 5º prêmio.' },
+    { cod: 11, sig: 'TG', id: 'terno-gp', nome: 'Terno de Grupo', cotacao: 100, prob: 1 - 3 * q(24 / 25) + 3 * q(23 / 25) - q(22 / 25), col: '1º ao 5º', desc: '3 grupos entre o 1º e o 5º prêmio.' },
+    { cod: 12, sig: 'TGC', id: 'terno-gp-col', nome: 'Terno de Grupo Colocado', cotacao: 1000, prob: 6 / 15625, col: '1º ao 3º, 2º ao 4º, 3º ao 5º', desc: '3 grupos dentro de uma faixa de 3 prêmios.' },
+    { cod: 13, sig: 'DG', id: 'duque-gp', nome: 'Dupla de Grupo', cotacao: 16, prob: 1 - 2 * q(24 / 25) + q(23 / 25), col: '1º ao 5º', desc: '2 grupos entre o 1º e o 5º prêmio.' },
+    { cod: 14, sig: 'DGC', id: 'duque-gp-col', nome: 'Dupla de Grupo Colocada', cotacao: 160, prob: 2 / 625, col: '1º-2º, 2º-3º, 3º-4º, 4º-5º', desc: '2 grupos dentro de uma faixa de 2 prêmios.' },
+    { cod: 15, sig: 'G', id: 'grupo', nome: 'Grupo', cotacao: 15, prob: 1 / 25, col: '1º ao 7º', desc: 'Acertar o bicho (grupo) do prêmio.' },
+    { cod: 16, sig: 'PAS', id: 'passe', nome: 'Passe', cotacao: 75, prob: passe, col: 'Somente 1º ao 5º', desc: '1º grupo na cabeça e o 2º grupo do 2º ao 5º prêmio.' },
+    { cod: 17, sig: 'PVV', id: 'pvv', nome: 'Passe Vai e Vem', cotacao: 37.5, prob: 2 * passe, col: 'Somente 1º ao 5º', desc: 'Passe nas duas ordens. Cotação padrão = metade do passe; confira com sua banca.' },
+    { cod: 18, sig: 'QG5', id: 'qg5', nome: 'Quina de Grupo (5 grupos)', cotacao: 500, prob: 120 / P5, col: 'Somente 1º ao 5º', desc: 'Os 5 grupos do 1º ao 5º são exatamente os 5 escolhidos.' },
+    { cod: 19, sig: 'QG10', id: 'qg10', nome: 'Quina de Grupo (10 grupos)', cotacao: 100, prob: 30240 / P5, col: 'Somente 1º ao 5º', desc: 'Os 5 grupos sorteados (distintos) estão entre os 10 escolhidos.' },
+    { cod: 20, sig: 'QG15', id: 'qg15', nome: 'Quina de Grupo (15 grupos)', cotacao: 10, prob: 360360 / P5, col: 'Somente 1º ao 5º', desc: 'Os 5 grupos sorteados (distintos) estão entre os 15 escolhidos.' },
+    { cod: 21, sig: 'LT3', id: 'lt3', nome: 'Lotinho 20 dezenas (Terno)', cotacao: 10, prob: binomGE(3), col: 'Somente 1º ao 5º', desc: '20 dezenas; ganha se 3 ou mais das dezenas do 1º ao 5º estiverem entre elas.' },
+    { cod: 22, sig: 'LT4', id: 'lt4', nome: 'Lotinho 20 dezenas (Quadra)', cotacao: 100, prob: binomGE(4), col: 'Somente 1º ao 5º', desc: '20 dezenas; ganha com 4 ou mais acertos.' },
+    { cod: 23, sig: 'LT5', id: 'lt5', nome: 'Lotinho 20 dezenas (Quina)', cotacao: 1000, prob: binomGE(5), col: 'Somente 1º ao 5º', desc: '20 dezenas; ganha com os 5 acertos.' },
+    { cod: 24, sig: 'SM', id: 'sm', nome: 'Super Milhar', cotacao: null, prob: null, col: '—', desc: 'Regras e cotação definidas pela banca.' },
+  ];
+
+  /* Cotações da Quininha (5 de 80, Quina) e Seninha (6 de 60, Mega-Sena) por quantidade de dezenas */
+  NM.QUININHA = { total: 80, sorteadas: 5, jogo: 'quina', nome: 'Quininha', base: 'Quina',
+    cotacoes: { 13: 6000, 14: 4000, 15: 3000, 16: 2300, 17: 1700, 18: 1250, 19: 960, 20: 750, 25: 230, 30: 90, 35: 40, 40: 22, 45: 12 },
+    limites: { 13: 10, 14: 15, 15: 20, 16: 25, 17: 30, 18: 45, 19: 60, 20: 75, 25: 250, 30: 600, 35: 1400, 40: 2500, 45: 4500 } };
+  NM.SENINHA = { total: 60, sorteadas: 6, jogo: 'megasena', nome: 'Seninha', base: 'Mega-Sena',
+    cotacoes: { 14: 6000, 15: 4000, 16: 2600, 17: 1800, 18: 1300, 19: 900, 20: 650, 25: 150, 30: 48, 35: 18, 40: 8 },
+    limites: { 14: 30, 15: 40, 16: 60, 17: 85, 18: 120, 19: 170, 20: 235, 25: 1050, 30: 3200, 35: 8400, 40: 19000 } };
+
+  /* Cotações personalizadas pelo visitante (configuradas na página Tabela) */
+  function loadCot() { try { return JSON.parse(localStorage.getItem('nm-cotacoes') || '{}'); } catch (e) { return {}; } }
+  NM.cotacoesCustom = loadCot();
+  NM.cot = (id) => { const c = NM.cotacoesCustom[id]; const m = NM.MODALIDADES.find((x) => x.id === id); return c != null ? c : m ? m.cotacao : null; };
+  NM.setCot = (id, v) => {
+    if (v == null || v === '' || isNaN(v)) delete NM.cotacoesCustom[id]; else NM.cotacoesCustom[id] = Number(v);
+    try { localStorage.setItem('nm-cotacoes', JSON.stringify(NM.cotacoesCustom)); } catch (e) {}
+  };
+  NM.mod = (id) => NM.MODALIDADES.find((x) => x.id === id);
+  NM.PROB = Object.fromEntries(NM.MODALIDADES.map((m) => [m.id, m.prob]));
+  NM.PROB.mc = 1e-3; // pelo menos a centena
+  /** Retorno esperado por R$ 1,00 apostado (usa as cotações em vigor). */
+  NM.ev = (id) => {
+    if (id === 'mc') return (NM.cot('milhar') * 1e-4 + NM.cot('centena') * 1e-3) / 2;
+    const c = NM.cot(id), p = NM.PROB[id];
+    return c != null && p != null ? c * p : null;
+  };
+
+  /* ---------- Datas ---------- */
+  NM.isoDate = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1, 2)}-${pad(d.getDate(), 2)}`;
+  NM.fmtDate = (iso) => { const [y, m, d] = iso.split('-'); return `${d}/${m}/${y}`; };
+  NM.fmtDateCurta = (iso) => { const [, m, d] = iso.split('-'); return `${d}/${m}`; };
+  NM.DIAS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+
+  /* ---------- PRNG determinístico (dados de demonstração) ---------- */
   function hash(str) {
     let h = 1779033703 ^ str.length;
-    for (let i = 0; i < str.length; i++) {
-      h = Math.imul(h ^ str.charCodeAt(i), 3432918353);
-      h = (h << 13) | (h >>> 19);
-    }
-    h = Math.imul(h ^ (h >>> 16), 2246822507);
-    h = Math.imul(h ^ (h >>> 13), 3266489909);
+    for (let i = 0; i < str.length; i++) { h = Math.imul(h ^ str.charCodeAt(i), 3432918353); h = (h << 13) | (h >>> 19); }
+    h = Math.imul(h ^ (h >>> 16), 2246822507); h = Math.imul(h ^ (h >>> 13), 3266489909);
     return (h ^= h >>> 16) >>> 0;
   }
   function mulberry32(a) {
     return function () {
-      a |= 0;
-      a = (a + 0x6d2b79f5) | 0;
+      a |= 0; a = (a + 0x6d2b79f5) | 0;
       let t = Math.imul(a ^ (a >>> 15), 1 | a);
       t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
       return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
@@ -92,75 +137,92 @@
   }
   NM.rng = (seed) => mulberry32(hash(String(seed)));
 
-  NM.isoDate = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1, 2)}-${pad(d.getDate(), 2)}`;
-  NM.fmtDate = (iso) => {
-    const [y, m, d] = iso.split('-');
-    return `${d}/${m}/${y}`;
-  };
-  NM.DIAS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
-
-  function buildExtracao(banca, ext, iso) {
-    const r = NM.rng(`${banca.id}|${ext.id}|${iso}`);
-    const premios = [];
-    for (let p = 0; p < 5; p++) premios.push(Math.floor(r() * 10000));
-    // 6º prêmio: soma dos cinco primeiros (últimos 4 dígitos)
-    premios.push(premios.reduce((a, b) => a + b, 0) % 10000);
-    // 7º prêmio: centena do produto do 1º pelo 2º
-    premios.push(Math.floor((premios[0] * premios[1]) / 1000) % 1000);
+  function montar(banca, e, iso, milhares) {
     return {
-      banca: banca.id,
-      bancaNome: banca.nome,
-      extracao: ext.id,
-      extracaoNome: ext.nome,
-      hora: ext.hora,
-      data: iso,
-      premios: premios.map((m, i) => ({
-        posicao: i + 1,
-        milhar: i === 6 ? pad(m, 3) : pad(m, 4),
-        grupo: NM.grupoDaDezena(m % 100),
-      })),
+      banca: banca.id, bancaNome: banca.nome, extracao: e.id, extracaoNome: e.nome || e.id, hora: e.hora || '', data: iso,
+      premios: milhares.filter(Boolean).map((m, i) => ({ posicao: i + 1, milhar: m, grupo: NM.grupoDaDezena(Number(m) % 100) })),
     };
   }
+  function demoExtracao(banca, e, iso) {
+    const r = NM.rng(`${banca.id}|${e.id}|${iso}`);
+    const p = [];
+    for (let i = 0; i < 5; i++) p.push(Math.floor(r() * 10000));
+    p.push(p.reduce((a, b) => a + b, 0) % 10000);
+    p.push(Math.floor((p[0] * p[1]) / 1000) % 1000);
+    return montar(banca, e, iso, p.map((m, i) => pad(m, i === 6 ? 3 : 4)));
+  }
 
+  /* ---------- Carregamento ---------- */
+  const live = {};      // bancaId -> { fonte, atualizado, extracoes: [...] }
   const cache = {};
-  /**
-   * Retorna as extrações de uma banca, da mais antiga para a mais recente,
-   * cobrindo os últimos `dias` dias (somente horários já passados hoje).
-   */
+
+  async function fetchJSON(url) {
+    const r = await fetch(url, { cache: 'no-cache' });
+    if (!r.ok) throw new Error(r.status);
+    return r.json();
+  }
+
+  NM.ready = (async () => {
+    if (location.protocol === 'file:') return;
+    await Promise.allSettled(NM.BANCAS.map(async (b) => {
+      const j = await fetchJSON(`data/bicho/${b.id}.json`);
+      if (!j.extracoes || !j.extracoes.length) return;
+      live[b.id] = {
+        fonte: j.fonte, atualizado: j.atualizado,
+        extracoes: j.extracoes.map((e) => montar(b, e, e.data, e.premios)),
+      };
+    }));
+  })();
+
+  NM.isLive = (bancaId) => !!live[bancaId];
+  NM.fonte = (bancaId) => live[bancaId] || null;
+
+  /** Extrações da banca nos últimos `dias` dias, da mais antiga para a mais recente. */
   NM.loadResults = function (bancaId = 'rj', dias = 180) {
-    const key = bancaId + dias;
+    const key = bancaId + '|' + dias;
     if (cache[key]) return cache[key];
     const banca = NM.banca(bancaId);
     const now = new Date();
-    const out = [];
-    for (let d = dias - 1; d >= 0; d--) {
-      const day = new Date(now.getFullYear(), now.getMonth(), now.getDate() - d);
-      const iso = NM.isoDate(day);
-      for (const ext of banca.extracoes) {
-        if (!ext.dias.includes(day.getDay())) continue;
-        if (d === 0) {
-          const [h, m] = ext.hora.split(':').map(Number);
-          if (now.getHours() * 60 + now.getMinutes() < h * 60 + m + 10) continue;
+    const limite = NM.isoDate(new Date(now.getFullYear(), now.getMonth(), now.getDate() - dias + 1));
+    let out;
+    if (live[bancaId]) {
+      out = live[bancaId].extracoes.filter((e) => e.data >= limite);
+    } else {
+      out = [];
+      for (let d = dias - 1; d >= 0; d--) {
+        const day = new Date(now.getFullYear(), now.getMonth(), now.getDate() - d);
+        const iso = NM.isoDate(day);
+        for (const e of banca.extracoes) {
+          if (!e.dias.includes(day.getDay())) continue;
+          if (d === 0) {
+            const [h, m] = e.hora.split(':').map(Number);
+            if (now.getHours() * 60 + now.getMinutes() < h * 60 + m + 10) continue;
+          }
+          out.push(demoExtracao(banca, e, iso));
         }
-        out.push(buildExtracao(banca, ext, iso));
       }
     }
     cache[key] = out;
     return out;
   };
 
-  /* Cotações de referência (quanto paga por R$ 1,00) e probabilidade de acerto
-   * na cabeça (1º prêmio). Valores variam de banca para banca. */
-  NM.MODALIDADES = [
-    { id: 'grupo', nome: 'Grupo', cotacao: 18, prob: 1 / 25, desc: 'Acertar o bicho (grupo) do prêmio.' },
-    { id: 'dezena', nome: 'Dezena', cotacao: 60, prob: 1 / 100, desc: 'Acertar os 2 últimos números.' },
-    { id: 'centena', nome: 'Centena', cotacao: 600, prob: 1 / 1000, desc: 'Acertar os 3 últimos números.' },
-    { id: 'milhar', nome: 'Milhar', cotacao: 4000, prob: 1 / 10000, desc: 'Acertar os 4 números.' },
-    { id: 'mc', nome: 'Milhar e Centena', cotacao: 2300, prob: 1 / 10000, desc: 'Metade na milhar, metade na centena.' },
-    { id: 'duque-gp', nome: 'Duque de Grupo', cotacao: 18.5, prob: null, desc: '2 grupos entre o 1º e o 5º prêmio.' },
-    { id: 'terno-gp', nome: 'Terno de Grupo', cotacao: 150, prob: null, desc: '3 grupos entre o 1º e o 5º prêmio.' },
-    { id: 'duque-dz', nome: 'Duque de Dezena', cotacao: 300, prob: null, desc: '2 dezenas entre o 1º e o 5º prêmio.' },
-    { id: 'terno-dz', nome: 'Terno de Dezena', cotacao: 5000, prob: null, desc: '3 dezenas entre o 1º e o 5º prêmio.' },
-    { id: 'passe', nome: 'Passe Vai', cotacao: 90, prob: null, desc: 'Grupo no 1º e outro grupo do 2º ao 5º.' },
-  ];
+  /** Concursos da Quina / Mega-Sena (mais recente primeiro). Tenta o arquivo do coletor e depois a API pública. */
+  NM.loadLoteria = async function (jogo) {
+    if (location.protocol !== 'file:') {
+      try {
+        const j = await fetchJSON(`data/loterias/${jogo}.json`);
+        if (j.concursos && j.concursos.length) return { fonte: 'Caixa (coletor)', atualizado: j.atualizado, concursos: j.concursos.map(normConc) };
+      } catch (e) {}
+    }
+    try {
+      const j = await fetchJSON(`https://loteriascaixa-api.herokuapp.com/api/${jogo}/latest`);
+      return { fonte: 'API pública Loterias Caixa', atualizado: new Date().toISOString(), concursos: [normConc({ numero: j.concurso, data: j.data, dezenas: j.dezenas })] };
+    } catch (e) {}
+    return null;
+  };
+  function normConc(c) {
+    let data = String(c.data);
+    if (data.includes('/')) { const [d, m, y] = data.split('/'); data = `${y}-${m}-${d}`; }
+    return { numero: Number(c.numero), data, dezenas: c.dezenas.map(Number).sort((a, b) => a - b) };
+  }
 })();
