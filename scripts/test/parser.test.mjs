@@ -35,3 +35,22 @@ const b = parsePage(colunas, { hoje: '2026-10-06' });
 assert.equal(b.length, 2, 'PTV incompleto deve ser descartado');
 assert.deepEqual(b.map((x) => [x.label, x.data, x.premios[0]]), [['PTM', '2026-10-05', '1111'], ['PT', '2026-10-05', '2222']]);
 console.log('parser ok');
+
+// Formato em blocos (deunoposte.app.br)
+const blocos = `<p class="chamada-tabela">Resultado ... sorteio 9 horas PPT premiou a milhar 2279</p><div class="caixa-tabela bixo"><div class="topo-tabela"><h2><span class="titulo">Deu no Poste Rio de Janeiro</span><span class="sorteio">Sorteio 9 horas PPT</span><span class="texto-sorteio">terça-feira 06/10/2026</span></h2></div>
+<div class="numeros-bicho"><div class="bicho-individual"><span class="numero-individual">1º</span><span class="milhar">2279</span><small>Peru (20) </small></div>
+<div class="bicho-individual"><span class="numero-individual">2º</span><span class="milhar">6544</span><small>Cavalo (11) </small></div>
+<div class="bicho-individual"><span class="numero-individual">3º</span><span class="milhar">3883</span><small>Touro (21) </small></div>
+<div class="bicho-individual"><span class="numero-individual">4º</span><span class="milhar">0203</span><small>Avestruz (1) </small></div>
+<div class="bicho-individual"><span class="numero-individual">5º</span><span class="milhar">6565</span><small>Macaco (17) </small></div>
+<div class="bicho-individual"><span class="numero-individual">6º</span><span class="milhar">19474</span><small>Soma </small></div>
+<div class="bicho-individual"><span class="numero-individual">7º</span><span class="milhar">913</span><small>Multiplicação </small></div></div></div>
+<p class="chamada-tabela">Resultado ... sorteio 21 horas Corujinha premiou</p><div class="caixa-tabela"><h2><span class="sorteio">Sorteio 21 horas Corujinha</span><span class="texto-sorteio">segunda-feira 05/10/2026</span></h2>
+<div class="bicho-individual"><span>1º</span><span>3451</span><small>Galo (13)</small></div><div><span>2º</span><span>6879</span><small>Peru (20)</small></div>
+<div><span>3º</span><span>5024</span></div><div><span>4º</span><span>9438</span></div><div><span>5º</span><span>1480</span></div></div>`;
+const c = parsePage(blocos, { hoje: '2026-10-06' });
+assert.deepEqual(c.map((x) => [x.label, x.hora, x.data, x.premios.join(',')]), [
+  ['PPT', '09:00', '2026-10-06', '2279,6544,3883,0203,6565,9474,913'],
+  ['COR', '21:00', '2026-10-05', '3451,6879,5024,9438,1480'],
+]);
+console.log('blocos ok');

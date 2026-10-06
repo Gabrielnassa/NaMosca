@@ -75,9 +75,9 @@ async function coletarBanca(b) {
         if (!antes || JSON.stringify(antes.premios) !== JSON.stringify(reg.premios)) novos++;
         porChave.set(chave, reg);
       }
-      fonteOk = url;
+      fonteOk = fonteOk || url;
       console.log(`  ${b.id}: ${lidas.length} extrações lidas de ${url}`);
-      break;
+      await sleep(300);
     } catch (err) {
       console.log(`  ${b.id}: falha em ${url} (${err.message})`);
     }

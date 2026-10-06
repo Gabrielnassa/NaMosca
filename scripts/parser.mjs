@@ -17,7 +17,7 @@ export function decode(s) {
 export const toText = (html) =>
   decode(html.replace(/<br\s*\/?>/gi, ' ').replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ').trim();
 
-const LABELS = ['PPT', 'PTM', 'PTV', 'PTN', 'PT', 'COR', 'CORUJA', 'FEDERAL', 'FED', 'BAND', 'BANDEIRANTES', 'PTP', 'PNP', 'CTG', 'LOOK', 'NACIONAL', 'MALUCA', 'LOTEP', 'LOTECE', 'ALVORADA'];
+const LABELS = ['PPT', 'PTM', 'PTV', 'PTN', 'PT', 'COR', 'CORUJA', 'FEDERAL', 'FED', 'BAND', 'BANDEIRANTES', 'PTP', 'PNP', 'CTG', 'LOOK', 'NACIONAL', 'MALUCA', 'LOTEP', 'LOTECE', 'ALVORADA', 'CORUJINHA'];
 const LABEL_RE = new RegExp(`(?:^|[^A-ZÀ-Ú])(${LABELS.join('|')})(?![A-ZÀ-Ú])`, 'gi');
 const TIME_RE = /(?:^|[^\d])([01]?\d|2[0-3])\s*(?::|h|hs|horas?)\s*([0-5]\d)?(?!\d)/gi;
 const DATE_RE = /(\d{2})[\/.-](\d{2})[\/.-](\d{4})/g;
@@ -35,7 +35,7 @@ export function findTime(text) {
 }
 export function findLabel(text) {
   const m = lastMatch(LABEL_RE, text.toUpperCase());
-  return m ? m[1].toUpperCase().replace('FEDERAL', 'FED').replace('CORUJA', 'COR').replace('BANDEIRANTES', 'BAND') : null;
+  return m ? m[1].toUpperCase().replace('FEDERAL', 'FED').replace('CORUJINHA', 'COR').replace('CORUJA', 'COR').replace('BANDEIRANTES', 'BAND') : null;
 }
 export function findDate(text) {
   const m = lastMatch(DATE_RE, text);
@@ -66,6 +66,37 @@ export function tables(html) {
     const caption = toText((/<caption[\s\S]*?<\/caption>/i.exec(m[0]) || [''])[0]);
     out.push({ context: before.slice(-400) + ' ' + caption, rows: rows.filter((r) => r.length) });
     prevEnd = m.index + m[0].length;
+  }
+  return out;
+}
+
+/**
+ * Formato C (blocos em <div>): lê os textos da página em sequência e procura "1º … 1234", "2º … 5678"…
+ * O título/horário/data do bloco vêm dos textos imediatamente anteriores ao 1º prêmio.
+ */
+export function parseBlocks(html, { hoje } = {}) {
+  html = html.replace(/<script[\s\S]*?<\/script>/gi, ' ').replace(/<style[\s\S]*?<\/style>/gi, ' ');
+  const toks = [...html.matchAll(/>([^<]+)</g)].map((m) => decode(m[1]).replace(/\s+/g, ' ').trim()).filter(Boolean);
+  const out = [];
+  for (let i = 0; i < toks.length; i++) {
+    if (posicao(toks[i]) !== 1) continue;
+    const premios = [];
+    let j = i, esperado = 1;
+    while (j < toks.length && esperado <= 10) {
+      if (posicao(toks[j]) === esperado) {
+        const v = toks.slice(j + 1, j + 3).map(milhar).find(Boolean);
+        if (!v) break;
+        premios[esperado - 1] = v;
+        esperado++;
+        j += 2;
+      } else if (j > i && posicao(toks[j]) === 1) break;
+      else j++;
+      if (j - i > 60) break;
+    }
+    // contexto: textos anteriores até o fim do bloco anterior
+    const ctx = toks.slice(Math.max(0, i - 8), i).join(' ');
+    push(out, { data: findDate(ctx) || hoje, label: findLabel(ctx), hora: findTime(ctx), premios });
+    i = j - 1;
   }
   return out;
 }
@@ -106,7 +137,7 @@ export function parsePage(html, { hoje } = {}) {
     const ctx = `${t.context} ${header.join(' ')}`;
     push(result, { data: findDate(ctx) || pageDate, label: findLabel(ctx), hora: findTime(ctx), premios });
   }
-  return result;
+  return result.length ? result : parseBlocks(html, { hoje: pageDate });
 }
 
 function push(list, { data, label, hora, premios }) {

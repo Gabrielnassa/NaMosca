@@ -12,6 +12,8 @@ for (const url of process.argv.slice(2)) {
     const i = h.search(/>\s*\d{4}\s*</);
     console.log('--- primeira milhar em', i);
     console.log(h.slice(Math.max(0, i - 2500), i + 3500));
+    const links = [...new Set([...h.matchAll(/href="([^"]+)"/gi)].map((m) => m[1]).filter((u) => /paulo|sp|band|federal|look|nacional/i.test(u)))].slice(0, 40);
+    console.log('--- links:', links.join('\n'));
     const urls = [...new Set([...h.matchAll(/https?:\/\/[^"' ]*(json|api)[^"' ]*/gi)].map((m) => m[0]))].slice(0, 15);
     console.log('--- urls json/api:', urls.join('\n'));
   } catch (e) { console.log('erro', e.message); }

@@ -5,10 +5,14 @@
       "id": "rj",
       "nome": "Rio de Janeiro",
       "urls": [
-        "https://portalbrasil.net/jogodobicho/rio-de-janeiro/",
         "https://deunoposte.app.br/",
-        "https://www.resultadofacil.com.br/deunoposte-rj-de-hoje",
-        "https://www.resultadofacil.com.br/resultado-do-jogo-do-bicho/rj"
+        "https://deunoposte.app.br/rio-de-janeiro/",
+        "https://deunoposte.app.br/resultado-rj-9-horas-ppt/",
+        "https://deunoposte.app.br/resultado-rj-11-horas-ptm/",
+        "https://deunoposte.app.br/resultado-rj-14-horas-pt/",
+        "https://deunoposte.app.br/resultado-rj-16-horas-ptv/",
+        "https://deunoposte.app.br/resultado-rj-18-horas-ptn/",
+        "https://deunoposte.app.br/resultado-corujinha/"
       ],
       "mapa": {
         "PPT": "RJ09",
@@ -27,8 +31,7 @@
         "16:20": "PTV",
         "18:20": "PTN",
         "21:20": "COR"
-      },
-      "historico": "https://www.resultadofacil.com.br/deunoposte-rj-dia-{data}"
+      }
     },
     {
       "id": "sp",
