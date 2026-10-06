@@ -52,8 +52,6 @@
     ...NM.BANCAS.flatMap((b) => b.extracoes.map((e) => ({ ...e, banca: b.id, tipo: 'bicho' }))),
     { id: 'QN', nome: 'Quininha', hora: '20:00', dias: SEG_SAB, banca: null, tipo: 'quininha', link: 'quininha.html' },
     { id: 'SN', nome: 'Seninha', hora: '20:00', dias: SEG_SAB, banca: null, tipo: 'seninha', link: 'seninha.html' },
-    { id: 'QN-DM', nome: 'Quininha Domingo', hora: '20:00', dias: DOM, banca: null, tipo: 'quininha', link: 'quininha.html', status: 'novo' },
-    { id: 'SN-DM', nome: 'Seninha Domingo', hora: '20:00', dias: DOM, banca: null, tipo: 'seninha', link: 'seninha.html', status: 'novo' },
   ].sort((a, b) => a.hora.localeCompare(b.hora) || a.id.localeCompare(b.id));
   NM.sorteio = (id) => NM.SORTEIOS.find((s) => s.id === id);
 
