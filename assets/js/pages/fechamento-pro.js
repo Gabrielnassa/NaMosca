@@ -25,6 +25,7 @@
 
   const st = { jogo: 'bicho', tipo: 0, modo: 'desd', marcar: 'm', sel: new Set(), fix: new Set(), jogos: [], info: null, resultados: [] };
   const J = () => JOGOS[st.jogo];
+  const ord = () => (st.jogo === 'bicho' ? NM.ordDz : (a, b) => a - b);
   const T = () => J().tipos[st.tipo];
   const k = () => Number($('#k').value);
   const gar = () => $('#gar').value.split('-').map(Number);
@@ -74,7 +75,7 @@
   /* ---------- volante ---------- */
   function volante() {
     const j = J();
-    $('#vol').innerHTML = Array.from({ length: j.universo }, (_, i) => i + j.base).map((n) =>
+    $('#vol').innerHTML = (st.jogo === 'bicho' ? NM.DEZENAS_BICHO : Array.from({ length: j.universo }, (_, i) => i + j.base)).map((n) =>
       `<button data-v="${n}" class="${st.fix.has(n) ? 'fix' : st.sel.has(n) ? 'on' : ''}">${j.fmt(n)}</button>`).join('');
     const total = new Set([...st.sel, ...st.fix]).size;
     $('#cnt').textContent = `${total} marcada${total === 1 ? '' : 's'}${st.fix.size ? ` · ${st.fix.size} fixa${st.fix.size > 1 ? 's' : ''}` : ''}`;
@@ -90,10 +91,10 @@
   }
 
   /* ---------- geração ---------- */
-  function pool() { return [...new Set([...st.sel, ...st.fix])].sort((a, b) => a - b); }
+  function pool() { return [...new Set([...st.sel, ...st.fix])].sort(ord()); }
 
   async function gerar() {
-    const K = k(), [t, m] = gar(), fix = [...st.fix].sort((a, b) => a - b), F = fix.length;
+    const K = k(), [t, m] = gar(), fix = [...st.fix].sort(ord()), F = fix.length;
     const livres = pool().filter((n) => !st.fix.has(n));
     const kL = K - F;
     const msg = (s) => { $('#jogos').innerHTML = `<p class="empty">${s}</p>`; st.jogos = []; kpis(); };
@@ -119,7 +120,7 @@
       } catch (e) { ocupado(false); return msg(e.message === 'cancelado' ? 'Cálculo cancelado.' : `Não foi possível: ${e.message}`); }
       ocupado(false);
     }
-    st.jogos = jogos.map((j) => [...fix, ...j].sort((a, b) => a - b));
+    st.jogos = jogos.map((j) => [...fix, ...j].sort(ord()));
     st.info = { ...info, ms: Date.now() - t0, totalDesd, K, t, m, F };
     $('#sim').innerHTML = '<p class="note" style="margin:0">Clique em “Simular” para medir a chance real deste fechamento.</p>';
     kpis(); render(); conferir();
@@ -204,7 +205,7 @@
     const set = new Set(dz);
     const premiados = st.jogos.filter((g) => g.filter((x) => set.has(x)).length >= tier).length;
     const dist = {}; st.jogos.forEach((g) => { const h = g.filter((x) => set.has(x)).length; dist[h] = (dist[h] || 0) + 1; });
-    $('#conf').innerHTML = `<div class="balls" style="margin-bottom:8px">${[...set].sort((a, b) => a - b).map((x) => `<span class="ball hit">${j.fmt(x)}</span>`).join('')}</div>
+    $('#conf').innerHTML = `<div class="balls" style="margin-bottom:8px">${[...set].sort(ord()).map((x) => `<span class="ball hit">${j.fmt(x)}</span>`).join('')}</div>
       <p style="margin:0"><b class="${premiados ? 'up' : ''}">${premiados} jogo(s) premiado(s)</b>${premiados && cot ? ` · prêmio estimado ${NM.brl(premiados * cot * valor())} · custo ${NM.brl(st.jogos.length * valor())}` : ''}</p>
       <p class="note" style="margin:4px 0 0">${Object.keys(dist).sort((a, b) => b - a).map((h) => `${dist[h]} jogo(s) com ${h} acerto(s)`).join(' · ')}</p>`;
     render([...set]);

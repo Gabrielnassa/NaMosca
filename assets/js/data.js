@@ -22,6 +22,9 @@
   /** Grupo (1–25) a partir de uma dezena (0–99). 00 pertence à Vaca (25). */
   NM.grupoDaDezena = (dz) => { dz = Number(dz) % 100; return dz === 0 ? 25 : Math.ceil(dz / 4); };
   NM.bicho = (grupo) => NM.BICHOS[grupo - 1];
+  /** Dezenas na ordem dos grupos: 01, 02 … 99, 00 (o 00 fecha o grupo da Vaca). */
+  NM.DEZENAS_BICHO = [...Array(99).keys()].map((i) => i + 1).concat(0);
+  NM.ordDz = (a, b) => (a || 100) - (b || 100);
   NM.bichoDaMilhar = (m) => NM.bicho(NM.grupoDaDezena(Number(m) % 100));
 
   /* ---------- Sorteios (a grade da banca) ----------

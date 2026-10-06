@@ -72,7 +72,7 @@
     if (m.tipo === 'grupo') {
       el.innerHTML = NM.BICHOS.map((b) => `<button data-v="${b.grupo}" class="${st.sel.has(b.grupo) ? 'on' : ''}"><b>${NM.pad(b.grupo, 2)}</b>${b.nome}</button>`).join('');
     } else {
-      el.innerHTML = [...Array(100).keys()].map((i) => `<button data-v="${i}" class="${st.sel.has(i) ? 'on' : ''}">${NM.pad(i, 2)}</button>`).join('');
+      el.innerHTML = NM.DEZENAS_BICHO.map((i) => `<button data-v="${i}" class="${st.sel.has(i) ? 'on' : ''}">${NM.pad(i, 2)}</button>`).join('');
     }
     el.onclick = (e) => {
       const b = e.target.closest('button[data-v]'); if (!b) return;
@@ -124,7 +124,7 @@
     }
     const cot = NM.cot(cotId()) || 0;
     const v = st.valor;
-    const sel = [...st.sel].sort((a, b) => a - b);
+    const sel = [...st.sel].sort(NM.ordDz);
     const fmtG = (g) => NM.pad(g, 2);
 
     if (m.tipo === 'milhar') return calcMilhar(cot, v);
@@ -247,7 +247,7 @@
 
   async function gerarLotinho() {
     const t = st.modo.subs[st.sub][1];
-    const sel = [...st.sel].sort((a, b) => a - b);
+    const sel = [...st.sel].sort(NM.ordDz);
     if (sel.length <= 20) { st.jogos = []; calc(); return; }
     if (sel.length > 50) { $('#jogos').innerHTML = '<p class="empty">Use no máximo 50 dezenas no fechamento</p>'; return; }
     const prog = $('#prog'); prog.hidden = false;
@@ -256,7 +256,7 @@
     prog.hidden = true; $('#gerar-lt').disabled = false;
     st.cobertura = r.cobertura;
     calc();
-    render(r.jogos.map((j) => j.slice().sort((a, b) => a - b)), (x) => NM.pad(x, 2), ' ');
+    render(r.jogos.map((j) => j.slice().sort(NM.ordDz)), (x) => NM.pad(x, 2), ' ');
     calc();
   }
 

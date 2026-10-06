@@ -108,7 +108,7 @@
   function dezenas() {
     const max = Math.max(...st.dezenas.map((d) => d.freq)) || 1;
     const min = Math.min(...st.dezenas.map((d) => d.freq));
-    $('#dezenas').innerHTML = `<div class="dz-grid">${st.dezenas.map((d) => {
+    $('#dezenas').innerHTML = `<div class="dz-grid">${[...st.dezenas.slice(1), st.dezenas[0]].map((d) => {
       const t = (d.freq - min) / (max - min || 1);
       const b = NM.bicho(NM.grupoDaDezena(Number(d.dezena)));
       return `<div class="dz" style="background:${heatColor(t)};color:${inkFor(t)}" data-tip="<b>Dezena ${d.dezena}</b> · ${NM.pad(b.grupo, 2)} ${b.nome}<br>${d.freq} vezes · atraso ${d.atraso}">${d.dezena}</div>`;
