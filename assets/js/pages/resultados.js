@@ -63,5 +63,7 @@
     $('#data').addEventListener('change', (e) => e.target.value && setDia(e.target.value));
     $('#busca').addEventListener('input', busca);
     setDia('hoje');
+    const q = new URLSearchParams(location.search).get('q');
+    if (q) { $('#busca').value = q; busca(); $('#busca-res').scrollIntoView({ block: 'start' }); }
   });
 })();

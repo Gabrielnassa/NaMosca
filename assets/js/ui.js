@@ -3,16 +3,21 @@
   const NM = window.NM;
 
   const NAV = [
-    ['index.html', 'Painel'],
-    ['resultados.html', 'Resultados'],
-    ['estatisticas.html', 'Estatísticas'],
-    ['fechamento.html', 'Fechamento'],
-    ['fechamento-pro.html', 'Fechamento PRO'],
-    ['quininha.html', 'Quininha'],
-    ['seninha.html', 'Seninha'],
-    ['gerador.html', 'Gerador'],
-    ['conferidor.html', 'Conferidor'],
-    ['tabela.html', 'Cotações'],
+    [null, 'Principal'],
+    ['index.html', 'Início', 'home'],
+    ['resultados.html', 'Resultados', 'list'],
+    ['estatisticas.html', 'Estatísticas', 'chart'],
+    [null, 'Ferramentas'],
+    ['fechamento-pro.html', 'Fechamento PRO', 'grid', true],
+    ['fechamento.html', 'Fechamento do bicho', 'layers'],
+    ['quininha.html', 'Quininha', 'ticket'],
+    ['seninha.html', 'Seninha', 'ticket'],
+    ['gerador.html', 'Gerador', 'dice'],
+    ['conferidor.html', 'Conferidor', 'check'],
+    [null, 'Referência'],
+    ['tabela.html', 'Cotações', 'book'],
+    ['analises.html', 'Análises', 'news'],
+    ['sonhos.html', 'Sonhos', 'moon'],
   ];
 
   const ICON = {
@@ -25,15 +30,27 @@
     check: '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>',
     dice: '<rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><circle cx="15.5" cy="15.5" r="1.5"/><circle cx="15.5" cy="8.5" r="1.5"/><circle cx="8.5" cy="15.5" r="1.5"/>',
     menu: '<line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/>',
+    layers: '<path d="m12 2 9 5-9 5-9-5 9-5Z"/><path d="m3 12 9 5 9-5"/><path d="m3 17 9 5 9-5"/>',
+    news: '<path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/>',
+    moon: '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>',
+    sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4"/>',
+    search: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
     book: '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>',
   };
   NM.icon = (n) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[n]}</svg>`;
 
   const BOTTOM = [['index.html', 'Início', 'home'], ['resultados.html', 'Resultados', 'list'], ['fechamento.html', 'Fechamento', 'grid'], ['fechamento-pro.html', 'PRO', 'ticket'], ['estatisticas.html', 'Estatísticas', 'chart']];
 
-  const LOGO = `<svg class="logo-mark" viewBox="0 0 32 32" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4">
-    <circle cx="16" cy="16" r="13"/><circle cx="16" cy="16" r="7"/><circle cx="16" cy="16" r="2.5" fill="currentColor" stroke="none"/></svg>`;
-  const BRAND = `<a class="brand" href="index.html" aria-label="Na Mosca — início">${LOGO}<span class="brand-word">Na Mosca</span></a>`;
+  const LOGO = `<svg class="logo-mark" viewBox="0 0 40 40" aria-hidden="true">
+    <defs><linearGradient id="nmg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34d399"/><stop offset="1" stop-color="#059669"/></linearGradient></defs>
+    <rect width="40" height="40" rx="11" fill="url(#nmg)"/>
+    <circle cx="20" cy="20" r="11" fill="none" stroke="#04150f" stroke-width="2.4" opacity=".9"/>
+    <circle cx="20" cy="20" r="5.5" fill="none" stroke="#04150f" stroke-width="2.4" opacity=".9"/>
+    <circle cx="20" cy="20" r="2" fill="#fbbf24"/></svg>`;
+  const BRAND = `<a class="brand" href="index.html" aria-label="Na Mosca — início">${LOGO}<span class="brand-word">Na Mosca<small>Resultados &amp; fechamentos</small></span></a>`;
+
+  // tema: escuro por padrão
+  try { const t = localStorage.getItem('nm-tema'); if (t) document.documentElement.setAttribute('data-theme', t); } catch (e) {}
 
   NM.getBanca = () => {
     const q = new URLSearchParams(location.search).get('banca');
@@ -171,19 +188,49 @@
   /* ---------- Layout ---------- */
   function header() {
     const page = location.pathname.split('/').pop() || 'index.html';
-    const h = document.createElement('header');
-    h.className = 'site-header';
-    h.innerHTML = `<div class="wrap header-row">${BRAND}
-        <nav class="nav" aria-label="Principal">${NAV.map(([href, label]) => `<a href="${href}"${href === page ? ' aria-current="page"' : ''}>${label}</a>`).join('')}</nav>
-        <button class="menu-btn" aria-label="Abrir menu" aria-expanded="false">${NM.icon('menu')}</button></div>`;
-    document.body.prepend(h);
-    const btn = h.querySelector('.menu-btn');
-    btn.addEventListener('click', () => btn.setAttribute('aria-expanded', h.classList.toggle('open')));
+    const side = document.createElement('aside');
+    side.className = 'sidebar';
+    side.setAttribute('aria-label', 'Menu');
+    side.innerHTML = BRAND + NAV.map(([href, label, ic, pro]) => href
+      ? `<a class="side-link" href="${href}"${href === page ? ' aria-current="page"' : ''}>${NM.icon(ic)}<span>${label}</span>${pro ? '<span class="pro-badge">PRO</span>' : ''}</a>`
+      : `<div class="side-sec">${label}</div>`).join('')
+      + `<div class="side-foot" id="side-foot"><span class="live-dot demo"></span>carregando…</div>`;
+    const ov = document.createElement('div');
+    ov.className = 'overlay';
+    const top = document.createElement('div');
+    top.className = 'topbar';
+    top.innerHTML = `<button class="icon-btn menu-btn" aria-label="Abrir menu">${NM.icon('menu')}</button><a class="top-brand" href="index.html">${LOGO}<span>Na Mosca</span></a>
+      <form class="search" action="resultados.html" role="search">${NM.icon('search')}<input type="search" name="q" placeholder="Buscar milhar ou dezena nos resultados…" inputmode="numeric" maxlength="4" aria-label="Buscar milhar"></form>
+      <div class="top-meta"><span class="hide-sm" id="top-data"></span><span id="top-hora"></span>
+        <button class="icon-btn" id="tema-btn" aria-label="Alternar tema claro/escuro" title="Tema claro/escuro">${NM.icon('sun')}</button></div>`;
+    document.body.prepend(side, ov, top);
+    const fechar = () => document.body.classList.remove('nav-open');
+    top.querySelector('.menu-btn').addEventListener('click', () => document.body.classList.toggle('nav-open'));
+    ov.addEventListener('click', fechar);
+    top.querySelector('#tema-btn').addEventListener('click', () => {
+      const t = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', t);
+      try { localStorage.setItem('nm-tema', t); } catch (e) {}
+    });
+    const relogio = () => {
+      const d = new Date();
+      top.querySelector('#top-hora').innerHTML = `<b>${d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' })}</b> BRT`;
+      top.querySelector('#top-data').textContent = d.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', timeZone: 'America/Sao_Paulo' });
+    };
+    relogio(); setInterval(relogio, 20000);
     const bn = document.createElement('nav');
     bn.className = 'bottom-nav';
     bn.setAttribute('aria-label', 'Atalhos');
     bn.innerHTML = BOTTOM.map(([href, label, ic]) => `<a href="${href}"${href === page ? ' aria-current="page"' : ''}>${NM.icon(ic)}<span>${label}</span></a>`).join('');
     document.body.append(bn);
+  }
+
+  function statusFonte() {
+    const vivas = NM.BANCAS.filter((b) => NM.isLive(b.id));
+    const el = document.getElementById('side-foot');
+    if (el) el.innerHTML = vivas.length
+      ? `<span class="live-dot"></span>Ao vivo: ${vivas.map((b) => b.sigla).join(' · ')}<br><span style="opacity:.7">atualiza a cada 15 min</span>`
+      : '<span class="live-dot demo"></span>Modo demonstração';
   }
 
   function footer() {
@@ -210,4 +257,5 @@
   };
 
   document.addEventListener('DOMContentLoaded', () => { header(); footer(); });
+  NM.onReady(statusFonte);
 })();

@@ -8,7 +8,6 @@
     ['seninha.html', 'ticket', 'Seninha', '14 a 40 dezenas na Mega-Sena, com fechamento e conferência.'],
     ['conferidor.html', 'check', 'Conferidor', 'Confira seu jogo em qualquer extração.'],
     ['gerador.html', 'dice', 'Gerador de palpites', 'Palpites por frequência, atraso e puxada.'],
-    ['tabela.html', 'book', 'Cotações', 'Quanto paga cada modalidade e a chance real.'],
   ];
 
   function sorteios() {

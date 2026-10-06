@@ -141,7 +141,7 @@
     $('#freq-meta').textContent = `${d.concursos.length} concurso(s) · ${d.fonte}`;
     $('#freq').innerHTML = `<div class="numgrid" style="gap:1px">${f.slice(1).map((c, i) => {
       const t = (c - mn) / (mx - mn || 1);
-      return `<div class="dz" style="background:color-mix(in srgb, var(--bar) ${Math.round(8 + t * 85)}%, var(--panel));color:${t > 0.55 ? '#fff' : 'var(--text)'}" data-tip="Dezena ${fmt(i + 1)} · ${c}×">${fmt(i + 1)}</div>`;
+      return `<div class="dz" style="background:color-mix(in srgb, var(--primary) ${Math.round(8 + t * 85)}%, var(--panel));color:${t > 0.55 ? '#fff' : 'var(--text)'}" data-tip="Dezena ${fmt(i + 1)} · ${c}×">${fmt(i + 1)}</div>`;
     }).join('')}</div>`;
     NM.tooltip($('#freq'));
   }

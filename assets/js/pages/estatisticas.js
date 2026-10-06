@@ -6,7 +6,7 @@
   // Rampa sequencial (um único tom, claro → escuro) em rgba da cor da marca
   function heatColor(t) {
     const a = 0.08 + 0.85 * Math.max(0, Math.min(1, t));
-    return `color-mix(in srgb, var(--bar) ${Math.round(a * 100)}%, var(--panel))`;
+    return `color-mix(in srgb, var(--primary) ${Math.round(a * 100)}%, var(--panel))`;
   }
   function inkFor(t) { return t > 0.55 ? '#fff' : 'var(--text)'; }
 
