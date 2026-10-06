@@ -10,56 +10,42 @@
 </head>
 <body>
 <main class="wrap">
-  <div class="page-head">
-    <div><span class="eyebrow" id="ph-eyebrow">Painel · visão geral</span>
-      <h1>Jogo do bicho, em números</h1>
-      <p>Resultados de todas as bancas, frequências, atrasos, puxadas e fechamentos — com probabilidade e retorno esperado calculados para cada aposta.</p></div>
-    <div class="toolbar" id="banca-bar" style="margin:0"></div>
+  <div class="stack" style="padding-top:16px">
+    <div id="banca-bar"></div>
+    <div class="pills" id="pills">
+      <button data-f="hoje" class="on">Hoje</button>
+      <button data-f="ontem">Ontem</button>
+      <a href="resultados.html">Todos os resultados</a>
+    </div>
   </div>
 
-  <div class="kpis" id="kpis"></div>
-
   <section class="section">
-    <div class="grid g-main">
-      <div class="grid" style="grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr)" id="row1">
-        <div class="card" id="last"></div>
-        <div class="card"><header><h3>Hoje na banca</h3><span class="muted small" id="hoje-meta"></span></header>
-          <div class="table-wrap"><table class="data-table dense" id="hoje"></table></div></div>
-      </div>
-      <div class="card"><header><h3>Quadro de bancas</h3><span class="muted small">1º prêmio mais recente</span></header>
-        <div class="table-wrap"><table class="data-table dense" id="board"></table></div></div>
-    </div>
+    <div class="section-title"><h2 id="res-title">Resultados de hoje</h2><a href="resultados.html">Ver todos</a></div>
+    <div class="stack" id="ultimos"></div>
   </section>
 
   <section class="section" style="padding-top:0">
-    <div class="grid g3">
-      <div class="card"><header><h3>Em alta</h3><span class="muted small">30 extr. vs 180 dias</span></header><div class="table-wrap"><table class="data-table dense" id="altas"></table></div></div>
-      <div class="card"><header><h3>Em baixa</h3><span class="muted small">30 extr. vs 180 dias</span></header><div class="table-wrap"><table class="data-table dense" id="baixas"></table></div></div>
-      <div class="card"><header><h3>Maiores atrasos</h3><span class="muted small">extrações sem sair na cabeça</span></header><div class="table-wrap"><table class="data-table dense" id="atrasos"></table></div></div>
-    </div>
+    <div class="section-title"><h2>Ferramentas</h2></div>
+    <div class="grid g3" id="tools"></div>
   </section>
 
   <section class="section" style="padding-top:0">
-    <div class="grid g-main">
-      <div class="card"><header><h3>Frequência na cabeça · 60 dias</h3><a class="small" href="estatisticas.html">Estatísticas completas</a></header>
+    <div class="section-title"><h2>Destaques da banca</h2><a href="estatisticas.html">Estatísticas completas</a></div>
+    <div class="kpis" id="kpis"></div>
+  </section>
+
+  <section class="section" style="padding-top:0">
+    <div class="grid g2">
+      <div class="card"><header><h3>Frequência na cabeça · 60 dias</h3></header>
         <div id="freq-chart"></div>
-        <p class="note" style="margin:8px 0 0">Tracejado = frequência esperada (1/25). Âmbar = acima do esperado.</p></div>
-      <div class="card"><header><h3>Retorno por modalidade</h3><a class="small" href="tabela.html">Tabela completa</a></header>
-        <div class="table-wrap"><table class="data-table dense" id="ev"></table></div></div>
+        <p class="note" style="margin:8px 0 0">Linha tracejada = média esperada. Azul forte = acima da média.</p></div>
+      <div class="card"><header><h3>Mais atrasados na cabeça</h3><span class="muted small">extrações sem sair</span></header><div id="atrasos"></div></div>
     </div>
   </section>
 
   <section class="section" style="padding-top:0">
-    <div class="grid g-main">
-      <div>
-        <div class="section-title"><h2>Ferramentas</h2></div>
-        <div class="grid g2" id="tools"></div>
-      </div>
-      <div>
-        <div class="section-title"><h2>Análises</h2><a href="analises.html">Ver todas</a></div>
-        <ul class="newsfeed card" id="news" style="padding:4px 16px"></ul>
-      </div>
-    </div>
+    <div class="section-title"><h2>Análises</h2><a href="analises.html">Ver todas</a></div>
+    <ul class="newsfeed card" id="news" style="padding:4px 16px"></ul>
   </section>
 </main>
 <script src="assets/js/data.js"></script>

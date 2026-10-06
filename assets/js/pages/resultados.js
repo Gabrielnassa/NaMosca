@@ -1,19 +1,33 @@
 (function () {
-  const { $ } = NM;
+  const { $, $$ } = NM;
   let banca = NM.getBanca();
   let res = [];
+  let filtro = 'hoje';
 
-  function datas() { return [...new Set(res.map((e) => e.data))]; }
+  const datas = () => [...new Set(res.map((e) => e.data))];
 
   function render() {
-    const d = $('#data').value;
-    const list = res.filter((e) => e.data === d);
-    $('#lista').innerHTML = list.length
-      ? list.map((e) => NM.extracaoCard(e)).join('')
-      : `<p class="empty">Sem extrações para ${NM.fmtDate(d)} nesta banca.</p>`;
     const ds = datas();
-    $('#prev').disabled = d <= ds[0];
-    $('#next').disabled = d >= ds[ds.length - 1];
+    const ultimo = ds[ds.length - 1];
+    let list, titulo = '';
+    if (filtro === 'hoje') list = res.filter((e) => e.data === ultimo);
+    else if (filtro === 'ontem') list = res.filter((e) => e.data === ds[ds.length - 2]);
+    else if (filtro === '7') list = res.filter((e) => ds.slice(-7).includes(e.data));
+    else list = res.filter((e) => e.data === filtro);
+    list = list.slice().reverse();
+    if (filtro === 'hoje' && ultimo !== NM.isoDate(new Date())) titulo = `<p class="note">Ainda não há resultados hoje. Mostrando ${NM.fmtDate(ultimo)}.</p>`;
+    let html = titulo, dia = '';
+    list.forEach((e) => {
+      if (filtro === '7' && e.data !== dia) { dia = e.data; html += `<h2 style="margin:8px 0 0">${NM.DIAS[new Date(e.data + 'T12:00').getDay()]}, ${NM.fmtDate(e.data)}</h2>`; }
+      html += NM.extracaoCard(e);
+    });
+    $('#lista').innerHTML = list.length ? html : '<div class="card empty">Sem extrações nesta data para esta banca.</div>';
+  }
+
+  function setFiltro(f) {
+    filtro = f;
+    $$('#pills > *').forEach((b) => b.classList.toggle('on', b.dataset.f === f || (b.id === 'cal-lbl' && !['hoje', 'ontem', '7'].includes(f))));
+    render();
   }
 
   function load() {
@@ -21,17 +35,8 @@
     const ds = datas();
     $('#data').min = ds[0];
     $('#data').max = ds[ds.length - 1];
-    if (!$('#data').value || $('#data').value > ds[ds.length - 1]) $('#data').value = ds[ds.length - 1];
     render();
     busca();
-  }
-
-  function shift(n) {
-    const ds = datas();
-    const i = ds.indexOf($('#data').value);
-    const j = Math.min(ds.length - 1, Math.max(0, (i < 0 ? ds.length - 1 : i) + n));
-    $('#data').value = ds[j];
-    render();
   }
 
   function busca() {
@@ -41,19 +46,18 @@
     for (let i = res.length - 1; i >= 0 && hits.length < 30; i--) {
       res[i].premios.slice(0, 5).forEach((p) => { if (p.milhar.endsWith(q)) hits.push({ e: res[i], p }); });
     }
-    const g = NM.bicho(NM.grupoDaDezena(Number(q.slice(-2))));
+    const g = NM.grupoDaDezena(Number(q.slice(-2)));
     $('#busca-res').innerHTML = `<div class="card" style="margin-bottom:16px">
-      <header><h3>Ocorrências de “${q}” (1º ao 5º)</h3><span>${NM.chip(g.grupo)}</span></header>
-      ${hits.length ? `<div class="table-wrap"><table class="data-table"><thead><tr><th>Data</th><th>Extração</th><th>Prêmio</th><th>Milhar</th></tr></thead><tbody>
-      ${hits.map(({ e, p }) => `<tr><td>${NM.fmtDate(e.data)}</td><td>${e.extracaoNome}</td><td>${p.posicao}º</td><td class="mono"><b>${p.milhar}</b></td></tr>`).join('')}
+      <header><h3>Onde saiu “${q}” (1º ao 5º)</h3><span>${NM.chip(g)}</span></header>
+      ${hits.length ? `<div class="table-wrap"><table class="data-table"><thead><tr><th>Data</th><th>Extração</th><th>Prêmio</th><th class="n">Milhar</th></tr></thead><tbody>
+      ${hits.map(({ e, p }) => `<tr><td>${NM.fmtDate(e.data)}</td><td>${NM.esc(e.extracaoNome)}</td><td>${p.posicao}º</td><td class="n"><b>${p.milhar}</b></td></tr>`).join('')}
       </tbody></table></div>` : '<p class="empty">Nenhuma ocorrência nos últimos 180 dias.</p>'}</div>`;
   }
 
   NM.onReady(() => {
     NM.bancaSelect($('#banca-bar'), (id) => { banca = id; load(); });
-    $('#data').addEventListener('change', render);
-    $('#prev').addEventListener('click', () => shift(-1));
-    $('#next').addEventListener('click', () => shift(1));
+    $$('#pills button').forEach((b) => b.addEventListener('click', () => setFiltro(b.dataset.f)));
+    $('#data').addEventListener('change', (e) => e.target.value && setFiltro(e.target.value));
     $('#busca').addEventListener('input', busca);
     load();
   });

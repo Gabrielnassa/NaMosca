@@ -10,20 +10,20 @@
 </head>
 <body>
 <main class="wrap">
-  <div class="page-head"><div><span class="eyebrow">RES · Resultados</span>
-    <h1>Resultados</h1>
-    <p>Resultados do 1º ao 7º prêmio de cada extração. O 1º prêmio é a <b>cabeça</b>; o 6º é a soma dos cinco primeiros e o 7º a centena do produto do 1º pelo 2º.</p></div></div>
-  <div class="toolbar">
+  <div class="page-head"><div><span class="eyebrow">Resultados</span><h1>Resultados do jogo do bicho</h1>
+    <p>Do 1º ao 5º prêmio de cada extração, com o 6º e o 7º logo abaixo.</p></div></div>
+  <div class="stack" style="margin-bottom:16px">
     <div id="banca-bar"></div>
-    <label class="field"><span>Data</span><input type="date" id="data"></label>
-    <div class="btn-row" style="margin:0">
-      <button class="btn btn-soft" id="prev">← Dia anterior</button>
-      <button class="btn btn-soft" id="next">Próximo dia →</button>
+    <div class="pills" id="pills">
+      <button data-f="hoje" class="on">Hoje</button>
+      <button data-f="ontem">Ontem</button>
+      <button data-f="7">Últimos 7 dias</button>
+      <label id="cal-lbl">Calendário<input type="date" id="data" aria-label="Escolher data"></label>
     </div>
-    <label class="field" style="margin-left:auto"><span>Buscar milhar/dezena</span><input type="search" id="busca" placeholder="ex.: 32 ou 4532" inputmode="numeric" maxlength="4"></label>
+    <label class="field" style="max-width:320px"><span>Buscar milhar ou dezena nos últimos 180 dias</span><input type="search" id="busca" placeholder="ex.: 32 ou 4532" inputmode="numeric" maxlength="4"></label>
   </div>
   <div id="busca-res"></div>
-  <div class="grid auto" id="lista"></div>
+  <div class="stack" id="lista"></div>
 </main>
 <script src="assets/js/data.js"></script>
 <script src="assets/js/stats.js"></script>

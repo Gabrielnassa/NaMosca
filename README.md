@@ -1,6 +1,6 @@
 # Na Mosca
 
-Terminal de dados para o jogo do bicho, a Quininha e a Seninha: resultados de todas as bancas,
+Site de resultados e ferramentas para o jogo do bicho, a Quininha e a Seninha: resultados de todas as bancas,
 estatísticas, fechamentos com garantia e retorno esperado de cada aposta. É um site estático
 (HTML, CSS e JavaScript, sem build), alimentado por um coletor que roda no GitHub Actions.
 

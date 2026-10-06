@@ -15,17 +15,25 @@
     ['tabela.html', 'Cotações'],
   ];
 
-  const LOGO = `<svg class="logo-mark" viewBox="0 0 32 32" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2">
-    <circle cx="16" cy="16" r="14"/><circle cx="16" cy="16" r="8"/><path d="M16 0v7M16 25v7M0 16h7M25 16h7"/><circle cx="16" cy="16" r="2.5" fill="currentColor" stroke="none"/></svg>`;
-  const BRAND = `<a class="brand" href="index.html" aria-label="Na Mosca — início">${LOGO}<span class="brand-word">Na<b>Mosca</b></span></a>`;
+  const ICON = {
+    home: '<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
+    list: '<line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/>',
+    grid: '<rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/>',
+    ticket: '<path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/>',
+    chart: '<path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>',
+    pin: '<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>',
+    check: '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>',
+    dice: '<rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><circle cx="15.5" cy="15.5" r="1.5"/><circle cx="15.5" cy="8.5" r="1.5"/><circle cx="8.5" cy="15.5" r="1.5"/>',
+    menu: '<line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/>',
+    book: '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>',
+  };
+  NM.icon = (n) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[n]}</svg>`;
 
-  /* Tema: escuro por padrão; o visitante pode trocar para "papel" */
-  try { const t = localStorage.getItem('nm-theme'); if (t) document.documentElement.setAttribute('data-theme', t); } catch (e) {}
-  function toggleTheme() {
-    const t = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-    document.documentElement.setAttribute('data-theme', t);
-    try { localStorage.setItem('nm-theme', t); } catch (e) {}
-  }
+  const BOTTOM = [['index.html', 'Início', 'home'], ['resultados.html', 'Resultados', 'list'], ['fechamento.html', 'Fechamento', 'grid'], ['quininha.html', 'Quininha', 'ticket'], ['estatisticas.html', 'Estatísticas', 'chart']];
+
+  const LOGO = `<svg class="logo-mark" viewBox="0 0 32 32" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4">
+    <circle cx="16" cy="16" r="13"/><circle cx="16" cy="16" r="7"/><circle cx="16" cy="16" r="2.5" fill="currentColor" stroke="none"/></svg>`;
+  const BRAND = `<a class="brand" href="index.html" aria-label="Na Mosca — início">${LOGO}<span class="brand-word">Na Mosca</span></a>`;
 
   NM.getBanca = () => {
     const q = new URLSearchParams(location.search).get('banca');
@@ -59,22 +67,27 @@
 
   NM.bancaSelect = (container, onChange) => {
     const cur = NM.getBanca();
-    container.innerHTML = `<label class="field"><span>Banca</span><select>${NM.BANCAS.map((b) =>
-      `<option value="${b.id}"${b.id === cur ? ' selected' : ''}>${b.nome}${NM.isLive(b.id) ? '' : ' · demo'}</option>`).join('')}</select></label>`;
-    container.querySelector('select').addEventListener('change', (e) => { NM.setBanca(e.target.value); onChange(e.target.value); });
+    container.innerHTML = `<div class="banca-bar"><div class="lbl">${NM.icon('pin')}<span>Banca: <b>${NM.esc(NM.banca(cur).nome)}</b></span> ${NM.statusTag(cur)}</div>
+      <select aria-label="Alterar banca">${NM.BANCAS.map((b) => `<option value="${b.id}"${b.id === cur ? ' selected' : ''}>${b.nome}</option>`).join('')}</select></div>`;
+    if (container.parentElement && container.parentElement.classList.contains('toolbar')) container.style.flex = '1 1 320px';
+    container.querySelector('select').addEventListener('change', (e) => {
+      NM.setBanca(e.target.value);
+      container.querySelector('.lbl').innerHTML = `${NM.icon('pin')}<span>Banca: <b>${NM.esc(NM.banca(e.target.value).nome)}</b></span> ${NM.statusTag(e.target.value)}`;
+      onChange(e.target.value);
+    });
   };
 
   NM.extracaoCard = (ext, { compact = false } = {}) => {
-    const rows = ext.premios.slice(0, compact ? 5 : 7).map((p) => {
-      const b = NM.bicho(p.grupo);
-      const is7 = p.milhar.length < 4;
-      return `<tr${p.posicao === 1 ? ' class="cabeca"' : ''}>
-        <td class="pos">${p.posicao}º</td><td class="milhar">${p.milhar}</td>
-        <td>${is7 ? '<span class="muted">—</span>' : `<span class="gnum">${NM.pad(b.grupo, 2)}</span><span class="gname">${b.nome}</span>`}</td></tr>`;
-    }).join('');
-    return `<article class="card ext-card">
-      <header><h3>${NM.esc(ext.extracaoNome)}${ext.hora && !String(ext.extracaoNome).includes(ext.hora) ? ` · ${ext.hora}` : ''}</h3><span class="muted small">${NM.fmtDate(ext.data)}</span></header>
-      <table class="res-table"><tbody>${rows}</tbody></table></article>`;
+    const p = ext.premios;
+    const box = (x) => {
+      const b = NM.bicho(x.grupo);
+      return `<div class="premio${x.posicao === 1 ? ' first' : ''}"><div class="pl">${x.posicao}º prêmio</div><div class="pm">${x.milhar}</div><div class="pb">${b.nome} <span>${NM.pad(b.grupo, 2)}</span></div></div>`;
+    };
+    const titulo = `${ext.hora ? ext.hora.replace(':', 'h') + ' · ' : ''}${NM.esc(ext.extracaoNome)}`;
+    const extra = !compact && p.length > 5
+      ? `<div class="ext-extra">${p[5] ? `<span>6º <b>${p[5].milhar}</b> ${NM.bicho(p[5].grupo).nome}</span>` : ''}${p[6] ? `<span>7º <b>${p[6].milhar}</b></span>` : ''}</div>` : '';
+    return `<article class="card ext-card"><header><h3>${titulo}</h3><span class="muted small">${NM.fmtDate(ext.data)}</span></header>
+      <div class="premios${compact ? ' compact' : ''}">${p.slice(0, 5).map(box).join('')}</div>${extra}</article>`;
   };
 
   /* ---------- Tooltip ---------- */
@@ -126,64 +139,19 @@
   /* ---------- Layout ---------- */
   function header() {
     const page = location.pathname.split('/').pop() || 'index.html';
-    const top = document.createElement('div');
-    top.className = 'topbar';
-    top.innerHTML = `<div class="wrap"><span><b>NA MOSCA</b> TERMINAL</span><span id="clk"></span><span id="src-status"><span class="dot"></span>carregando dados…</span><span class="sp" id="next-ext"></span></div>`;
     const h = document.createElement('header');
     h.className = 'site-header';
     h.innerHTML = `<div class="wrap header-row">${BRAND}
         <nav class="nav" aria-label="Principal">${NAV.map(([href, label]) => `<a href="${href}"${href === page ? ' aria-current="page"' : ''}>${label}</a>`).join('')}</nav>
-        <div class="header-tools"><button class="icon-btn theme-btn" title="Alternar tema escuro/papel">TEMA</button><button class="icon-btn menu-btn" aria-label="Abrir menu" aria-expanded="false">MENU</button></div>
-      </div>`;
-    const tk = document.createElement('div');
-    tk.className = 'ticker';
-    tk.setAttribute('aria-label', 'Últimos resultados');
-    tk.innerHTML = '<div class="ticker-track" id="ticker"></div>';
-    document.body.prepend(top, h, tk);
+        <button class="menu-btn" aria-label="Abrir menu" aria-expanded="false">${NM.icon('menu')}</button></div>`;
+    document.body.prepend(h);
     const btn = h.querySelector('.menu-btn');
     btn.addEventListener('click', () => btn.setAttribute('aria-expanded', h.classList.toggle('open')));
-    h.querySelector('.theme-btn').addEventListener('click', toggleTheme);
-    clock();
-    setInterval(clock, 1000);
-  }
-
-  function clock() {
-    const el = document.getElementById('clk');
-    if (!el) return;
-    const d = new Date();
-    el.innerHTML = `BRT <b>${d.toLocaleTimeString('pt-BR', { timeZone: 'America/Sao_Paulo' })}</b> · ${d.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric', timeZone: 'America/Sao_Paulo' }).toUpperCase()}`;
-  }
-
-  function status() {
-    const vivas = NM.BANCAS.filter((b) => NM.isLive(b.id));
-    document.getElementById('src-status').innerHTML = vivas.length
-      ? `<span class="dot live"></span>AO VIVO <b>${vivas.map((b) => b.sigla).join(' · ')}</b>${vivas.length < NM.BANCAS.length ? ' · demais em demo' : ''}`
-      : '<span class="dot demo"></span>MODO DEMONSTRAÇÃO · resultados simulados';
-
-    // próxima extração da banca selecionada
-    const b = NM.banca(NM.getBanca());
-    const now = new Date();
-    const mins = now.getHours() * 60 + now.getMinutes();
-    const prox = b.extracoes.filter((e) => e.dias.includes(now.getDay())).map((e) => {
-      const [hh, mm] = e.hora.split(':').map(Number); return { e, m: hh * 60 + mm };
-    }).find((x) => x.m > mins);
-    document.getElementById('next-ext').innerHTML = prox
-      ? `PRÓX. ${b.sigla} <b>${prox.e.nome} ${prox.e.hora}</b> · em ${Math.floor((prox.m - mins) / 60)}h${NM.pad((prox.m - mins) % 60, 2)}`
-      : `${b.sigla} · extrações do dia encerradas`;
-  }
-
-  function ticker() {
-    const items = [];
-    NM.BANCAS.forEach((b) => {
-      const r = NM.loadResults(b.id, 4);
-      r.slice(-3).reverse().forEach((e) => {
-        const c = e.premios[0];
-        items.push(`<span class="tk-item">${b.sigla}·${NM.esc(e.extracaoNome)} <b>${c.milhar}</b> <span class="acc">G${NM.pad(c.grupo, 2)}</span> ${NM.bicho(c.grupo).nome.toUpperCase()}</span>`);
-      });
-    });
-    const el = document.getElementById('ticker');
-    el.innerHTML = items.join('') + items.join('');
-    el.style.animationDuration = `${Math.max(60, items.length * 4)}s`;
+    const bn = document.createElement('nav');
+    bn.className = 'bottom-nav';
+    bn.setAttribute('aria-label', 'Atalhos');
+    bn.innerHTML = BOTTOM.map(([href, label, ic]) => `<a href="${href}"${href === page ? ' aria-current="page"' : ''}>${NM.icon(ic)}<span>${label}</span></a>`).join('');
+    document.body.append(bn);
   }
 
   function footer() {
@@ -210,5 +178,4 @@
   };
 
   document.addEventListener('DOMContentLoaded', () => { header(); footer(); });
-  NM.onReady(() => { status(); ticker(); setInterval(status, 30000); });
 })();

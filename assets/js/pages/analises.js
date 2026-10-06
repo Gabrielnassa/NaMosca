@@ -34,7 +34,7 @@
 
   function lista() {
     const banca = NM.getBanca();
-    $('#conteudo').innerHTML = `<div class="page-head"><div><span class="eyebrow">ANL · Análises</span><h1>Análises</h1>
+    $('#conteudo').innerHTML = `<div class="page-head"><div><span class="eyebrow">Análises</span><h1>Análises</h1>
       <p>Leituras dos dados, guias e a matemática de cada aposta.</p></div></div>
       <div id="dia">${analiseDoDia(banca)}</div>
       <div class="grid g3">${NM.artigoCards(NM.ARTIGOS)}</div>`;
