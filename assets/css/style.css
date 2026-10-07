@@ -430,3 +430,11 @@ select:focus, input:focus, textarea:focus { outline: none; border-color: var(--p
 .top-brand:hover { text-decoration: none; }
 .top-brand .logo-mark { width: 28px; height: 28px; }
 @media (max-width: 1080px) { .top-brand { display: inline-flex; } }
+
+.sorteio .fav { position: absolute; top: 5px; left: 8px; font-size: .9rem; color: var(--line-2); opacity: 0; transition: opacity .15s, color .15s; }
+.sorteio:hover .fav, .sorteio.favorito .fav { opacity: 1; }
+.sorteio.favorito .fav { color: var(--gold); }
+.sorteio .fav:hover { color: var(--gold); }
+@media (hover: none) { .sorteio .fav { opacity: .6; } }
+.share-btn { width: 30px; height: 30px; border-radius: 8px; }
+.share-btn svg { width: 15px; height: 15px; }

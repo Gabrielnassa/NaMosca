@@ -108,7 +108,7 @@ async function coletarBanca(b) {
       } catch (err) { console.log(`  ${b.id} ${dia}: falha no histórico (${err.message})`); }
     }
   }
-  if (!fonteOk) return 0;
+  if (!fonteOk) return -1;
   const limite = new Date(Date.now() - MANTER_DIAS * 864e5).toISOString().slice(0, 10);
   const extracoes = [...porChave.values()]
     .filter((e) => e.data >= limite)
@@ -160,9 +160,13 @@ async function federalParaBicho() {
 }
 
 let total = 0;
+const semFonte = [];
 if (!args['so-loterias']) {
   console.log('Jogo do bicho');
-  for (const b of cfg.bancas) total += await coletarBanca(b);
+  for (const b of cfg.bancas) {
+    const r = await coletarBanca(b);
+    if (r === -1) semFonte.push(b.id); else total += r;
+  }
 }
 if (!args['so-bicho']) {
   console.log('Loterias Caixa');
@@ -172,3 +176,8 @@ if (!args['so-bicho']) {
   await federalParaBicho();
 }
 console.log(`Concluído: ${total} registro(s) novo(s).`);
+if (semFonte.length) {
+  // falha visível no GitHub (e e-mail ao dono do repositório) quando nenhuma fonte de uma banca respondeu
+  console.error(`::error::Nenhuma fonte respondeu para: ${semFonte.join(', ')}. Verifique scripts/fontes.json.`);
+  process.exitCode = 1;
+}

@@ -20,6 +20,7 @@
     ['tabela.html', 'Cotações', 'book'],
     ['analises.html', 'Análises', 'news'],
     ['sonhos.html', 'Sonhos', 'moon'],
+    ['sobre.html', 'Sobre', 'info'],
   ];
 
   const ICON = {
@@ -38,6 +39,8 @@
     sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4"/>',
     target: '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
     star: '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
+    share: '<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/>',
+    info: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
     search: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
     book: '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>',
   };
@@ -107,7 +110,9 @@
     const titulo = `${ext.hora ? ext.hora.replace(':', 'h') + ' · ' : ''}${NM.esc(ext.extracaoNome)}`;
     const extra = !compact && p.length > 5
       ? `<div class="ext-extra">${p[5] ? `<span>6º <b>${p[5].milhar}</b> ${NM.bicho(p[5].grupo).nome}</span>` : ''}${p[6] ? `<span>7º <b>${p[6].milhar}</b></span>` : ''}</div>` : '';
-    return `<article class="card ext-card"><header><h3>${titulo}</h3><span class="muted small">${NM.fmtDate(ext.data)}</span></header>
+    const key = `${ext.banca}|${ext.data}|${ext.extracao}`;
+    (NM._exts = NM._exts || {})[key] = ext;
+    return `<article class="card ext-card"><header><h3>${titulo}</h3><span class="muted small" style="display:flex;align-items:center;gap:10px">${NM.fmtDate(ext.data)}<button class="icon-btn share-btn" data-share="${key}" title="Compartilhar imagem" aria-label="Compartilhar">${NM.icon('share')}</button></span></header>
       <div class="premios${compact ? ' compact' : ''}">${p.slice(0, 5).map(box).join('')}</div>${extra}</article>`;
   };
 
@@ -121,7 +126,9 @@
     const dow = new Date(dia + 'T12:00').getDay();
     const porBanca = {};
     const res = (b) => (porBanca[b] = porBanca[b] || NM.loadResults(b, 180));
-    el.innerHTML = NM.SORTEIOS.map((s) => {
+    const favs = NM.favoritos();
+    const lista = [...NM.SORTEIOS].sort((a, b) => (favs.includes(b.id) - favs.includes(a.id)));
+    el.innerHTML = lista.map((s) => {
       let cls = '', val = '', bx = '';
       const [h, m] = s.hora.split(':').map(Number);
       if (s.status === 'novo') { cls = 'novo'; bx = 'em breve'; }
@@ -129,17 +136,31 @@
       else if (s.banca) {
         const e = res(s.banca).find((x) => x.data === dia && x.extracao === s.id);
         if (e) { cls = 'saiu'; val = e.premios[0].milhar; bx = NM.bicho(e.premios[0].grupo).nome; }
-        else if (dia === hoje && mins < h * 60 + m + 10) { cls = 'aguardando'; bx = 'aguardando'; }
+        else if (dia === hoje && mins < h * 60 + m + 10) {
+          cls = 'aguardando';
+          const falta = h * 60 + m - mins;
+          bx = falta > 0 && falta <= 180 ? `em ${falta >= 60 ? Math.floor(falta / 60) + 'h' : ''}${NM.pad(falta % 60, 2)}${falta < 60 ? ' min' : ''}` : falta <= 0 ? 'apurando…' : 'aguardando';
+        }
         else bx = 'sem resultado';
       } else { cls = 'loto'; bx = s.nome; }
       if (s.tipo !== 'bicho') cls += ' loto';
       if (opts.sel === s.id) cls += ' sel';
       const href = s.link || (opts.link ? opts.link(s.id) : null);
       const tag = href ? `a href="${href}"` : 'button type="button"';
-      return `<${tag} class="sorteio ${cls}" data-id="${s.id}" title="${NM.esc(s.nome)} · ${s.hora}"><span class="st"></span>
+      if (favs.includes(s.id)) cls += ' favorito';
+      return `<${tag} class="sorteio ${cls}" data-id="${s.id}" title="${NM.esc(s.nome)} · ${s.hora}"><span class="st"></span><span class="fav" data-fav="${s.id}" title="Favoritar">★</span>
         <span class="cod">${s.id}</span><span class="hr">${s.hora.replace(':', 'h')}</span>${val ? `<span class="val">${val}</span>` : ''}<span class="bx">${bx}</span></${href ? 'a' : 'button'}>`;
     }).join('');
-    if (opts.onSelect) el.onclick = (e) => { const b = e.target.closest('button.sorteio'); if (b) opts.onSelect(b.dataset.id); };
+    el.onclick = (e) => {
+      const f = e.target.closest('[data-fav]');
+      if (f) { e.preventDefault(); e.stopPropagation(); NM.toggleFavorito(f.dataset.fav); NM.grade(el, dia, opts); return; }
+      const b = e.target.closest('button.sorteio'); if (b && opts.onSelect) opts.onSelect(b.dataset.id);
+    };
+  };
+  NM.favoritos = () => { try { return JSON.parse(localStorage.getItem('nm-fav') || '[]'); } catch (e) { return []; } };
+  NM.toggleFavorito = (id) => {
+    const f = NM.favoritos(); const i = f.indexOf(id); i >= 0 ? f.splice(i, 1) : f.push(id);
+    try { localStorage.setItem('nm-fav', JSON.stringify(f)); } catch (e) {}
   };
   NM.gradeLegenda = '<div class="grade-legenda"><span><i style="background:#22c55e"></i>saiu</span><span><i style="background:#f59e0b"></i>aguardando</span><span><i style="background:#d1d5db"></i>sem resultado</span><span><i style="background:#fff;border:1px dashed #9ca3af"></i>novo · em breve</span></div>';
 
@@ -204,7 +225,7 @@
     const top = document.createElement('div');
     top.className = 'topbar';
     top.innerHTML = `<button class="icon-btn menu-btn" aria-label="Abrir menu">${NM.icon('menu')}</button><a class="top-brand" href="index.html">${LOGO}<span>Na Mosca</span></a>
-      <form class="search" action="resultados.html" role="search">${NM.icon('search')}<input type="search" name="q" placeholder="Buscar milhar ou dezena nos resultados…" inputmode="numeric" maxlength="4" aria-label="Buscar milhar"></form>
+      <form class="search" action="resultados.html" role="search">${NM.icon('search')}<input type="search" name="q" placeholder="Buscar milhar, dezena ou bicho (ex.: 4532, leão)…" maxlength="20" aria-label="Buscar milhar"></form>
       <div class="top-meta"><span class="hide-sm" id="top-data"></span><span id="top-hora"></span>
         <button class="icon-btn" id="tema-btn" aria-label="Alternar tema claro/escuro" title="Tema claro/escuro">${NM.icon('sun')}</button></div>`;
     document.body.prepend(side, ov, top);
@@ -235,6 +256,37 @@
     if (el) el.innerHTML = vivas.length
       ? `<span class="live-dot"></span>Ao vivo: ${vivas.map((b) => b.sigla).join(' · ')}<br><span style="opacity:.7">atualiza a cada 15 min</span>`
       : '<span class="live-dot demo"></span>Modo demonstração';
+    if (el && 'Notification' in window && 'serviceWorker' in navigator) {
+      const on = Notification.permission === 'granted' && localStorage.getItem('nm-avisos') === '1';
+      el.insertAdjacentHTML('beforeend', `<button class="btn btn-soft" id="avisos-btn" style="width:100%;margin-top:10px;padding:8px 10px;font-size:.8rem">${on ? '🔔 Avisos ligados' : '🔔 Avisar novos resultados'}</button>`);
+      document.getElementById('avisos-btn').addEventListener('click', ativarAvisos);
+      if (on) iniciarAvisos();
+    }
+  }
+
+  /* ---------- PWA e avisos ---------- */
+  if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+  }
+  async function iniciarAvisos() {
+    const reg = await navigator.serviceWorker.ready;
+    reg.active && reg.active.postMessage({ tipo: 'avisos', estado: { ativo: true, favs: NM.favoritos() } });
+    try { if ('periodicSync' in reg) await reg.periodicSync.register('resultados', { minInterval: 15 * 60 * 1000 }); } catch (e) {}
+    clearInterval(NM._avisoTimer);
+    NM._avisoTimer = setInterval(() => reg.active && reg.active.postMessage({ tipo: 'verificar' }), 120000);
+    reg.active && reg.active.postMessage({ tipo: 'verificar' });
+  }
+  async function ativarAvisos(e) {
+    const btn = e.currentTarget;
+    if (localStorage.getItem('nm-avisos') === '1' && Notification.permission === 'granted') {
+      localStorage.removeItem('nm-avisos'); btn.textContent = '🔔 Avisar novos resultados';
+      const reg = await navigator.serviceWorker.ready; reg.active && reg.active.postMessage({ tipo: 'avisos', estado: { ativo: false } });
+      return;
+    }
+    const p = await Notification.requestPermission();
+    if (p !== 'granted') { btn.textContent = 'Permissão negada no navegador'; return; }
+    localStorage.setItem('nm-avisos', '1'); btn.textContent = '🔔 Avisos ligados';
+    iniciarAvisos();
   }
 
   function footer() {
@@ -245,7 +297,7 @@
           <div>${BRAND}<p class="muted" style="margin-top:10px">Resultados, estatística e fechamentos para o jogo do bicho, Quininha e Seninha.</p></div>
           <div><h4>Ferramentas</h4><a href="fechamento-pro.html">Fechamento PRO</a><a href="fechamento.html">Fechamento do bicho</a><a href="milhar.html">Inteligência da milhar</a><a href="quininha.html">Quininha</a><a href="seninha.html">Seninha</a><a href="gerador.html">Gerador</a><a href="conferidor.html">Conferidor</a></div>
           <div><h4>Dados</h4><a href="resultados.html">Resultados</a><a href="estatisticas.html">Estatísticas</a><a href="analises.html">Análises</a></div>
-          <div><h4>Referência</h4><a href="tabela.html">Cotações e modalidades</a><a href="sonhos.html">Dicionário dos sonhos</a></div>
+          <div><h4>Referência</h4><a href="tabela.html">Cotações e modalidades</a><a href="sonhos.html">Dicionário dos sonhos</a><a href="sobre.html">Sobre o Na Mosca</a><a href="meus-jogos.html">Meus jogos</a></div>
         </div>
         <p class="disclaimer">Site informativo. Não vendemos nem intermediamos apostas. Probabilidades e fechamentos são cálculos matemáticos e não garantem prêmio:
         cada sorteio é independente. O jogo do bicho é contravenção penal no Brasil (Decreto-Lei 3.688/41, art. 58). Proibido para menores de 18 anos.
@@ -253,6 +305,37 @@
       </div>`;
     document.body.append(f);
   }
+
+  /* ---------- Compartilhar resultado como imagem ---------- */
+  NM.imagemResultado = (ext) => {
+    const W = 1080, H = 1080, c = document.createElement('canvas'); c.width = W; c.height = H;
+    const g = c.getContext('2d');
+    const bg = g.createLinearGradient(0, 0, W, H); bg.addColorStop(0, '#0b1424'); bg.addColorStop(1, '#0a2a22'); g.fillStyle = bg; g.fillRect(0, 0, W, H);
+    g.fillStyle = 'rgba(16,185,129,.18)'; g.beginPath(); g.arc(W - 120, 120, 260, 0, Math.PI * 2); g.fill();
+    g.fillStyle = '#34d399'; g.font = '800 34px Sora, Manrope, sans-serif'; g.fillText('NA MOSCA', 80, 110);
+    g.fillStyle = '#e8edf6'; g.font = '800 64px Sora, Manrope, sans-serif'; g.fillText(`${ext.extracaoNome} · ${ext.hora.replace(':', 'h')}`, 80, 210);
+    g.fillStyle = '#a5b1c7'; g.font = '600 34px Manrope, sans-serif'; g.fillText(`${NM.banca(ext.banca).nome} · ${NM.fmtDate(ext.data)}`, 80, 265);
+    ext.premios.slice(0, 7).forEach((p, i) => {
+      const y = 350 + i * 96, first = i === 0;
+      g.fillStyle = first ? 'rgba(251,191,36,.14)' : 'rgba(255,255,255,.05)';
+      g.beginPath(); g.roundRect ? g.roundRect(70, y - 66, W - 140, 84, 18) : g.rect(70, y - 66, W - 140, 84); g.fill();
+      g.fillStyle = first ? '#fbbf24' : '#6c7a93'; g.font = '800 30px Manrope, sans-serif'; g.fillText(`${p.posicao}º`, 100, y - 12);
+      g.fillStyle = first ? '#fbbf24' : '#e8edf6'; g.font = '800 54px Sora, Manrope, sans-serif'; g.fillText(p.milhar, 190, y - 4);
+      if (p.milhar.length === 4) { const b = NM.bicho(p.grupo); g.fillStyle = '#a5b1c7'; g.font = '700 36px Manrope, sans-serif'; g.textAlign = 'right'; g.fillText(`${b.nome} ${NM.pad(b.grupo, 2)}`, W - 100, y - 8); g.textAlign = 'left'; }
+    });
+    g.fillStyle = '#6c7a93'; g.font = '600 26px Manrope, sans-serif'; g.fillText('gabrielnassa.github.io/NaMosca', 80, H - 50);
+    return c;
+  };
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-share]'); if (!b) return;
+    const ext = (NM._exts || {})[b.dataset.share]; if (!ext) return;
+    NM.imagemResultado(ext).toBlob(async (blob) => {
+      const nome = `resultado-${ext.extracao}-${ext.data}.png`;
+      const file = new File([blob], nome, { type: 'image/png' });
+      try { if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: `Resultado ${ext.extracaoNome}` }); return; } } catch (err) { if (err.name === 'AbortError') return; }
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = nome; a.click();
+    });
+  });
 
   /** Executa fn quando o DOM e os dados estiverem prontos. */
   NM.onReady = (fn) => {

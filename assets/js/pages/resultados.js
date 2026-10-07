@@ -45,7 +45,11 @@
   }
 
   function busca() {
-    const q = $('#busca').value.replace(/\D/g, '');
+    const bruto = $('#busca').value.trim();
+    const norm = (x) => x.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const bicho = /\D/.test(bruto) && bruto.length >= 3 ? NM.BICHOS.find((b) => norm(b.nome).startsWith(norm(bruto))) : null;
+    if (bicho) return buscaBicho(bicho);
+    const q = bruto.replace(/\D/g, '');
     if (q.length < 2) { $('#busca-res').innerHTML = ''; return; }
     const res = todos().sort((a, b) => (b.data + b.hora).localeCompare(a.data + a.hora));
     const hits = [];
@@ -53,6 +57,15 @@
     $('#busca-res').innerHTML = `<div class="card" style="margin-bottom:14px"><header><h3>Onde saiu “${q}” (1º ao 5º)</h3><span>${NM.chip(NM.grupoDaDezena(Number(q.slice(-2))))}</span></header>
       ${hits.length ? `<div class="table-wrap"><table class="data-table dense"><thead><tr><th>Data</th><th>Sorteio</th><th>Prêmio</th><th class="n">Milhar</th></tr></thead><tbody>${hits.map(({ e, p }) =>
         `<tr><td>${NM.fmtDate(e.data)}</td><td><b>${e.extracao}</b></td><td>${p.posicao}º</td><td class="n"><b>${p.milhar}</b></td></tr>`).join('')}</tbody></table></div>` : '<p class="empty">Nenhuma ocorrência nos últimos 180 dias.</p>'}</div>`;
+  }
+
+  function buscaBicho(b) {
+    const res = todos().sort((a, c) => (c.data + c.hora).localeCompare(a.data + a.hora));
+    const hits = [];
+    for (const e of res) { if (hits.length >= 40) break; e.premios.slice(0, 5).forEach((p) => { if (p.grupo === b.grupo) hits.push({ e, p }); }); }
+    $('#busca-res').innerHTML = `<div class="card" style="margin-bottom:14px"><header><h3>Onde saiu ${NM.chip(b.grupo)} (1º ao 5º)</h3><span class="muted small">dezenas ${b.dezenas.join(' · ')}</span></header>
+      ${hits.length ? `<div class="table-wrap"><table class="data-table dense"><thead><tr><th>Data</th><th>Sorteio</th><th>Prêmio</th><th class="n">Milhar</th></tr></thead><tbody>${hits.map(({ e, p }) =>
+        `<tr><td>${NM.fmtDate(e.data)}</td><td><b>${e.extracao}</b></td><td>${p.posicao}º</td><td class="n"><b>${p.milhar}</b></td></tr>`).join('')}</tbody></table></div>` : '<p class="empty">Não saiu no período.</p>'}</div>`;
   }
 
   NM.onReady(() => {
