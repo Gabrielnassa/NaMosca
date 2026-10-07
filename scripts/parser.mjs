@@ -96,7 +96,7 @@ export function parseBlocks(html, { hoje } = {}) {
     // contexto: textos anteriores até o fim do bloco anterior
     const ctx = toks.slice(Math.max(0, i - 8), i).join(' ');
     push(out, { data: findDate(ctx) || hoje, label: findLabel(ctx), hora: findTime(ctx), premios });
-    i = j - 1;
+    i = Math.max(i, j - 1);
   }
   return out;
 }

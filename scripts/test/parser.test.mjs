@@ -1,6 +1,6 @@
 // Teste do parser com layouts típicos. Rode: node scripts/test/parser.test.mjs
 import assert from 'node:assert/strict';
-import { parsePage } from '../parser.mjs';
+import { parsePage, parseBlocks } from '../parser.mjs';
 
 const porTabela = `<html><h1>Resultado do Jogo do Bicho RJ - 06/10/2026</h1>
 <div><h2>Resultado PTM 11:20 - 06/10/2026</h2><table>
@@ -64,3 +64,9 @@ const diario = `<p>Acompanhe o resultado do Jogo do Bicho de <strong>02/10/2026<
 const d = parsePage(diario, { hoje: '2026-10-07' });
 assert.deepEqual(d.map((x) => [x.label, x.hora, x.data, x.premios[0]]), [['PPT', '09:00', '2026-10-02', '2707'], ['PTM', '11:00', '2026-10-02', '9802'], ['COR', '21:00', '2026-10-02', '1111']]);
 console.log('diário ok');
+
+// Regressão: "1º" sem milhar em seguida não pode travar o leitor de blocos
+const t0 = Date.now();
+parseBlocks('<div><span>1º</span><span>Prêmio</span></div><div><span>1º</span><span>2º</span><span>3º</span></div>', { hoje: '2026-10-07' });
+assert.ok(Date.now() - t0 < 1000);
+console.log('sem loop ok');
