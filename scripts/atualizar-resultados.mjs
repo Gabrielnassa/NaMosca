@@ -27,7 +27,7 @@ async function get(url, type = 'text') {
   try {
     const r = await fetch(url, { headers: { 'user-agent': UA, accept: type === 'json' ? 'application/json' : 'text/html' }, signal: ctrl.signal });
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    return type === 'json' ? r.json() : r.text();
+    return await (type === 'json' ? r.json() : r.text()); // await aqui: o tempo limite vale também para o corpo
   } finally { clearTimeout(t); }
 }
 async function readJSON(p, fallback) {
