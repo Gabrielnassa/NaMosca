@@ -137,6 +137,7 @@
     const f = new Array(TOT + 1).fill(0);
     d.concursos.forEach((c) => c.dezenas.forEach((n) => f[n]++));
     st.freq = f;
+    analise(d.concursos);
     const mx = Math.max(...f), mn = Math.min(...f.slice(1));
     $('#freq-meta').textContent = `${d.concursos.length} concurso(s) · ${d.fonte}`;
     $('#freq').innerHTML = `<div class="numgrid" style="gap:1px">${f.slice(1).map((c, i) => {
@@ -144,6 +145,34 @@
       return `<div class="dz" style="background:color-mix(in srgb, var(--primary) ${Math.round(8 + t * 85)}%, var(--panel));color:${t > 0.55 ? '#fff' : 'var(--text)'}" data-tip="Dezena ${fmt(i + 1)} · ${c}×">${fmt(i + 1)}</div>`;
     }).join('')}</div>`;
     NM.tooltip($('#freq'));
+  }
+
+  /* Análise estilo MegaCover: atrasadas, pares/ímpares, soma, repetidas do anterior, quentes recentes */
+  function analise(cs) {
+    if (!cs || cs.length < 2) { $('#an2').innerHTML = '<p class="empty">Poucos concursos para analisar</p>'; return; }
+    const atraso = new Array(TOT + 1).fill(cs.length);
+    cs.forEach((c, i) => c.dezenas.forEach((n) => { if (atraso[n] === cs.length) atraso[n] = i; }));
+    const atrasadas = [...Array(TOT).keys()].map((i) => i + 1).sort((a, b) => atraso[b] - atraso[a]).slice(0, 12);
+    const pares = {}; const somas = []; let rep = 0;
+    cs.forEach((c, i) => {
+      const p = c.dezenas.filter((n) => n % 2 === 0).length; pares[p] = (pares[p] || 0) + 1;
+      somas.push(c.dezenas.reduce((a, b) => a + b, 0));
+      if (i < cs.length - 1) { const prev = new Set(cs[i + 1].dezenas); rep += c.dezenas.filter((n) => prev.has(n)).length; }
+    });
+    somas.sort((a, b) => a - b);
+    const q = (x) => somas[Math.floor(x * (somas.length - 1))];
+    const rec = new Array(TOT + 1).fill(0); cs.slice(0, 10).forEach((c) => c.dezenas.forEach((n) => rec[n]++));
+    const quentes = [...Array(TOT).keys()].map((i) => i + 1).sort((a, b) => rec[b] - rec[a]).slice(0, 10);
+    const ult = cs[0];
+    $('#an2-meta').textContent = `${cs.length} concursos`;
+    $('#an2').innerHTML = `<div class="grid g2">
+      <div><div class="field"><span>Mais atrasadas (concursos sem sair)</span></div><div class="balls" style="margin-top:6px">${atrasadas.map((n) => `<span class="ball" title="${atraso[n]} concursos">${fmt(n)}</span>`).join('')}</div>
+        <p class="note" style="margin:6px 0 0">${atrasadas.slice(0, 5).map((n) => `${fmt(n)}: ${atraso[n]}`).join(' · ')}</p></div>
+      <div><div class="field"><span>Mais sorteadas nos últimos 10</span></div><div class="balls" style="margin-top:6px">${quentes.map((n) => `<span class="ball hit">${fmt(n)}</span>`).join('')}</div></div>
+    </div>
+    <div class="table-wrap" style="margin-top:14px"><table class="data-table dense"><thead><tr><th>Pares no sorteio</th>${[...Array(S + 1).keys()].map((k) => `<th class="n">${k}</th>`).join('')}</tr></thead><tbody>
+      <tr><td>Concursos</td>${[...Array(S + 1).keys()].map((k) => `<td class="n">${NM.pct((pares[k] || 0) / cs.length, 0)}</td>`).join('')}</tr></tbody></table></div>
+    <p class="note" style="margin:10px 0 0">Soma das dezenas: metade dos concursos fica entre <b>${q(0.25)}</b> e <b>${q(0.75)}</b> (mín. ${somas[0]}, máx. ${somas[somas.length - 1]}). Em média <b>${NM.num(rep / (cs.length - 1), 2)}</b> dezenas repetem do concurso anterior. Último (${ult.numero}): soma ${ult.dezenas.reduce((a, b) => a + b, 0)}, ${ult.dezenas.filter((n) => n % 2 === 0).length} pares.</p>`;
   }
 
   NM.onReady(async () => {

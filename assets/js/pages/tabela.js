@@ -2,12 +2,13 @@
   const { $, $$ } = NM;
 
   function modalidades() {
-    $('#modalidades').innerHTML = `<table class="data-table"><thead><tr><th>Cód.</th><th>Modalidade</th><th>Colocações</th><th class="n">Paga (×)</th><th class="n">Chance</th><th class="n">Retorno / R$ 100</th><th>Regra</th></tr></thead><tbody>
+    $('#modalidades').innerHTML = `<table class="data-table"><thead><tr><th>Cód.</th><th>Modalidade</th><th>Colocações</th><th class="n">Paga (×)</th><th class="n">Chance</th><th class="n">Prêmio p/ valor</th><th class="n">Retorno / R$ 100</th><th>Regra</th></tr></thead><tbody>
       ${NM.MODALIDADES.map((m) => {
         const c = NM.cot(m.id), ev = NM.ev(m.id), custom = NM.cotacoesCustom[m.id] != null;
         return `<tr><td class="mono muted">${NM.pad(m.cod, 2)}</td><td><span class="gtag">${m.sig}</span> ${m.nome}</td><td class="small">${m.col}</td>
         <td class="n">${c == null ? '<span class="muted">—</span>' : `<input type="number" step="0.5" min="0" data-id="${m.id}" value="${c}" style="width:96px;text-align:right${custom ? ';border-color:var(--accent)' : ''}">`}</td>
         <td class="n">${m.prob ? NM.umEm(m.id === 'mc' ? 1e-4 : m.prob) : '<span class="muted">varia</span>'}</td>
+        <td class="n">${c == null ? '—' : `<b>${NM.brl(c * (Number(($('#calc-valor') || {}).value) || 1))}</b>`}</td>
         <td class="n">${ev == null ? '<span class="muted">—</span>' : `<span class="${ev < 0.4 ? 'down' : ''}">${NM.brl(ev * 100)}</span>`}</td>
         <td class="small muted">${m.desc}</td></tr>`;
       }).join('')}</tbody></table>`;
@@ -40,6 +41,7 @@
 
   NM.onReady(() => {
     modalidades(); horarios(); bichos();
+    $('#calc-valor').addEventListener('input', modalidades);
     loto($('#qnh'), NM.QUININHA); loto($('#snh'), NM.SENINHA);
     $('#reset').addEventListener('click', () => { NM.MODALIDADES.forEach((m) => NM.setCot(m.id, null)); modalidades(); });
     let hl;

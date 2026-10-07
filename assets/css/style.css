@@ -438,3 +438,15 @@ select:focus, input:focus, textarea:focus { outline: none; border-color: var(--p
 @media (hover: none) { .sorteio .fav { opacity: .6; } }
 .share-btn { width: 30px; height: 30px; border-radius: 8px; }
 .share-btn svg { width: 15px; height: 15px; }
+
+/* ---------- Impressão ---------- */
+@media print {
+  :root { --bg: #fff; --panel: #fff; --panel-2: #fff; --panel-3: #f3f4f6; --text: #000; --text-2: #333; --muted: #555; --line: #ccc; --line-2: #999; --gold: #000; }
+  body { padding: 0 !important; background: #fff !important; }
+  .sidebar, .topbar, .bottom-nav, .overlay, .hero, .site-footer, .btn, .btn-row, .seg, .tabs, .pills, .progress, form, .toolbar { display: none !important; }
+  .card { box-shadow: none !important; break-inside: avoid; border-color: #ccc; }
+  .g-side, .g-main, .g2 { grid-template-columns: 1fr !important; }
+  .g-side > :first-child { display: none; }
+  .ball { border-color: #999; background: #fff; color: #000; }
+  .panel-float > *, main > .wrap > * { animation: none !important; }
+}
