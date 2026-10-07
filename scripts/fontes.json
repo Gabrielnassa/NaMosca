@@ -34,7 +34,8 @@
       },
       "ignorar": [
         "FED"
-      ]
+      ],
+      "historico": "https://portalbrasil.net/jogodobicho/{yyyy}/{mm}/{dd}/resultado-do-jogo-do-bicho-de-{dd}-de-{mes}-de-{yyyy}/"
     },
     {
       "id": "sp",

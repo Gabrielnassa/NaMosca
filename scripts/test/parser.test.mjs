@@ -54,3 +54,13 @@ assert.deepEqual(c.map((x) => [x.label, x.hora, x.data, x.premios.join(',')]), [
   ['COR', '21:00', '2026-10-05', '3451,6879,5024,9438,1480'],
 ]);
 console.log('blocos ok');
+
+// Formato D (portalbrasil, arquivo diário): prêmios em colunas
+const diario = `<p>Acompanhe o resultado do Jogo do Bicho de <strong>02/10/2026</strong>.</p><h2>Resultado de 02/10/2026 – Rio de Janeiro</h2><table><thead><tr><th>EXTRAÇÃO</th><th>1º</th><th>2º</th><th>3º</th><th>4º</th><th>5º</th><th>STATUS</th></tr></thead><tbody>
+<tr><td>PPT 09h</td><td>2707</td><td>7738</td><td>1360</td><td>6359</td><td>2583</td><td><strong>ÁGUIA</strong></td></tr>
+<tr><td>FEDERAL 11h<br /><span>Somente domingo</span></td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>só aos DOMINGOS</td></tr>
+<tr><td>PTM 11h</td><td>9802</td><td>1348</td><td>4301</td><td>3815</td><td>4848</td><td>AVESTRUZ</td></tr>
+<tr><td>CORUJA 21h</td><td>1111</td><td>2222</td><td>3333</td><td>4444</td><td>5555</td><td>x</td></tr></tbody></table>`;
+const d = parsePage(diario, { hoje: '2026-10-07' });
+assert.deepEqual(d.map((x) => [x.label, x.hora, x.data, x.premios[0]]), [['PPT', '09:00', '2026-10-02', '2707'], ['PTM', '11:00', '2026-10-02', '9802'], ['COR', '21:00', '2026-10-02', '1111']]);
+console.log('diário ok');

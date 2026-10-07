@@ -108,6 +108,19 @@ export function parsePage(html, { hoje } = {}) {
   for (const t of tables(html)) {
     const header = t.rows.find((r) => !posicao(r[0] || '')) || [];
 
+    // Formato D: prêmios em colunas ("Extração | 1º | 2º | … | 5º"), uma extração por linha
+    const posCols = header.map((c) => posicao(c));
+    if (posCols.filter(Boolean).length >= 5) {
+      const date = findDate(t.context) || pageDate;
+      for (const r of t.rows) {
+        if (r === header || !r[0]) continue;
+        const premios = [];
+        r.forEach((c, i) => { const p = posCols[i]; if (p) { const v = milhar(c); if (v) premios[p - 1] = v; } });
+        push(result, { data: date, label: findLabel(r[0]), hora: findTime(r[0]), premios });
+      }
+      continue;
+    }
+
     // Formato B: extrações em colunas
     const colMeta = header.map((c) => ({ label: findLabel(c), hora: findTime(c) }));
     const nCols = colMeta.filter((c) => c.label || c.hora).length;

@@ -31,7 +31,7 @@ jobs:
         with:
           node-version: 20
       - name: Coletar resultados
-        run: node scripts/atualizar-resultados.mjs --backfill=${{ github.event.inputs.backfill || '60' }} --dias-bicho=${{ github.event.inputs.dias_bicho || '0' }}
+        run: node scripts/atualizar-resultados.mjs --backfill=${{ github.event.inputs.backfill || '60' }} --dias-bicho=${{ github.event.inputs.dias_bicho || '2' }}
       - name: Publicar dados
         run: |
           git config user.name "na-mosca-bot"

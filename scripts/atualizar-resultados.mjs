@@ -89,11 +89,16 @@ async function coletarBanca(b) {
   if (b.historico && diasHist > 0) {
     for (let d = 1; d <= diasHist; d++) {
       const dia = new Date(Date.now() - 3 * 3600e3 - d * 864e5).toISOString().slice(0, 10);
-      if ([...porChave.keys()].some((k) => k.startsWith(dia + '|'))) continue;
+      if ([...porChave.keys()].filter((k) => k.startsWith(dia + '|')).length >= 5) continue;
       try {
-        const lidas = parsePage(await get(b.historico.replace('{data}', dia)), { hoje: dia }).filter((e) => e.data === dia);
+        const [yyyy, mm, dd] = dia.split('-');
+        const MESES = ['janeiro', 'fevereiro', 'marco', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+        const url = b.historico.replace('{data}', dia).replaceAll('{yyyy}', yyyy).replaceAll('{mm}', mm).replaceAll('{dd}', dd).replaceAll('{mes}', MESES[Number(mm) - 1]);
+        const lidas = parsePage(await get(url), { hoje: dia }).filter((e) => e.data === dia);
         for (const e of lidas) {
           const id = codigo(b, e);
+          if ((b.ignorar || []).includes(id)) continue;
+          e.premios = e.premios.slice(0, 5);
           porChave.set(`${e.data}|${id}`, { data: e.data, id, nome: id, hora: e.hora, premios: completar(e.premios) });
           novos++;
         }
