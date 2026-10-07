@@ -15,9 +15,10 @@
     <p>Frequências, atrasos e padrões do histórico. Escolha a banca, o período e se quer considerar só a cabeça ou do 1º ao 5º prêmio.</p></div></div>
   <div class="toolbar">
     <div id="banca-bar"></div>
+    <label class="field"><span>Sorteio</span><select id="sorteio"></select></label>
     <label class="field"><span>Período</span><select id="periodo">
       <option value="30">Últimos 30 dias</option><option value="60">Últimos 60 dias</option>
-      <option value="90" selected>Últimos 90 dias</option><option value="180">Últimos 180 dias</option></select></label>
+      <option value="90" selected>Últimos 90 dias</option><option value="180">Últimos 180 dias</option><option value="365">Último ano</option></select></label>
     <div class="field"><span>Prêmios</span><div class="seg" id="ate"><button data-v="1" class="on">Cabeça</button><button data-v="5">1º ao 5º</button></div></div>
   </div>
   <div class="grid g4" id="tiles"></div>
@@ -46,6 +47,15 @@
         <div id="puxada"></div>
       </div>
     </div>
+  </section>
+  <section class="section" style="padding-bottom:0">
+    <div class="grid g2">
+      <div class="card"><header><h3>Ciclo dos 25 bichos</h3><span class="muted small" id="ciclo-meta"></span></header><div id="ciclo"></div></div>
+      <div class="card"><header><h3>Repetições</h3><span class="muted small">na cabeça</span></header><div id="repet"></div></div>
+    </div>
+  </section>
+  <section class="section" style="padding-bottom:0">
+    <div class="card"><header><h3>Bicho × sorteio</h3><span class="muted small">vezes na cabeça em cada horário</span></header><div class="table-wrap"><div id="horario"></div></div></div>
   </section>
   <section class="section" style="padding-bottom:0">
     <div class="card">

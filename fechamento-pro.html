@@ -56,15 +56,33 @@
           <div class="progress" id="prog" hidden><div></div></div>
           <p class="note" id="prog-txt" style="margin:0"></p>
         </div>
+        <div class="card stack">
+          <header><h3><span class="step-n">+</span>Filtros</h3><label class="field" style="flex-direction:row;align-items:center;gap:8px"><input type="checkbox" id="f-on"> <span>Aplicar</span></label></header>
+          <div class="grid g2">
+            <label class="field"><span>Soma mínima</span><input type="number" id="f-smin" placeholder="—"></label>
+            <label class="field"><span>Soma máxima</span><input type="number" id="f-smax" placeholder="—"></label>
+          </div>
+          <div class="grid g2">
+            <label class="field"><span>Pares mín.</span><input type="number" id="f-pmin" min="0" placeholder="—"></label>
+            <label class="field"><span>Pares máx.</span><input type="number" id="f-pmax" min="0" placeholder="—"></label>
+          </div>
+          <div class="grid g2">
+            <label class="field"><span>Máx. em sequência</span><input type="number" id="f-seq" min="1" placeholder="—"></label>
+            <label class="field"><span>Máx. repetidas do último</span><input type="number" id="f-rep" min="0" placeholder="—"></label>
+          </div>
+          <p class="note" style="margin:0">Os filtros removem jogos depois do fechamento. Isso reduz o custo, mas a garantia deixa de ser total — veja a simulação.</p>
+        </div>
       </div>
 
       <div class="stack">
         <div class="kpis" id="kpis"></div>
         <div class="card"><header><h3><span class="step-n">3</span>Jogos</h3>
-          <div class="btn-row" style="margin:0"><button class="btn btn-soft" id="copiar">Copiar</button><button class="btn btn-soft" id="txt">.txt</button><button class="btn btn-soft" id="csv">.csv</button></div></header>
+          <div class="btn-row" style="margin:0"><button class="btn btn-soft" id="copiar">Copiar</button><button class="btn btn-soft" id="txt">.txt</button><button class="btn btn-soft" id="csv">.csv</button><button class="btn btn-soft" id="salvar">Salvar</button></div></header>
           <div id="jogos"><p class="empty">Marque as dezenas e gere o fechamento</p></div></div>
         <div class="card"><header><h3>Simulação</h3><button class="btn btn-soft" id="simular">Simular 50.000 sorteios</button></header>
           <div id="sim"><p class="note" style="margin:0">Sorteia resultados aleatórios e mede quantas vezes o seu fechamento seria premiado.</p></div></div>
+        <div class="card"><header><h3>Backtest com resultados reais</h3><button class="btn btn-soft" id="backtest">Testar no histórico</button></header>
+          <div id="bt"><p class="note" style="margin:0">Mostra quanto este fechamento teria ganhado ou perdido se tivesse sido jogado em todos os sorteios reais do histórico.</p></div></div>
         <div class="card"><header><h3>Conferir</h3>
           <label class="field" style="flex-direction:row;align-items:center;gap:8px"><span>Resultado</span><select id="res-sel" style="max-width:240px"></select></label></header>
           <label class="field"><span>Ou digite as dezenas sorteadas</span><input type="text" id="res-txt" placeholder="ex.: 05 12 33 47 80"></label>
@@ -78,6 +96,7 @@
 <script src="assets/js/ui.js"></script>
 <script src="assets/js/fechamento.js"></script>
 <script src="assets/js/fechamento-pro-engine.js"></script>
+<script src="assets/js/meus-jogos.js"></script>
 <script src="assets/js/pages/fechamento-pro.js"></script>
 </body>
 </html>

@@ -352,8 +352,23 @@
 
   NM.onReady(() => {
     st.modo = modoFromHash();
+    try { const m = sessionStorage.getItem('nm-milhares'); if (m && st.modo.id === 'mm') { st.milhares = m; sessionStorage.removeItem('nm-milhares'); } } catch (e) {}
     tabs(); form(); calc();
     $('#copiar').addEventListener('click', (e) => st.texto && NM.copiar(e.target, `Na Mosca · ${st.modo.nome}\n${st.texto}`));
+    $('#salvar').addEventListener('click', (e) => {
+      const m = st.modo;
+      if (!st.jogos.length || !m.r || m.passe || m.quina) { e.target.textContent = 'Indisponível aqui'; setTimeout(() => (e.target.textContent = 'Salvar'), 1500); return; }
+      const nome = prompt('Nome para este fechamento:', `${m.nome} · ${st.jogos.length} jogos`); if (nome == null) return;
+      NM.meusJogos.salvar({ nome, jogo: m.tipo === 'grupo' ? 'grupos' : 'bicho', tipo: m.id, k: m.r, t: m.r, tier: m.r, cot: NM.cot(cotId()), valor: st.valor, jogos: st.jogos });
+      e.target.textContent = 'Salvo ✓'; setTimeout(() => (e.target.textContent = 'Salvar'), 1500);
+    });
+    $('#backtest').addEventListener('click', async () => {
+      const m = st.modo;
+      if (!st.jogos.length || !m.r || m.passe || m.quina || (m.janelas && m.janelas[st.janela][1] !== 5)) { $('#bt').innerHTML = '<p class="note">Backtest disponível para terno/dupla de grupo e terno/duque de dezena (1º ao 5º).</p>'; return; }
+      $('#bt').innerHTML = '<p class="note">Testando…</p>';
+      const s = (await NM.sorteiosReais(m.tipo === 'grupo' ? 'grupos' : 'bicho', 365)).sort((a, b) => a.data.localeCompare(b.data));
+      $('#bt').innerHTML = NM.backtestHTML(NM.backtest(st.jogos, s, { tier: m.r, cot: NM.cot(cotId()), valor: st.valor }));
+    });
     $('#txt').addEventListener('click', () => st.texto && NM.baixarTxt(`fechamento-${st.modo.id}.txt`, `Na Mosca · ${st.modo.nome}\n${st.texto}\n`));
   });
 })();

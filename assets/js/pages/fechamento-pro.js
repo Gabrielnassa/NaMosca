@@ -121,9 +121,49 @@
       ocupado(false);
     }
     st.jogos = jogos.map((j) => [...fix, ...j].sort(ord()));
+    const antes = st.jogos.length;
+    if ($('#f-on').checked) st.jogos = await filtrar(st.jogos);
+    info.filtrados = antes - st.jogos.length;
     st.info = { ...info, ms: Date.now() - t0, totalDesd, K, t, m, F };
     $('#sim').innerHTML = '<p class="note" style="margin:0">Clique em “Simular” para medir a chance real deste fechamento.</p>';
+    $('#bt').innerHTML = '<p class="note" style="margin:0">Clique em “Testar no histórico” para ver o resultado com sorteios reais.</p>';
     kpis(); render(); conferir();
+  }
+
+  /* ---------- filtros ---------- */
+  async function filtrar(jogos) {
+    const num = (id) => { const v = $(id).value; return v === '' ? null : Number(v); };
+    const smin = num('#f-smin'), smax = num('#f-smax'), pmin = num('#f-pmin'), pmax = num('#f-pmax'), seq = num('#f-seq'), rep = num('#f-rep');
+    let ultimo = null;
+    if (rep != null) { const s = await NM.sorteiosReais(st.jogo, 30); ultimo = s.length ? new Set(st.jogo === 'bicho' ? s.sort((a, b) => a.data.localeCompare(b.data)).slice(-1)[0].nums : s[0].nums) : null; }
+    return jogos.filter((j) => {
+      const soma = j.reduce((a, b) => a + b, 0);
+      if (smin != null && soma < smin) return false;
+      if (smax != null && soma > smax) return false;
+      const pares = j.filter((x) => x % 2 === 0).length;
+      if (pmin != null && pares < pmin) return false;
+      if (pmax != null && pares > pmax) return false;
+      if (seq != null) { let mx = 1, c = 1; const o = j.slice().sort((a, b) => a - b); for (let i = 1; i < o.length; i++) { c = o[i] === o[i - 1] + 1 ? c + 1 : 1; mx = Math.max(mx, c); } if (mx > seq) return false; }
+      if (ultimo && rep != null && j.filter((x) => ultimo.has(x)).length > rep) return false;
+      return true;
+    });
+  }
+
+  async function backtest() {
+    if (!st.jogos.length) return;
+    $('#bt').innerHTML = '<p class="note">Carregando resultados…</p>';
+    const sorteios = await NM.sorteiosReais(st.jogo, 365);
+    const tier = T().tier(st.info.t), cot = T().cot(st.info.K, st.info.t) || 0;
+    $('#bt').innerHTML = NM.backtestHTML(NM.backtest(st.jogos, sorteios, { tier, cot, valor: valor() }));
+  }
+
+  function salvar(btn) {
+    if (!st.jogos.length) return;
+    const nome = prompt('Nome para este fechamento:', `${J().nome} · ${st.jogos.length} jogos`);
+    if (nome == null) return;
+    const ok = NM.meusJogos.salvar({ nome, jogo: st.jogo, tipo: T().id, k: st.info.K, t: st.info.t, valor: valor(), jogos: st.jogos });
+    btn.textContent = ok ? 'Salvo ✓' : 'Sem espaço';
+    setTimeout(() => (btn.textContent = 'Salvar'), 1500);
   }
 
   function ocupado(on) {
@@ -141,6 +181,7 @@
       ['Jogos', NM.num(n), i.tentativas ? `melhor de ${i.tentativas} tentativas` : `${(i.ms / 1000).toFixed(1).replace('.', ',')} s`],
       ['Custo total', NM.brl(n * valor()), `${NM.brl(valor())} por jogo`],
       ['Garantia', i.garantia === 'total' ? 'Total' : `${cap(nome(i.t))} se ${nome(i.m)}`, i.garantia === 'total' ? 'todas as combinações' : `cobertura ${NM.pct(i.cobertura, 1)}`],
+      ...(i.filtrados ? [['Filtrados', NM.num(i.filtrados), 'jogos removidos pelos filtros']] : []),
       ['Economia', i.garantia === 'total' ? '—' : NM.pct(Math.min(red, 0.9999), red > 0.99 ? 2 : 1), `vs ${NM.num(i.totalDesd)} do desdobramento`],
       ['Prêmio por jogo', cot ? NM.brl(cot * valor()) : '—', cot ? `cotação ${NM.num(cot)}×` : ''],
     ].map(([l, v, s]) => `<div class="kpi"><div class="label">${l}</div><div class="value">${v}</div><div class="sub">${s}</div></div>`).join('');
@@ -246,6 +287,8 @@
     $('#gerar').addEventListener('click', gerar);
     $('#cancelar').addEventListener('click', () => NM.proCancelar());
     $('#simular').addEventListener('click', simular);
+    $('#backtest').addEventListener('click', backtest);
+    $('#salvar').addEventListener('click', (e) => salvar(e.target));
     $('#res-sel').addEventListener('change', () => { $('#res-txt').value = ''; conferir(); });
     $('#res-txt').addEventListener('input', () => { $('#res-sel').value = ''; conferir(); });
     $('#copiar').onclick = (e) => st.jogos.length && NM.copiar(e.target, texto());

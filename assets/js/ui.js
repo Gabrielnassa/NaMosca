@@ -10,10 +10,12 @@
     [null, 'Ferramentas'],
     ['fechamento-pro.html', 'Fechamento PRO', 'grid', true],
     ['fechamento.html', 'Fechamento do bicho', 'layers'],
+    ['milhar.html', 'Inteligência da milhar', 'target'],
     ['quininha.html', 'Quininha', 'ticket'],
     ['seninha.html', 'Seninha', 'ticket'],
     ['gerador.html', 'Gerador', 'dice'],
     ['conferidor.html', 'Conferidor', 'check'],
+    ['meus-jogos.html', 'Meus jogos', 'star'],
     [null, 'Referência'],
     ['tabela.html', 'Cotações', 'book'],
     ['analises.html', 'Análises', 'news'],
@@ -34,6 +36,8 @@
     news: '<path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/>',
     moon: '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>',
     sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4"/>',
+    target: '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+    star: '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
     search: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
     book: '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>',
   };
@@ -239,7 +243,7 @@
     f.innerHTML = `<div class="wrap">
         <div class="footer-grid">
           <div>${BRAND}<p class="muted" style="margin-top:10px">Resultados, estatística e fechamentos para o jogo do bicho, Quininha e Seninha.</p></div>
-          <div><h4>Ferramentas</h4><a href="fechamento-pro.html">Fechamento PRO</a><a href="fechamento.html">Fechamento do bicho</a><a href="quininha.html">Quininha</a><a href="seninha.html">Seninha</a><a href="gerador.html">Gerador</a><a href="conferidor.html">Conferidor</a></div>
+          <div><h4>Ferramentas</h4><a href="fechamento-pro.html">Fechamento PRO</a><a href="fechamento.html">Fechamento do bicho</a><a href="milhar.html">Inteligência da milhar</a><a href="quininha.html">Quininha</a><a href="seninha.html">Seninha</a><a href="gerador.html">Gerador</a><a href="conferidor.html">Conferidor</a></div>
           <div><h4>Dados</h4><a href="resultados.html">Resultados</a><a href="estatisticas.html">Estatísticas</a><a href="analises.html">Análises</a></div>
           <div><h4>Referência</h4><a href="tabela.html">Cotações e modalidades</a><a href="sonhos.html">Dicionário dos sonhos</a></div>
         </div>

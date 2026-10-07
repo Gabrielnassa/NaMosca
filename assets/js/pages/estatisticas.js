@@ -1,6 +1,6 @@
 (function () {
   const { $, $$ } = NM;
-  const state = { banca: NM.getBanca(), dias: 90, ate: 1, sort: 'grupo', dir: 1 };
+  const state = { sorteio: '', banca: NM.getBanca(), dias: 90, ate: 1, sort: 'grupo', dir: 1 };
   let st, res;
 
   // Rampa sequencial (um único tom, claro → escuro) em rgba da cor da marca
@@ -11,9 +11,9 @@
   function inkFor(t) { return t > 0.55 ? '#fff' : 'var(--text)'; }
 
   function compute() {
-    const all = NM.loadResults(state.banca, 180);
+    const all = NM.loadResults(state.banca, 365);
     const lim = NM.isoDate(new Date(Date.now() - state.dias * 864e5));
-    res = all.filter((e) => e.data > lim);
+    res = all.filter((e) => e.data > lim && (!state.sorteio || e.extracao === state.sorteio));
     st = NM.stats(res, { ate: state.ate });
   }
 
@@ -130,12 +130,68 @@
     ], { fmt: (v) => NM.pct(v / t, 0) });
   }
 
+  function ciclo() {
+    const seq = res.map((e) => e.premios[0].grupo);
+    const tamanhos = []; let vistos = new Set(), ini = 0;
+    seq.forEach((g, i) => { vistos.add(g); if (vistos.size === 25) { tamanhos.push(i - ini + 1); vistos = new Set(); ini = i + 1; } });
+    const faltam = NM.BICHOS.filter((b) => !vistos.has(b.grupo));
+    const media = tamanhos.length ? tamanhos.reduce((a, b) => a + b, 0) / tamanhos.length : null;
+    $('#ciclo-meta').textContent = `${tamanhos.length} ciclo(s) completo(s)${media ? ` · média ${NM.num(media, 0)} extrações` : ''}`;
+    $('#ciclo').innerHTML = `<p style="margin:0 0 10px">Ciclo atual: <b>${seq.length - ini}</b> extrações, <b>${vistos.size}</b> de 25 bichos já saíram na cabeça.</p>
+      <div class="progress" style="margin-bottom:12px"><div style="width:${(vistos.size / 25) * 100}%"></div></div>
+      ${faltam.length ? `<div class="field" style="margin-bottom:6px"><span>Faltam sair neste ciclo</span></div><div class="chips">${faltam.map((b) => NM.chip(b.grupo, 'cold')).join('')}</div>` : '<p class="note">Ciclo acabou de fechar.</p>'}
+      ${tamanhos.length ? `<p class="note" style="margin:10px 0 0">Ciclos anteriores: ${tamanhos.slice(-8).join(', ')} extrações (menor ${Math.min(...tamanhos)}, maior ${Math.max(...tamanhos)}).</p>` : ''}`;
+  }
+
+  function repeticoes() {
+    let mesmo = 0, nos5 = 0, mesmoSorteio = 0, nSorteio = 0;
+    const ultimoPorSorteio = {};
+    res.forEach((e, i) => {
+      const g = e.premios[0].grupo;
+      if (i > 0) {
+        if (res[i - 1].premios[0].grupo === g) mesmo++;
+        if (res[i - 1].premios.slice(0, 5).some((p) => p.grupo === g)) nos5++;
+      }
+      const ant = ultimoPorSorteio[e.extracao];
+      if (ant != null) { nSorteio++; if (ant === g) mesmoSorteio++; }
+      ultimoPorSorteio[e.extracao] = g;
+    });
+    const n = Math.max(1, res.length - 1), esp5 = 1 - Math.pow(24 / 25, 5);
+    const linha = (t, v, tot, esp) => `<tr><td>${t}</td><td class="n"><b>${NM.pct(v / Math.max(1, tot), 1)}</b></td><td class="n muted">${NM.pct(esp, 1)}</td><td class="n">${v}/${tot}</td></tr>`;
+    $('#repet').innerHTML = `<table class="data-table dense"><thead><tr><th>Situação</th><th class="n">Aconteceu</th><th class="n">Esperado</th><th class="n">Vezes</th></tr></thead><tbody>
+      ${linha('Cabeça repete o bicho da cabeça anterior', mesmo, n, 1 / 25)}
+      ${linha('Cabeça sai entre o 1º–5º da extração anterior', nos5, n, esp5)}
+      ${linha('Cabeça repete a do mesmo sorteio no dia anterior', mesmoSorteio, nSorteio, 1 / 25)}
+      </tbody></table><p class="note" style="margin:8px 0 0">Esperado = o que aconteceria por puro acaso.</p>`;
+  }
+
+  function horario() {
+    const exts = NM.banca(state.banca).extracoes.filter((e) => e.status !== 'novo').map((e) => e.id);
+    const c = {}; res.forEach((e) => { const k = e.extracao + '|' + e.premios[0].grupo; c[k] = (c[k] || 0) + 1; });
+    const max = Math.max(1, ...Object.values(c));
+    let html = `<div class="heat" style="grid-template-columns:130px repeat(${exts.length}, minmax(44px,1fr));min-width:${130 + exts.length * 48}px"><div></div>${exts.map((x) => `<div class="hh">${x}</div>`).join('')}`;
+    NM.BICHOS.forEach((b) => {
+      html += `<div class="hh" style="justify-content:flex-start">${NM.pad(b.grupo, 2)} ${b.nome}</div>`;
+      exts.forEach((x) => { const v = c[x + '|' + b.grupo] || 0, t = v / max; html += `<div class="hc" style="background:${heatColor(t)};color:${inkFor(t)}" data-tip="<b>${b.nome}</b> no ${x}: ${v}×">${v || ''}</div>`; });
+    });
+    $('#horario').innerHTML = html + '</div>';
+    NM.tooltip($('#horario'));
+  }
+
+  function opcoesSorteio() {
+    const b = NM.banca(state.banca);
+    $('#sorteio').innerHTML = '<option value="">Todos</option>' + b.extracoes.filter((e) => e.status !== 'novo').map((e) => `<option value="${e.id}"${e.id === state.sorteio ? ' selected' : ''}>${e.id} · ${e.hora}</option>`).join('');
+    if (!b.extracoes.some((e) => e.id === state.sorteio)) state.sorteio = '';
+  }
+
   function renderAll() {
-    compute(); tiles(); freq(); tabela(); tendencia(); puxada(); heat(); dezenas(); digitos();
+    opcoesSorteio();
+    compute(); tiles(); freq(); tabela(); tendencia(); puxada(); heat(); dezenas(); digitos(); ciclo(); repeticoes(); horario();
   }
 
   NM.onReady(() => {
     NM.bancaSelect($('#banca-bar'), (id) => { state.banca = id; renderAll(); });
+    $('#sorteio').addEventListener('change', (e) => { state.sorteio = e.target.value; renderAll(); });
     $('#periodo').addEventListener('change', (e) => { state.dias = Number(e.target.value); renderAll(); });
     $$('#ate button').forEach((b) => b.addEventListener('click', () => {
       $$('#ate button').forEach((x) => x.classList.toggle('on', x === b));
