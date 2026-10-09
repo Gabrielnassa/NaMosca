@@ -16,10 +16,14 @@
     ['gerador.html', 'Gerador', 'dice'],
     ['conferidor.html', 'Conferidor', 'check'],
     ['meus-jogos.html', 'Meus jogos', 'star'],
+    ['simulador.html', 'Simulador', 'chart'],
+    ['diario.html', 'Diário e limites', 'book'],
     [null, 'Referência'],
     ['tabela.html', 'Cotações', 'book'],
     ['analises.html', 'Análises', 'news'],
     ['sonhos.html', 'Sonhos', 'moon'],
+    ['status.html', 'Status dos dados', 'check'],
+    ['ajuda.html', 'Ajuda', 'info'],
     ['sobre.html', 'Sobre', 'info'],
   ];
 
@@ -112,7 +116,10 @@
       ? `<div class="ext-extra">${p[5] ? `<span>6º <b>${p[5].milhar}</b> ${NM.bicho(p[5].grupo).nome}</span>` : ''}${p[6] ? `<span>7º <b>${p[6].milhar}</b></span>` : ''}</div>` : '';
     const key = `${ext.banca}|${ext.data}|${ext.extracao}`;
     (NM._exts = NM._exts || {})[key] = ext;
-    return `<article class="card ext-card"><header><h3>${titulo}</h3><span class="muted small" style="display:flex;align-items:center;gap:10px">${NM.fmtDate(ext.data)}<button class="icon-btn share-btn" data-share="${key}" title="Compartilhar imagem" aria-label="Compartilhar">${NM.icon('share')}</button></span></header>
+    const selo = ext.divergente ? `<span class="tag cold" title="Fontes divergem: ${NM.esc(ext.divergente.fonte)} informou ${ext.divergente.premios.join(' ')}">⚠ divergente</span>`
+      : ext.fontes && ext.fontes.length > 1 ? `<span class="tag ok" title="Conferido em ${ext.fontes.join(' e ')}">✓ conferido</span>`
+      : ext.fontes ? `<span class="tag neutral" title="Fonte: ${ext.fontes[0]}">1 fonte</span>` : '';
+    return `<article class="card ext-card"><header><h3>${titulo} ${selo}</h3><span class="muted small" style="display:flex;align-items:center;gap:10px">${NM.fmtDate(ext.data)}<button class="icon-btn share-btn" data-share="${key}" title="Compartilhar imagem" aria-label="Compartilhar">${NM.icon('share')}</button></span></header>
       <div class="premios${compact ? ' compact' : ''}">${p.slice(0, 5).map(box).join('')}</div>${extra}</article>`;
   };
 
@@ -228,7 +235,9 @@
       <form class="search" action="resultados.html" role="search">${NM.icon('search')}<input type="search" name="q" placeholder="Buscar milhar, dezena ou bicho (ex.: 4532, leão)…" maxlength="20" aria-label="Buscar milhar"></form>
       <div class="top-meta"><span class="hide-sm" id="top-data"></span><span id="top-hora"></span>
         <button class="icon-btn" id="tema-btn" aria-label="Alternar tema claro/escuro" title="Tema claro/escuro">${NM.icon('sun')}</button></div>`;
-    document.body.prepend(side, ov, top);
+    const skip = document.createElement('a'); skip.className = 'skip'; skip.href = '#conteudo-principal'; skip.textContent = 'Pular para o conteúdo';
+    document.body.prepend(skip, side, ov, top);
+    const mn = document.querySelector('main'); if (mn) { mn.id = mn.id || 'conteudo-principal'; mn.setAttribute('tabindex', '-1'); }
     const fechar = () => document.body.classList.remove('nav-open');
     top.querySelector('.menu-btn').addEventListener('click', () => document.body.classList.toggle('nav-open'));
     ov.addEventListener('click', fechar);
@@ -297,7 +306,7 @@
           <div>${BRAND}<p class="muted" style="margin-top:10px">Resultados, estatística e fechamentos para o jogo do bicho, Quininha e Seninha.</p></div>
           <div><h4>Ferramentas</h4><a href="fechamento-pro.html">Fechamento PRO</a><a href="fechamento.html">Fechamento do bicho</a><a href="milhar.html">Inteligência da milhar</a><a href="quininha.html">Quininha</a><a href="seninha.html">Seninha</a><a href="gerador.html">Gerador</a><a href="conferidor.html">Conferidor</a></div>
           <div><h4>Dados</h4><a href="resultados.html">Resultados</a><a href="estatisticas.html">Estatísticas</a><a href="analises.html">Análises</a></div>
-          <div><h4>Referência</h4><a href="tabela.html">Cotações e modalidades</a><a href="sonhos.html">Dicionário dos sonhos</a><a href="sobre.html">Sobre o Na Mosca</a><a href="meus-jogos.html">Meus jogos</a></div>
+          <div><h4>Referência</h4><a href="tabela.html">Cotações e modalidades</a><a href="sonhos.html">Dicionário dos sonhos</a><a href="sobre.html">Sobre o Na Mosca</a><a href="ajuda.html">Central de ajuda</a><a href="privacidade.html">Privacidade</a><a href="termos.html">Termos de uso</a><a href="meus-jogos.html">Meus jogos</a></div>
         </div>
         <p class="disclaimer">Site informativo. Não vendemos nem intermediamos apostas. Probabilidades e fechamentos são cálculos matemáticos e não garantem prêmio:
         cada sorteio é independente. O jogo do bicho é contravenção penal no Brasil (Decreto-Lei 3.688/41, art. 58). Proibido para menores de 18 anos.
@@ -337,12 +346,75 @@
     });
   });
 
+  /* ---------- Boas-vindas: confirmação de idade e tour rápido ---------- */
+  function boasVindas() {
+    let visto; try { visto = localStorage.getItem('nm-18'); } catch (e) { visto = '1'; }
+    if (visto || /privacidade|termos/.test(location.pathname) || navigator.webdriver) return;
+    const PASSOS = [
+      ['Bem-vindo ao Na Mosca', 'Resultados do jogo do bicho, Quininha e Seninha, com estatística, fechamentos e simulações. Este site é informativo: não aceitamos apostas.<br><br><b>Você tem 18 anos ou mais?</b>', ['Tenho 18 anos ou mais', 'Não tenho']],
+      ['Resultados e sorteios', 'Na página inicial fica a grade dos sorteios do dia. Toque em um para ver os prêmios; a estrela ★ fixa seus favoritos no topo.', ['Próximo']],
+      ['Ferramentas', 'Fechamento PRO, Inteligência da milhar, Simulador e Backtest mostram custo, chance real e o histórico. Use o Diário para controlar quanto joga.', ['Próximo']],
+      ['Com responsabilidade', 'Nenhuma estatística garante prêmio: em todas as modalidades o retorno médio é menor que o apostado. Defina seus limites no Diário.', ['Começar']],
+    ];
+    let i = 0;
+    const bg = document.createElement('div'); bg.className = 'modal-bg'; bg.setAttribute('role', 'dialog'); bg.setAttribute('aria-modal', 'true');
+    const draw = () => {
+      const [t, txt, bts] = PASSOS[i];
+      bg.innerHTML = `<div class="modal">${LOGO}<h2 style="margin-top:14px">${t}</h2><p>${txt}</p><div class="btn-row">${bts.map((b, k) => `<button class="btn ${k ? 'btn-soft' : 'btn-primary'}" data-k="${k}">${b}</button>`).join('')}</div><div class="passos">${PASSOS.map((_, k) => `<i class="${k <= i ? 'on' : ''}"></i>`).join('')}</div></div>`;
+      bg.querySelector('button').focus();
+    };
+    bg.addEventListener('click', (e) => {
+      const b = e.target.closest('button[data-k]'); if (!b) return;
+      if (i === 0 && b.dataset.k === '1') { bg.querySelector('.modal').innerHTML = `${LOGO}<h2 style="margin-top:14px">Acesso não permitido</h2><p>O Na Mosca é destinado apenas a maiores de 18 anos.</p>`; return; }
+      if (i === 0) { try { localStorage.setItem('nm-18', '1'); } catch (er) {} }
+      if (++i >= PASSOS.length) { bg.remove(); return; }
+      draw();
+    });
+    draw(); document.body.append(bg);
+  }
+
+  /* ---------- Diário, limites e backup (dados locais do visitante) ---------- */
+  const ler = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch (e) { return d; } };
+  const gravar = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+  NM.diario = {
+    listar: () => ler('nm-diario', []).sort((a, b) => b.data.localeCompare(a.data) || b.id.localeCompare(a.id)),
+    adicionar: (x) => gravar('nm-diario', [{ id: Date.now().toString(36), ...x }, ...ler('nm-diario', [])]),
+    remover: (id) => gravar('nm-diario', ler('nm-diario', []).filter((x) => x.id !== id)),
+    limites: () => ler('nm-limites', {}),
+    setLimites: (l) => gravar('nm-limites', l),
+  };
+  NM.avisoLimite = () => {
+    const lim = NM.diario.limites(); if (!lim.dia && !lim.mes) return '';
+    const l = ler('nm-diario', []), hoje = NM.isoDate(new Date());
+    const g = (f) => l.filter(f).reduce((a, x) => a + (x.valor || 0), 0);
+    const dia = g((x) => x.data === hoje), mes = g((x) => x.data.startsWith(hoje.slice(0, 7)));
+    const msgs = [];
+    if (lim.dia && dia >= lim.dia * 0.8) msgs.push(`hoje: ${NM.brl(dia)} de ${NM.brl(lim.dia)}`);
+    if (lim.mes && mes >= lim.mes * 0.8) msgs.push(`no mês: ${NM.brl(mes)} de ${NM.brl(lim.mes)}`);
+    if (!msgs.length) return '';
+    const estourou = (lim.dia && dia >= lim.dia) || (lim.mes && mes >= lim.mes);
+    return `<div class="callout limite" role="alert" style="border-color:${estourou ? 'var(--down)' : 'var(--gold)'}"><b>${estourou ? 'Limite atingido' : 'Perto do seu limite'}</b> — ${msgs.join(' · ')}. <a href="diario.html">Ver diário</a></div>`;
+  };
+  NM.backupExportar = () => {
+    const dados = {}; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k.startsWith('nm-')) dados[k] = localStorage.getItem(k); }
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([JSON.stringify({ app: 'na-mosca', versao: 1, criado: new Date().toISOString(), dados }, null, 1)], { type: 'application/json' }));
+    a.download = `na-mosca-backup-${NM.isoDate(new Date())}.json`; a.click();
+  };
+  NM.backupImportar = (txt) => {
+    try { const j = JSON.parse(txt); if (j.app !== 'na-mosca') return false; Object.entries(j.dados).forEach(([k, v]) => k.startsWith('nm-') && localStorage.setItem(k, v)); return true; } catch (e) { return false; }
+  };
+
   /** Executa fn quando o DOM e os dados estiverem prontos. */
   NM.onReady = (fn) => {
     const go = () => NM.ready.then(fn);
     document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', go) : go();
   };
 
-  document.addEventListener('DOMContentLoaded', () => { header(); footer(); });
+  document.addEventListener('DOMContentLoaded', () => {
+    header(); footer(); boasVindas();
+    const av = NM.avisoLimite();
+    if (av && !location.pathname.endsWith('diario.html')) { const m = document.querySelector('main'); if (m) m.insertAdjacentHTML('afterbegin', `<div class="wrap" style="padding-top:14px">${av}</div>`); }
+  });
   NM.onReady(statusFonte);
 })();

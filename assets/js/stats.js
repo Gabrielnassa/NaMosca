@@ -188,3 +188,30 @@
   /** Probabilidade de um grupo específico sair em pelo menos um dos k prêmios. */
   NM.probEmK = (p, k) => 1 - Math.pow(1 - p, k);
 })();
+
+/* ---------- Estatística inferencial ---------- */
+(function () {
+  const NM = window.NM;
+  function lnGamma(z) {
+    const g = 7, c = [0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313, -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
+    if (z < 0.5) return Math.log(Math.PI / Math.sin(Math.PI * z)) - lnGamma(1 - z);
+    z -= 1; let x = c[0]; for (let i = 1; i < g + 2; i++) x += c[i] / (z + i);
+    const t = z + g + 0.5; return 0.5 * Math.log(2 * Math.PI) + (z + 0.5) * Math.log(t) - t + Math.log(x);
+  }
+  /** Q(a, x): gama incompleta regularizada superior (valor-p do qui-quadrado com a = gl/2, x = χ²/2). */
+  function gammaQ(a, x) {
+    if (x <= 0) return 1;
+    if (x < a + 1) { let sum = 1 / a, del = sum, ap = a; for (let n = 0; n < 500; n++) { ap++; del *= x / ap; sum += del; if (Math.abs(del) < Math.abs(sum) * 1e-12) break; } return 1 - sum * Math.exp(-x + a * Math.log(x) - lnGamma(a)); }
+    let b = x + 1 - a, c = 1e300, d = 1 / b, h = d;
+    for (let i = 1; i < 500; i++) { const an = -i * (i - a); b += 2; d = an * d + b; if (Math.abs(d) < 1e-300) d = 1e-300; c = b + an / c; if (Math.abs(c) < 1e-300) c = 1e-300; d = 1 / d; const del = d * c; h *= del; if (Math.abs(del - 1) < 1e-12) break; }
+    return Math.exp(-x + a * Math.log(x) - lnGamma(a)) * h;
+  }
+  /** Teste qui-quadrado de aderência (categorias equiprováveis). */
+  NM.quiQuadrado = function (obs) {
+    const n = obs.reduce((a, b) => a + b, 0), k = obs.length, e = n / k;
+    const chi = obs.reduce((s, o) => s + ((o - e) ** 2) / e, 0);
+    const p = gammaQ((k - 1) / 2, chi / 2);
+    const desv = Math.sqrt(n * (1 / k) * (1 - 1 / k));
+    return { n, chi, gl: k - 1, p, esperado: e, z: obs.map((o) => (o - e) / (desv || 1)) };
+  };
+})();

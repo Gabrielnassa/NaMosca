@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Status dos dados — Na Mosca</title>
+  <meta name="description" content="Quando cada sorteio foi atualizado, de qual fonte veio e quantos resultados foram conferidos em dois sites.">
+  <link rel="icon" type="image/png" href="assets/img/icon-192.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#0a0f1c">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+  <link rel="canonical" href="https://gabrielnassa.github.io/NaMosca/status.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Na Mosca">
+  <meta property="og:title" content="Status dos dados — Na Mosca">
+  <meta property="og:description" content="Quando cada sorteio foi atualizado, de qual fonte veio e quantos resultados foram conferidos em dois sites.">
+  <meta property="og:image" content="https://gabrielnassa.github.io/NaMosca/assets/img/icon-512.png">
+  <meta name="twitter:card" content="summary">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<main>
+  <section class="hero"><div class="wrap hero-row"><div><span class="eyebrow">Referência</span><h1>Status dos dados</h1>
+    <p>De onde vem cada resultado, quando foi atualizado e quantos foram conferidos em duas fontes diferentes.</p></div>
+    <div class="btn-row" style="margin:0"><button class="btn btn-soft" id="csv">Exportar resultados (.csv)</button></div></div></section>
+  <div class="wrap panel-float">
+    <div class="kpis" id="kpis"></div>
+    <section class="section"><div class="card"><header><h3>Sorteios</h3><span class="muted small">último resultado coletado</span></header><div class="table-wrap" id="sorteios"></div></div></section>
+    <section class="section" style="padding-top:0"><div class="card"><header><h3>Loterias Caixa</h3></header><div class="table-wrap" id="loterias"></div></div></section>
+  </div>
+</main>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/stats.js"></script>
+<script src="assets/js/ui.js"></script>
+<script src="assets/js/pages/status.js"></script>
+</body>
+</html>

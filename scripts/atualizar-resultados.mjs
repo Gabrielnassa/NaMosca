@@ -56,6 +56,24 @@ function codigo(b, e) {
   return e.label || `H${(e.hora || '').replace(':', '')}`;
 }
 
+/** Junta uma leitura ao arquivo, registrando quais sites confirmam o mesmo resultado. Retorna true se mudou algo. */
+function juntar(porChave, chave, reg, fonte) {
+  const antes = porChave.get(chave);
+  const iguais = (a, b) => JSON.stringify(a.premios.slice(0, 5)) === JSON.stringify(b.premios.slice(0, 5));
+  if (!antes) { porChave.set(chave, { ...reg, fontes: [fonte] }); return true; }
+  const fontes = antes.fontes || [];
+  if (iguais(antes, reg)) {
+    if (fontes.includes(fonte)) return false;
+    antes.fontes = [...fontes, fonte]; delete antes.divergente; return true;
+  }
+  if (!fontes.length || (fontes.length === 1 && fontes[0] === fonte)) { porChave.set(chave, { ...reg, fontes: [fonte] }); return true; }
+  if (antes.divergente) return false;
+  antes.divergente = { fonte, premios: reg.premios.slice(0, 5) };
+  console.log(`  ⚠ divergência em ${chave}: ${fontes.join('+')} ≠ ${fonte}`);
+  return true;
+}
+const dominio = (u) => new URL(u).hostname.replace(/^www\./, '');
+
 async function coletarBanca(b) {
   const arq = join(ROOT, 'data/bicho', `${b.id}.json`);
   const atual = await readJSON(arq, { banca: b.id, nome: b.nome, extracoes: [] });
@@ -73,9 +91,7 @@ async function coletarBanca(b) {
         if ((b.ignorar || []).includes(id)) continue;
         // 6º (soma) e 7º (multiplicação) sempre calculados pela regra da banca
         const reg = { data: e.data, id, nome: id, hora: e.hora, premios: completar(e.premios.slice(0, 5)) };
-        const antes = porChave.get(chave);
-        if (!antes || JSON.stringify(antes.premios) !== JSON.stringify(reg.premios)) novos++;
-        porChave.set(chave, reg);
+        if (juntar(porChave, chave, reg, dominio(url))) novos++;
       }
       fonteOk = fonteOk || url;
       console.log(`  ${b.id}: ${lidas.length} extrações lidas de ${url}`);
@@ -86,10 +102,11 @@ async function coletarBanca(b) {
   }
   // histórico: páginas por dia (ex.: --dias-bicho=60)
   const diasHist = Number(args['dias-bicho'] || 0);
-  if (b.historico && diasHist > 0) {
-    for (let d = 1; d <= diasHist; d++) {
+  if (b.historico) {
+    for (let d = 0; d <= Math.max(1, diasHist); d++) {
       const dia = new Date(Date.now() - 3 * 3600e3 - d * 864e5).toISOString().slice(0, 10);
-      if ([...porChave.keys()].filter((k) => k.startsWith(dia + '|')).length >= 5) continue;
+      // hoje e ontem sempre (servem de segunda fonte para confirmar); dias antigos só se faltarem
+      if (d > 1 && [...porChave.keys()].filter((k) => k.startsWith(dia + '|')).length >= 5) continue;
       try {
         const [yyyy, mm, dd] = dia.split('-');
         const MESES = ['janeiro', 'fevereiro', 'marco', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
@@ -98,9 +115,8 @@ async function coletarBanca(b) {
         for (const e of lidas) {
           const id = codigo(b, e);
           if ((b.ignorar || []).includes(id)) continue;
-          e.premios = e.premios.slice(0, 5);
-          porChave.set(`${e.data}|${id}`, { data: e.data, id, nome: id, hora: e.hora, premios: completar(e.premios) });
-          novos++;
+          const reg = { data: e.data, id, nome: id, hora: e.hora, premios: completar(e.premios.slice(0, 5)) };
+          if (juntar(porChave, `${e.data}|${id}`, reg, dominio(url))) novos++;
         }
         console.log(`  ${b.id} ${dia}: ${lidas.length} extrações (histórico)`);
         fonteOk = fonteOk || b.historico;

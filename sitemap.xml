@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://gabrielnassa.github.io/NaMosca/ajuda.html</loc><changefreq>weekly</changefreq></url>
   <url><loc>https://gabrielnassa.github.io/NaMosca/analises.html</loc><changefreq>weekly</changefreq></url>
   <url><loc>https://gabrielnassa.github.io/NaMosca/conferidor.html</loc><changefreq>weekly</changefreq></url>
+  <url><loc>https://gabrielnassa.github.io/NaMosca/diario.html</loc><changefreq>weekly</changefreq></url>
   <url><loc>https://gabrielnassa.github.io/NaMosca/estatisticas.html</loc><changefreq>weekly</changefreq></url>
   <url><loc>https://gabrielnassa.github.io/NaMosca/fechamento-pro.html</loc><changefreq>weekly</changefreq></url>
   <url><loc>https://gabrielnassa.github.io/NaMosca/fechamento.html</loc><changefreq>weekly</changefreq></url>
@@ -9,10 +11,14 @@
   <url><loc>https://gabrielnassa.github.io/NaMosca/</loc><changefreq>hourly</changefreq></url>
   <url><loc>https://gabrielnassa.github.io/NaMosca/meus-jogos.html</loc><changefreq>weekly</changefreq></url>
   <url><loc>https://gabrielnassa.github.io/NaMosca/milhar.html</loc><changefreq>weekly</changefreq></url>
+  <url><loc>https://gabrielnassa.github.io/NaMosca/privacidade.html</loc><changefreq>weekly</changefreq></url>
   <url><loc>https://gabrielnassa.github.io/NaMosca/quininha.html</loc><changefreq>weekly</changefreq></url>
   <url><loc>https://gabrielnassa.github.io/NaMosca/resultados.html</loc><changefreq>hourly</changefreq></url>
   <url><loc>https://gabrielnassa.github.io/NaMosca/seninha.html</loc><changefreq>weekly</changefreq></url>
+  <url><loc>https://gabrielnassa.github.io/NaMosca/simulador.html</loc><changefreq>weekly</changefreq></url>
   <url><loc>https://gabrielnassa.github.io/NaMosca/sobre.html</loc><changefreq>weekly</changefreq></url>
   <url><loc>https://gabrielnassa.github.io/NaMosca/sonhos.html</loc><changefreq>weekly</changefreq></url>
+  <url><loc>https://gabrielnassa.github.io/NaMosca/status.html</loc><changefreq>hourly</changefreq></url>
   <url><loc>https://gabrielnassa.github.io/NaMosca/tabela.html</loc><changefreq>weekly</changefreq></url>
+  <url><loc>https://gabrielnassa.github.io/NaMosca/termos.html</loc><changefreq>weekly</changefreq></url>
 </urlset>

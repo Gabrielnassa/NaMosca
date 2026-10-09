@@ -1,7 +1,6 @@
 name: Testes
 on:
   push:
-    paths: ['scripts/**']
   workflow_dispatch:
 jobs:
   parser:
@@ -12,3 +11,13 @@ jobs:
         with:
           node-version: 20
       - run: node scripts/test/parser.test.mjs
+  paginas:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm i --no-save playwright@1 && npx playwright install --with-deps chromium
+      - run: python3 -m http.server 8765 >/dev/null 2>&1 &
+      - run: sleep 2 && node scripts/test/e2e.mjs

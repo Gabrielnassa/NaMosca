@@ -130,6 +130,21 @@
     ], { fmt: (v) => NM.pct(v / t, 0) });
   }
 
+  function quiq() {
+    const obs = st.grupos.map((g) => g.freq);
+    const r = NM.quiQuadrado(obs);
+    const fora = st.grupos.map((g, i) => ({ g, z: r.z[i] })).filter((x) => Math.abs(x.z) > 3.29).sort((a, b) => Math.abs(b.z) - Math.abs(a.z));
+    const top = st.grupos.map((g, i) => ({ g, z: r.z[i] })).sort((a, b) => Math.abs(b.z) - Math.abs(a.z)).slice(0, 5);
+    const pouco = r.n < 250;
+    const veredito = pouco ? '<span class="tag neutral">poucos dados</span>' : r.p < 0.01 ? '<span class="tag cold">foge do acaso</span>' : '<span class="tag ok">compatível com o acaso</span>';
+    $('#quiq').innerHTML = `<div class="kpis" style="margin-bottom:12px">
+        <div class="kpi"><div class="label">Resultado</div><div class="value" style="font-size:1.1rem">${veredito}</div><div class="sub">${NM.num(r.n)} prêmios analisados</div></div>
+        <div class="kpi"><div class="label">χ² (${r.gl} gl)</div><div class="value">${NM.num(r.chi, 1)}</div><div class="sub">esperado ≈ ${r.gl} se for aleatório</div></div>
+        <div class="kpi"><div class="label">Valor-p</div><div class="value">${r.p < 0.001 ? '< 0,001' : NM.num(r.p, 3)}</div><div class="sub">abaixo de 0,01 indicaria vício</div></div></div>
+      <p style="margin:0 0 8px">Maiores desvios: ${top.map((x) => `${NM.chip(x.g.grupo)} <span class="mono ${x.z > 0 ? 'up' : 'down'}">${x.z > 0 ? '+' : ''}${NM.num(x.z, 1)}σ</span>`).join(' ')}</p>
+      <p class="note" style="margin:0">${fora.length ? `<b>${fora.length}</b> grupo(s) passam de 3,3σ (raro por acaso).` : 'Nenhum grupo passa de 3,3 desvios — o "quente" e o "frio" desta página estão dentro do que o acaso produz.'} ${pouco ? 'Com menos de 250 prêmios o teste tem pouco poder; aumente o período ou use 1º ao 5º.' : ''}</p>`;
+  }
+
   function ciclo() {
     const seq = res.map((e) => e.premios[0].grupo);
     const tamanhos = []; let vistos = new Set(), ini = 0;
@@ -186,7 +201,7 @@
 
   function renderAll() {
     opcoesSorteio();
-    compute(); tiles(); freq(); tabela(); tendencia(); puxada(); heat(); dezenas(); digitos(); ciclo(); repeticoes(); horario();
+    compute(); tiles(); freq(); tabela(); tendencia(); puxada(); heat(); dezenas(); digitos(); quiq(); ciclo(); repeticoes(); horario();
   }
 
   NM.onReady(() => {

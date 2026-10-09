@@ -148,6 +148,7 @@
     return {
       banca: banca.id, bancaNome: banca.nome, extracao: e.id, extracaoNome: e.nome || e.id, hora: e.hora || '', data: iso,
       premios: milhares.filter(Boolean).map((m, i) => ({ posicao: i + 1, milhar: m, grupo: NM.grupoDaDezena(Number(m) % 100) })),
+      fontes: e.fontes || null, divergente: e.divergente || null,
     };
   }
   function demoExtracao(banca, e, iso) {

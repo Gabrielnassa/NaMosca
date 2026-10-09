@@ -42,6 +42,20 @@
   NM.onReady(() => {
     modalidades(); horarios(); bichos();
     $('#calc-valor').addEventListener('input', modalidades);
+    // perfis de cotação (uma tabela por banca)
+    const lerP = () => { try { return JSON.parse(localStorage.getItem('nm-perfis') || '{}'); } catch (e) { return {}; } };
+    const opcoesP = () => { const p = lerP(); $('#perfil').innerHTML = '<option value="">— atual —</option>' + Object.keys(p).map((n) => `<option>${NM.esc(n)}</option>`).join(''); };
+    opcoesP();
+    $('#perfil-salvar').addEventListener('click', () => {
+      const n = prompt('Nome do perfil (ex.: nome da banca):'); if (!n) return;
+      const p = lerP(); p[n] = { ...NM.cotacoesCustom }; try { localStorage.setItem('nm-perfis', JSON.stringify(p)); } catch (e) {}
+      opcoesP(); $('#perfil').value = n;
+    });
+    $('#perfil').addEventListener('change', (e) => {
+      const p = lerP()[e.target.value]; if (!p) return;
+      NM.MODALIDADES.forEach((m) => NM.setCot(m.id, p[m.id] != null ? p[m.id] : null));
+      modalidades();
+    });
     loto($('#qnh'), NM.QUININHA); loto($('#snh'), NM.SENINHA);
     $('#reset').addEventListener('click', () => { NM.MODALIDADES.forEach((m) => NM.setCot(m.id, null)); modalidades(); });
     let hl;
