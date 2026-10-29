@@ -193,7 +193,7 @@
     const hs = hits ? new Set(hits) : null;
     $('#jogos').innerHTML = `<div class="jogos" style="grid-template-columns:1fr">${st.jogos.slice(0, MAX).map((g, i) => {
       const h = hs ? g.filter((x) => hs.has(x)).length : 0;
-      return `<div class="jogo"><span class="idx">${NM.pad(i + 1, String(n).length)}</span><div class="balls">${g.map((x) => `<span class="ball${hs && hs.has(x) ? ' hit' : ''}${st.fix.has(x) ? '" style="border-color:#16a34a' : ''}">${j.fmt(x)}</span>`).join('')}</div>${hs ? `<span class="tag ${h >= tier ? 'ok' : 'neutral'}">${h} acerto${h === 1 ? '' : 's'}</span>` : ''}</div>`;
+      return `<div class="jogo"><span class="idx">${NM.pad(i + 1, String(n).length)}</span><div class="balls">${g.map((x) => `<span class="ball${hs && hs.has(x) ? ' hit' : ''}${st.fix.has(x) ? ' fix' : ''}">${j.fmt(x)}</span>`).join('')}</div>${hs ? `<span class="tag ${h >= tier ? 'ok' : 'neutral'}">${h} acerto${h === 1 ? '' : 's'}</span>` : ''}</div>`;
     }).join('')}</div>${n > MAX ? `<p class="note" style="margin-top:8px">Mostrando ${MAX} de ${NM.num(n)} jogos. Use .txt ou .csv para a lista completa.</p>` : ''}`;
   }
 

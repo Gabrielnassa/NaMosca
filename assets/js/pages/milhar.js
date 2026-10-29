@@ -76,7 +76,7 @@
     $('#digitos').innerHTML = `<table class="data-table"><thead><tr><th>Casa</th>${[...Array(10).keys()].map((d) => `<th class="n">${d}</th>`).join('')}</tr></thead><tbody>${D.map((row, i) => {
       const mx = Math.max(...row), mn = Math.min(...row);
       return `<tr><td><b>${nomes[i]}</b></td>${row.map((c) => { const t = (c - mn) / (mx - mn || 1);
-        return `<td class="n" style="background:color-mix(in srgb, var(--primary) ${Math.round(t * 45)}%, transparent);${c === mx ? 'font-weight:800' : ''}">${c}</td>`; }).join('')}</tr>`;
+        return `<td class="n" style="background:color-mix(in srgb, var(--primary) ${Math.round(t * 28)}%, transparent);${c === mx ? 'font-weight:800' : ''}">${c}</td>`; }).join('')}</tr>`;
     }).join('')}</tbody></table><p class="note" style="margin:8px 0 0">Quanto mais verde, mais vezes o dígito saiu naquela casa.</p>`;
   }
 

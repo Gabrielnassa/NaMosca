@@ -3,12 +3,12 @@
   const state = { sorteio: '', banca: NM.getBanca(), dias: 90, ate: 1, sort: 'grupo', dir: 1 };
   let st, res;
 
-  // Rampa sequencial (um único tom, claro → escuro) em rgba da cor da marca
+  // Rampa sequencial em escala de cinza (fundo do card → branco)
   function heatColor(t) {
     const a = 0.08 + 0.85 * Math.max(0, Math.min(1, t));
     return `color-mix(in srgb, var(--primary) ${Math.round(a * 100)}%, var(--panel))`;
   }
-  function inkFor(t) { return t > 0.55 ? '#fff' : 'var(--text)'; }
+  function inkFor(t) { return t > 0.55 ? '#000' : 'var(--text)'; }
 
   function compute() {
     const all = NM.loadResults(state.banca, 365);

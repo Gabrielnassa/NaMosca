@@ -1,4 +1,4 @@
-/* Na Mosca — layout comum (barra de status, cabeçalho, ticker, rodapé, tema) e componentes visuais. */
+/* Na Mosca — layout comum (menu, barra superior, rodapé, boas-vindas) e componentes visuais. */
 (function () {
   const NM = window.NM;
 
@@ -52,16 +52,13 @@
 
   const BOTTOM = [['index.html', 'Início', 'home'], ['resultados.html', 'Resultados', 'list'], ['fechamento.html', 'Fechamento', 'grid'], ['fechamento-pro.html', 'PRO', 'ticket'], ['estatisticas.html', 'Estatísticas', 'chart']];
 
-  const LOGO = `<svg class="logo-mark" viewBox="0 0 40 40" aria-hidden="true">
-    <defs><linearGradient id="nmg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34d399"/><stop offset="1" stop-color="#059669"/></linearGradient></defs>
-    <rect width="40" height="40" rx="11" fill="url(#nmg)"/>
-    <circle cx="20" cy="20" r="11" fill="none" stroke="#04150f" stroke-width="2.4" opacity=".9"/>
-    <circle cx="20" cy="20" r="5.5" fill="none" stroke="#04150f" stroke-width="2.4" opacity=".9"/>
-    <circle cx="20" cy="20" r="2" fill="#fbbf24"/></svg>`;
-  const BRAND = `<a class="brand" href="index.html" aria-label="Na Mosca — início">${LOGO}<span class="brand-word">Na Mosca<small>Resultados &amp; fechamentos</small></span></a>`;
+  // símbolo "mira de foco": anel em quatro arcos + marcas de mira; o laranja só no ponto central (acertou na mosca)
+  const LOGO = `<svg class="logo-mark" viewBox="0 0 48 48" aria-hidden="true"><path d="M40.42 28.40A17 17 0 0 1 28.40 40.42M19.60 40.42A17 17 0 0 1 7.58 28.40M7.58 19.60A17 17 0 0 1 19.60 7.58M28.40 7.58A17 17 0 0 1 40.42 19.60" fill="none" stroke="currentColor" stroke-width="3"/><path d="M24 5.5V15.5M24 42.5V32.5M5.5 24H15.5M42.5 24H32.5" stroke="currentColor" stroke-width="3"/><circle cx="24" cy="24" r="3.5" fill="#ffa41c"/>
+</svg>`;
+  const BRAND = `<a class="brand" href="index.html" aria-label="Na Mosca — início">${LOGO}<span class="brand-word">Na Mosca<small>Resultados · fechamentos</small></span></a>`;
 
-  // tema: escuro por padrão
-  try { const t = localStorage.getItem('nm-tema'); if (t) document.documentElement.setAttribute('data-theme', t); } catch (e) {}
+  // tema único (escuro); limpa a preferência do antigo tema claro
+  try { localStorage.removeItem('nm-tema'); } catch (e) {}
 
   NM.getBanca = () => {
     const q = new URLSearchParams(location.search).get('banca');
@@ -116,7 +113,7 @@
       ? `<div class="ext-extra">${p[5] ? `<span>6º <b>${p[5].milhar}</b> ${NM.bicho(p[5].grupo).nome}</span>` : ''}${p[6] ? `<span>7º <b>${p[6].milhar}</b></span>` : ''}</div>` : '';
     const key = `${ext.banca}|${ext.data}|${ext.extracao}`;
     (NM._exts = NM._exts || {})[key] = ext;
-    const selo = ext.divergente ? `<span class="tag cold" title="Fontes divergem: ${NM.esc(ext.divergente.fonte)} informou ${ext.divergente.premios.join(' ')}">⚠ divergente</span>`
+    const selo = ext.divergente ? `<span class="tag warn" title="Fontes divergem: ${NM.esc(ext.divergente.fonte)} informou ${ext.divergente.premios.join(' ')}">⚠ divergente</span>`
       : ext.fontes && ext.fontes.length > 1 ? `<span class="tag ok" title="Conferido em ${ext.fontes.join(' e ')}">✓ conferido</span>`
       : ext.fontes ? `<span class="tag neutral" title="Fonte: ${ext.fontes[0]}">1 fonte</span>` : '';
     return `<article class="card ext-card"><header><h3>${titulo} ${selo}</h3><span class="muted small" style="display:flex;align-items:center;gap:10px">${NM.fmtDate(ext.data)}<button class="icon-btn share-btn" data-share="${key}" title="Compartilhar imagem" aria-label="Compartilhar">${NM.icon('share')}</button></span></header>
@@ -169,7 +166,7 @@
     const f = NM.favoritos(); const i = f.indexOf(id); i >= 0 ? f.splice(i, 1) : f.push(id);
     try { localStorage.setItem('nm-fav', JSON.stringify(f)); } catch (e) {}
   };
-  NM.gradeLegenda = '<div class="grade-legenda"><span><i style="background:#22c55e"></i>saiu</span><span><i style="background:#f59e0b"></i>aguardando</span><span><i style="background:#d1d5db"></i>sem resultado</span><span><i style="background:#fff;border:1px dashed #9ca3af"></i>novo · em breve</span></div>';
+  NM.gradeLegenda = '<div class="grade-legenda"><span><i class="saiu"></i>saiu</span><span><i class="aguardando"></i>aguardando</span><span><i></i>sem resultado</span><span><i class="novo"></i>novo · em breve</span></div>';
 
   /* ---------- Tooltip ---------- */
   let tip;
@@ -231,21 +228,15 @@
     ov.className = 'overlay';
     const top = document.createElement('div');
     top.className = 'topbar';
-    top.innerHTML = `<button class="icon-btn menu-btn" aria-label="Abrir menu">${NM.icon('menu')}</button><a class="top-brand" href="index.html">${LOGO}<span>Na Mosca</span></a>
+    top.innerHTML = `<button class="icon-btn menu-btn" aria-label="Abrir menu">${NM.icon('menu')}</button><a class="top-brand" href="index.html" aria-label="Na Mosca — início">${LOGO}<span>Na Mosca</span></a>
       <form class="search" action="resultados.html" role="search">${NM.icon('search')}<input type="search" name="q" placeholder="Buscar milhar, dezena ou bicho (ex.: 4532, leão)…" maxlength="20" aria-label="Buscar milhar"></form>
-      <div class="top-meta"><span class="hide-sm" id="top-data"></span><span id="top-hora"></span>
-        <button class="icon-btn" id="tema-btn" aria-label="Alternar tema claro/escuro" title="Tema claro/escuro">${NM.icon('sun')}</button></div>`;
+      <div class="top-meta"><span class="hide-sm" id="top-data"></span><span id="top-hora"></span></div>`;
     const skip = document.createElement('a'); skip.className = 'skip'; skip.href = '#conteudo-principal'; skip.textContent = 'Pular para o conteúdo';
     document.body.prepend(skip, side, ov, top);
     const mn = document.querySelector('main'); if (mn) { mn.id = mn.id || 'conteudo-principal'; mn.setAttribute('tabindex', '-1'); }
     const fechar = () => document.body.classList.remove('nav-open');
     top.querySelector('.menu-btn').addEventListener('click', () => document.body.classList.toggle('nav-open'));
     ov.addEventListener('click', fechar);
-    top.querySelector('#tema-btn').addEventListener('click', () => {
-      const t = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-      document.documentElement.setAttribute('data-theme', t);
-      try { localStorage.setItem('nm-tema', t); } catch (e) {}
-    });
     const relogio = () => {
       const d = new Date();
       top.querySelector('#top-hora').innerHTML = `<b>${d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' })}</b> BRT`;
@@ -263,11 +254,11 @@
     const vivas = NM.BANCAS.filter((b) => NM.isLive(b.id));
     const el = document.getElementById('side-foot');
     if (el) el.innerHTML = vivas.length
-      ? `<span class="live-dot"></span>Ao vivo: ${vivas.map((b) => b.sigla).join(' · ')}<br><span style="opacity:.7">atualiza a cada 15 min</span>`
+      ? `<span class="live-dot"></span>Ao vivo: ${vivas.map((b) => b.sigla).join(' · ')}<br><span style="color:var(--dim)">atualiza a cada 15 min</span>`
       : '<span class="live-dot demo"></span>Modo demonstração';
     if (el && 'Notification' in window && 'serviceWorker' in navigator) {
       const on = Notification.permission === 'granted' && localStorage.getItem('nm-avisos') === '1';
-      el.insertAdjacentHTML('beforeend', `<button class="btn btn-soft" id="avisos-btn" style="width:100%;margin-top:10px;padding:8px 10px;font-size:.8rem">${on ? '🔔 Avisos ligados' : '🔔 Avisar novos resultados'}</button>`);
+      el.insertAdjacentHTML('beforeend', `<button class="btn btn-soft" id="avisos-btn" style="width:100%;margin-top:12px;padding:8px 10px;font-size:12px">${on ? 'Avisos ligados' : 'Avisar novos resultados'}</button>`);
       document.getElementById('avisos-btn').addEventListener('click', ativarAvisos);
       if (on) iniciarAvisos();
     }
@@ -288,13 +279,13 @@
   async function ativarAvisos(e) {
     const btn = e.currentTarget;
     if (localStorage.getItem('nm-avisos') === '1' && Notification.permission === 'granted') {
-      localStorage.removeItem('nm-avisos'); btn.textContent = '🔔 Avisar novos resultados';
+      localStorage.removeItem('nm-avisos'); btn.textContent = 'Avisar novos resultados';
       const reg = await navigator.serviceWorker.ready; reg.active && reg.active.postMessage({ tipo: 'avisos', estado: { ativo: false } });
       return;
     }
     const p = await Notification.requestPermission();
     if (p !== 'granted') { btn.textContent = 'Permissão negada no navegador'; return; }
-    localStorage.setItem('nm-avisos', '1'); btn.textContent = '🔔 Avisos ligados';
+    localStorage.setItem('nm-avisos', '1'); btn.textContent = 'Avisos ligados';
     iniciarAvisos();
   }
 
@@ -316,34 +307,42 @@
   }
 
   /* ---------- Compartilhar resultado como imagem ---------- */
+  const MIRA = ['M40.42 28.40A17 17 0 0 1 28.40 40.42M19.60 40.42A17 17 0 0 1 7.58 28.40M7.58 19.60A17 17 0 0 1 19.60 7.58M28.40 7.58A17 17 0 0 1 40.42 19.60', 'M24 5.5V15.5M24 42.5V32.5M5.5 24H15.5M42.5 24H32.5'];
   NM.imagemResultado = (ext) => {
     const W = 1080, H = 1080, c = document.createElement('canvas'); c.width = W; c.height = H;
     const g = c.getContext('2d');
-    const bg = g.createLinearGradient(0, 0, W, H); bg.addColorStop(0, '#0b1424'); bg.addColorStop(1, '#0a2a22'); g.fillStyle = bg; g.fillRect(0, 0, W, H);
-    g.fillStyle = 'rgba(16,185,129,.18)'; g.beginPath(); g.arc(W - 120, 120, 260, 0, Math.PI * 2); g.fill();
-    g.fillStyle = '#34d399'; g.font = '800 34px Sora, Manrope, sans-serif'; g.fillText('NA MOSCA', 80, 110);
-    g.fillStyle = '#e8edf6'; g.font = '800 64px Sora, Manrope, sans-serif'; g.fillText(`${ext.extracaoNome} · ${ext.hora.replace(':', 'h')}`, 80, 210);
-    g.fillStyle = '#a5b1c7'; g.font = '600 34px Manrope, sans-serif'; g.fillText(`${NM.banca(ext.banca).nome} · ${NM.fmtDate(ext.data)}`, 80, 265);
+    g.fillStyle = '#000'; g.fillRect(0, 0, W, H);
+    // símbolo (48×48) desenhado a partir do mesmo traçado do SVG
+    g.save(); g.translate(80, 64); g.scale(56 / 48, 56 / 48);
+    g.strokeStyle = '#fff'; g.lineWidth = 3; MIRA.forEach((d) => g.stroke(new Path2D(d)));
+    g.fillStyle = '#ffa41c'; g.beginPath(); g.arc(24, 24, 3.5, 0, Math.PI * 2); g.fill(); g.restore();
+    g.fillStyle = '#fff'; g.font = '500 30px Tomorrow, monospace';
+    if ('letterSpacing' in g) g.letterSpacing = '5px';
+    g.fillText('NA MOSCA', 156, 104);
+    if ('letterSpacing' in g) g.letterSpacing = '0px';
+    g.fillStyle = '#fff'; g.font = '500 60px Tomorrow, monospace'; g.fillText(`${ext.extracaoNome} · ${ext.hora.replace(':', 'h')}`, 80, 226);
+    g.fillStyle = '#aaa'; g.font = '400 32px Inter, sans-serif'; g.fillText(`${NM.banca(ext.banca).nome} · ${NM.fmtDate(ext.data)}`, 80, 278);
     ext.premios.slice(0, 7).forEach((p, i) => {
-      const y = 350 + i * 96, first = i === 0;
-      g.fillStyle = first ? 'rgba(251,191,36,.14)' : 'rgba(255,255,255,.05)';
-      g.beginPath(); g.roundRect ? g.roundRect(70, y - 66, W - 140, 84, 18) : g.rect(70, y - 66, W - 140, 84); g.fill();
-      g.fillStyle = first ? '#fbbf24' : '#6c7a93'; g.font = '800 30px Manrope, sans-serif'; g.fillText(`${p.posicao}º`, 100, y - 12);
-      g.fillStyle = first ? '#fbbf24' : '#e8edf6'; g.font = '800 54px Sora, Manrope, sans-serif'; g.fillText(p.milhar, 190, y - 4);
-      if (p.milhar.length === 4) { const b = NM.bicho(p.grupo); g.fillStyle = '#a5b1c7'; g.font = '700 36px Manrope, sans-serif'; g.textAlign = 'right'; g.fillText(`${b.nome} ${NM.pad(b.grupo, 2)}`, W - 100, y - 8); g.textAlign = 'left'; }
+      const y = 368 + i * 92, first = i === 0;
+      g.fillStyle = first ? '#262626' : '#111';
+      g.beginPath(); g.roundRect ? g.roundRect(70, y - 62, W - 140, 80, 8) : g.rect(70, y - 62, W - 140, 80); g.fill();
+      g.fillStyle = first ? '#fff' : '#999'; g.font = '500 28px Tomorrow, monospace'; g.fillText(`${p.posicao}º`, 100, y - 10);
+      g.fillStyle = first ? '#fff' : '#f1f1f1'; g.font = '500 50px Tomorrow, monospace'; g.fillText(p.milhar, 190, y - 4);
+      if (p.milhar.length === 4) { const b = NM.bicho(p.grupo); g.fillStyle = '#aaa'; g.font = '500 34px Inter, sans-serif'; g.textAlign = 'right'; g.fillText(`${b.nome} ${NM.pad(b.grupo, 2)}`, W - 100, y - 8); g.textAlign = 'left'; }
     });
-    g.fillStyle = '#6c7a93'; g.font = '600 26px Manrope, sans-serif'; g.fillText('gabrielnassa.github.io/NaMosca', 80, H - 50);
+    g.fillStyle = '#999'; g.font = '400 24px Tomorrow, monospace'; g.fillText('gabrielnassa.github.io/NaMosca', 80, H - 48);
     return c;
   };
   document.addEventListener('click', (e) => {
     const b = e.target.closest('[data-share]'); if (!b) return;
     const ext = (NM._exts || {})[b.dataset.share]; if (!ext) return;
-    NM.imagemResultado(ext).toBlob(async (blob) => {
+    const fontes = document.fonts ? Promise.all(['500 50px Tomorrow', '400 32px Inter'].map((f) => document.fonts.load(f))).catch(() => {}) : Promise.resolve();
+    fontes.then(() => NM.imagemResultado(ext).toBlob(async (blob) => {
       const nome = `resultado-${ext.extracao}-${ext.data}.png`;
       const file = new File([blob], nome, { type: 'image/png' });
       try { if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: `Resultado ${ext.extracaoNome}` }); return; } } catch (err) { if (err.name === 'AbortError') return; }
       const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = nome; a.click();
-    });
+    }));
   });
 
   /* ---------- Boas-vindas: confirmação de idade e tour rápido ---------- */

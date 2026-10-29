@@ -5,60 +5,68 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Na Mosca — Terminal do jogo do bicho</title>
   <meta name="description" content="Resultados, estatísticas, bichos atrasados, gerador de palpites e análises do jogo do bicho.">
-  <link rel="icon" type="image/png" href="assets/img/icon-192.png">
+  <link rel="icon" href="assets/img/logo/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/img/favicon-32.png" type="image/png" sizes="32x32">
   <link rel="manifest" href="manifest.webmanifest">
-  <meta name="theme-color" content="#0a0f1c">
+  <meta name="theme-color" content="#000000">
   <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
   <link rel="canonical" href="https://gabrielnassa.github.io/NaMosca/">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Na Mosca">
   <meta property="og:title" content="Na Mosca — Terminal do jogo do bicho">
   <meta property="og:description" content="Resultados, estatísticas, bichos atrasados, gerador de palpites e análises do jogo do bicho.">
-  <meta property="og:image" content="https://gabrielnassa.github.io/NaMosca/assets/img/icon-512.png">
-  <meta name="twitter:card" content="summary">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <meta property="og:image" content="https://gabrielnassa.github.io/NaMosca/assets/img/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="preload" href="assets/fonts/tomorrow-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="assets/css/style.css">
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Na Mosca","url":"https://gabrielnassa.github.io/NaMosca/","description":"Resultados do jogo do bicho, estatísticas e fechamentos.","potentialAction":{"@type":"SearchAction","target":"https://gabrielnassa.github.io/NaMosca/resultados.html?q={q}","query-input":"required name=q"}}</script>
 </head>
 <body>
 <main>
-  <section class="hero">
-    <div class="wrap hero-row">
-      <div><span class="eyebrow" id="hoje-txt"></span><h1>Sorteios de hoje</h1><p>Toque em um sorteio para ver todos os prêmios.</p></div>
-      <div class="pills"><a href="resultados.html">Ver todos os resultados</a></div>
+  <section class="hero hero-home">
+    <div class="wrap hero-grid"><div>
+      <span class="eyebrow">Resultados · Fechamentos · Estatística</span>
+      <h1>O bicho em números.</h1>
+      <p>Resultados do Rio, de São Paulo e da Federal conferidos em duas fontes, estatística sem achismo e fechamentos com garantia matemática para o bicho, a Quininha e a Seninha.</p>
+      <div class="btn-row"><a class="btn btn-primary" href="#hoje">Ver sorteios de hoje</a><a class="btn btn-soft" href="fechamento-pro.html">Fechamento PRO</a></div>
+      <div class="hero-meta" id="hero-meta"></div>
+    </div>
+    <aside class="card hero-next" aria-label="Próximos sorteios"><header><h3>Próximos sorteios</h3><span class="muted small" id="next-dia">hoje</span></header><ol class="next-list" id="next-list"></ol><div class="next-last" id="next-last"></div></aside>
     </div>
   </section>
-  <div class="wrap panel-float">
-  <div class="card"><div class="grade" id="grade"></div><div id="legenda"></div></div>
+  <div class="wrap">
+  <section class="home-sec" id="hoje">
+    <div class="sec-head"><div><span class="eyebrow" id="hoje-txt">Hoje</span><h2>Sorteios de hoje</h2></div><a href="resultados.html">Ver todos os resultados →</a></div>
+    <div class="card"><div class="grade" id="grade"></div><div id="legenda"></div></div>
+  </section>
 
-  <section class="section">
-    <div class="section-title"><h2>Últimos resultados</h2><a href="resultados.html">Ver todos</a></div>
+  <section class="home-sec">
+    <div class="sec-head"><div><span class="eyebrow">Ao vivo</span><h2>Últimos resultados</h2></div><a href="resultados.html">Ver todos →</a></div>
     <div class="grid g2" id="ultimos"></div>
   </section>
 
-  <section class="section" style="padding-top:0">
-    <div class="section-title"><h2>Ferramentas</h2></div>
+  <section class="home-sec">
+    <div class="sec-head"><div><span class="eyebrow">Ferramentas</span><h2>Monte e confira o seu jogo</h2></div></div>
     <div class="grid g3" id="tools"></div>
   </section>
 
-  <section class="section" style="padding-top:0">
-    <div class="section-title"><h2>Destaques</h2><a href="estatisticas.html">Estatísticas completas</a></div>
-    <div id="banca-bar" style="margin-bottom:12px"></div>
+  <section class="home-sec">
+    <div class="sec-head"><div><span class="eyebrow">Estatística</span><h2>Destaques da banca</h2></div><a href="estatisticas.html">Estatísticas completas →</a></div>
+    <div id="banca-bar" style="margin-bottom:16px"></div>
     <div class="kpis" id="kpis"></div>
-  </section>
-
-  <section class="section" style="padding-top:0">
-    <div class="grid g2">
+    <div class="grid g2" style="margin-top:16px">
       <div class="card"><header><h3>Frequência na cabeça · 60 dias</h3></header>
         <div id="freq-chart"></div>
-        <p class="note" style="margin:8px 0 0">Linha tracejada = média esperada. Azul forte = acima da média.</p></div>
+        <p class="note" style="margin:8px 0 0">Linha tracejada = média esperada. Barra branca = acima da média.</p></div>
       <div class="card"><header><h3>Mais atrasados na cabeça</h3><span class="muted small">extrações sem sair</span></header><div id="atrasos"></div></div>
     </div>
   </section>
 
-  <section class="section" style="padding-top:0">
-    <div class="section-title"><h2>Análises</h2><a href="analises.html">Ver todas</a></div>
+  <section class="home-sec">
+    <div class="sec-head"><div><span class="eyebrow">Análises</span><h2>Leituras do dia</h2></div><a href="analises.html">Ver todas →</a></div>
     <ul class="newsfeed card" id="news" style="padding:4px 16px"></ul>
   </section>
   </div>

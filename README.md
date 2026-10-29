@@ -58,6 +58,18 @@ As cotações padrão seguem a tabela da banca (Milhar 3000, Centena 500, Dezena
 TDZ 3000, DDZ 200, TG 100, TGC 1000, DG 16, DGC 160, Lotinho 10/100/1000, QG 500/100/10). Podem ser alteradas na
 página Cotações e ficam salvas no navegador de quem alterou. O PVV usa a metade do Passe como padrão.
 
+## Design e marca
+
+Visual "Precision Night Vision" (referência em [`docs/DESIGN_1.md`](docs/DESIGN_1.md), plano em [`docs/plano-redesign.md`](docs/plano-redesign.md)):
+
+- **Cores:** fundo preto `#000`; superfícies `#111` → `#1d1d1d` → `#262626` (sem sombras e sem gradientes); texto `#fff` / `#f1f1f1` / `#aaa` / `#999`.
+- **Acento único:** laranja `#ffa41c`, só no botão principal de cada tela e nos rótulos de seção. Exceção de contraste: o botão laranja usa texto preto (10,6:1), porque o branco daria só 2:1.
+- **Sinais de dados:** 1º prêmio por superfície `#262626`; status dos sorteios por forma (ponto cheio, vazado, cinza, tracejado); gráficos e mapas de calor em escala de cinza; verde `#7fd6a0` e vermelho `#ff8a80` só em resultado financeiro.
+- **Tipografia:** Tomorrow (títulos, rótulos, números) e Inter (texto), servidas do próprio site em `assets/fonts/` (licença SIL OFL 1.1).
+- **Formas:** raio de 8px em botões, cards e campos; nada de pílulas. Só tema escuro.
+- **Logo:** símbolo "mira de foco" (anel em quatro arcos com marcas de mira e o ponto laranja no centro — acertou na mosca) e o nome "NA MOSCA" em Tomorrow 500 espaçada. Fontes SVG em `assets/img/logo/` (`simbolo.svg`, `simbolo-pequeno.svg` para 16–24px, `logotipo-horizontal.svg`, `logotipo-empilhado.svg`, versões `-preto` para fundo claro e `favicon.svg`). A prancha com os três conceitos avaliados está em [`docs/logo/prancha-conceitos.png`](docs/logo/prancha-conceitos.png).
+- **Ícones:** `assets/img/icon-192.png`, `icon-512.png`, `icon-maskable-512.png` (com área de segurança), `apple-touch-icon.png`, `favicon-32.png` e a imagem de compartilhamento `og-image.png` (1200×630).
+
 ## Aviso
 
 Site informativo. Não vende nem intermedeia apostas. Probabilidade e fechamento não garantem prêmio. Proibido para menores de 18 anos.

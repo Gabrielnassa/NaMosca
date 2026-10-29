@@ -13,10 +13,36 @@
   function sorteios() {
     const todos = ['rj', 'sp', 'fed'].flatMap((b) => NM.loadResults(b, 4));
     const hoje = NM.isoDate(new Date());
-    $('#hoje-txt').textContent = `${NM.DIAS[new Date().getDay()]}, ${NM.fmtDate(hoje)}`;
+    $('#hoje-txt').textContent = `Hoje · ${NM.DIAS[new Date().getDay()]}, ${NM.fmtDate(hoje)}`;
+    const vivas = NM.BANCAS.filter((b) => NM.isLive(b.id));
+    const atual = vivas.map((b) => NM.fonte(b.id) && NM.fonte(b.id).atualizado).filter(Boolean).sort().pop();
+    $('#hero-meta').innerHTML = [
+      `<span><b>${NM.SORTEIOS.length}</b> sorteios na grade</span>`,
+      `<span><b>${NM.BANCAS.length}</b> bancas · ${NM.BANCAS.map((b) => b.sigla).join(' · ')}</span>`,
+      `<span><b>2</b> fontes conferidas</span>`,
+      atual ? `<span>Atualizado <b>${new Date(atual).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' })}</b></span>` : '<span>Modo <b>demonstração</b></span>',
+    ].join('');
     NM.grade($('#grade'), hoje, { link: (id) => `resultados.html?s=${id}` });
     const ult = todos.sort((a, b) => (b.data + b.hora).localeCompare(a.data + a.hora)).slice(0, 4);
     $('#ultimos').innerHTML = ult.map((e) => NM.extracaoCard(e)).join('');
+    proximos(ult);
+  }
+
+  // painel da abertura: os próximos sorteios do bicho e o último resultado que saiu
+  function proximos(todos) {
+    const agora = new Date(), mins = agora.getHours() * 60 + agora.getMinutes();
+    const m = (s) => { const [h, mm] = s.hora.split(':').map(Number); return h * 60 + mm; };
+    const doDia = (dow) => NM.SORTEIOS.filter((s) => s.tipo === 'bicho' && s.status !== 'novo' && s.dias.includes(dow));
+    let lista = doDia(agora.getDay()).filter((s) => m(s) > mins), amanha = false;
+    if (!lista.length) { lista = doDia((agora.getDay() + 1) % 7); amanha = true; }
+    $('#next-dia').textContent = amanha ? 'amanhã' : 'hoje';
+    $('#next-list').innerHTML = lista.slice(0, 5).map((s) => {
+      const f = m(s) - mins;
+      const em = amanha ? NM.banca(s.banca).sigla : f < 60 ? `em ${f} min` : `em ${Math.floor(f / 60)}h${NM.pad(f % 60, 2)}`;
+      return `<li><a href="resultados.html?s=${s.id}"><span class="cod">${s.id}</span><span class="nm">${NM.esc(s.nome)}</span><span class="hr">${s.hora.replace(':', 'h')}</span><span class="em">${em}</span></a></li>`;
+    }).join('');
+    const u = todos[0];
+    $('#next-last').innerHTML = u ? `Último resultado · <b>${u.extracao}</b> ${u.hora.replace(':', 'h')} · <b>${u.premios[0].milhar}</b> ${NM.bicho(u.premios[0].grupo).nome}` : '';
   }
 
   function destaques(bancaId) {

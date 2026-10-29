@@ -6,7 +6,7 @@
       ${NM.MODALIDADES.map((m) => {
         const c = NM.cot(m.id), ev = NM.ev(m.id), custom = NM.cotacoesCustom[m.id] != null;
         return `<tr><td class="mono muted">${NM.pad(m.cod, 2)}</td><td><span class="gtag">${m.sig}</span> ${m.nome}</td><td class="small">${m.col}</td>
-        <td class="n">${c == null ? '<span class="muted">—</span>' : `<input type="number" step="0.5" min="0" data-id="${m.id}" value="${c}" style="width:96px;text-align:right${custom ? ';border-color:var(--accent)' : ''}">`}</td>
+        <td class="n">${c == null ? '<span class="muted">—</span>' : `<input type="number" step="0.5" min="0" data-id="${m.id}" value="${c}" style="width:96px;text-align:right${custom ? ';border-color:var(--head)' : ''}">`}</td>
         <td class="n">${m.prob ? NM.umEm(m.id === 'mc' ? 1e-4 : m.prob) : '<span class="muted">varia</span>'}</td>
         <td class="n">${c == null ? '—' : `<b>${NM.brl(c * (Number(($('#calc-valor') || {}).value) || 1))}</b>`}</td>
         <td class="n">${ev == null ? '<span class="muted">—</span>' : `<span class="${ev < 0.4 ? 'down' : ''}">${NM.brl(ev * 100)}</span>`}</td>
