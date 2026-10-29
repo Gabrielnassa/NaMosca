@@ -89,7 +89,7 @@
     const m = st.modo;
     const el = $('#pick');
     if (m.tipo === 'grupo') {
-      el.innerHTML = NM.BICHOS.map((b) => `<button data-v="${b.grupo}" class="${st.sel.has(b.grupo) ? 'on' : ''}"><b>${NM.pad(b.grupo, 2)}</b>${b.nome}</button>`).join('');
+      el.innerHTML = NM.BICHOS.map((b) => `<button data-v="${b.grupo}" class="${st.sel.has(b.grupo) ? 'on' : ''}">${NM.bichoSvg(b.grupo)}<b>${NM.pad(b.grupo, 2)}</b>${b.nome}</button>`).join('');
     } else {
       el.innerHTML = NM.DEZENAS_BICHO.map((i) => `<button data-v="${i}" class="${st.sel.has(i) ? 'on' : ''}">${NM.pad(i, 2)}</button>`).join('');
     }

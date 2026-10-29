@@ -8,7 +8,7 @@
   <link rel="icon" href="assets/img/logo/favicon.svg" type="image/svg+xml">
   <link rel="icon" href="assets/img/favicon-32.png" type="image/png" sizes="32x32">
   <link rel="manifest" href="manifest.webmanifest">
-  <meta name="theme-color" content="#000000">
+  <meta name="theme-color" content="#0a3d2e">
   <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
   <link rel="canonical" href="https://gabrielnassa.github.io/NaMosca/">
   <meta property="og:type" content="website">
@@ -29,9 +29,10 @@
   <section class="hero hero-home">
     <div class="wrap hero-grid"><div>
       <span class="eyebrow">Resultados · Fechamentos · Estatística</span>
-      <h1>O bicho em números.</h1>
+      <h1>O bicho em <em>números.</em></h1>
       <p>Resultados do Rio, de São Paulo e da Federal conferidos em duas fontes, estatística sem achismo e fechamentos com garantia matemática para o bicho, a Quininha e a Seninha.</p>
-      <div class="btn-row"><a class="btn btn-primary" href="#hoje">Ver sorteios de hoje</a><a class="btn btn-soft" href="fechamento-pro.html">Fechamento PRO</a></div>
+      <div class="btn-row"><a class="btn btn-gold" href="#hoje">Ver sorteios de hoje</a><a class="btn btn-soft" href="fechamento-pro.html">Fechamento PRO</a></div>
+      <div class="hero-bichos" id="hero-bichos" aria-hidden="true"></div>
       <div class="hero-meta" id="hero-meta"></div>
     </div>
     <aside class="card hero-next" aria-label="Próximos sorteios"><header><h3>Próximos sorteios</h3><span class="muted small" id="next-dia">hoje</span></header><ol class="next-list" id="next-list"></ol><div class="next-last" id="next-last"></div></aside>
@@ -49,6 +50,12 @@
   </section>
 
   <section class="home-sec">
+    <div class="sec-head"><div><span class="eyebrow">Os 25 bichos</span><h2>Tabela dos bichos</h2></div><a href="tabela.html">Cotações e modalidades →</a></div>
+    <div class="bichos-grid" id="bichos"></div>
+    <p class="note" style="margin:10px 0 0">Dourado = os 3 que mais saíram na cabeça em 60 dias. Atraso = extrações seguidas sem sair na cabeça. Toque para ver os resultados do bicho.</p>
+  </section>
+
+  <section class="home-sec">
     <div class="sec-head"><div><span class="eyebrow">Ferramentas</span><h2>Monte e confira o seu jogo</h2></div></div>
     <div class="grid g3" id="tools"></div>
   </section>
@@ -60,7 +67,7 @@
     <div class="grid g2" style="margin-top:16px">
       <div class="card"><header><h3>Frequência na cabeça · 60 dias</h3></header>
         <div id="freq-chart"></div>
-        <p class="note" style="margin:8px 0 0">Linha tracejada = média esperada. Barra branca = acima da média.</p></div>
+        <p class="note" style="margin:8px 0 0">Linha tracejada = média esperada. Barra verde-escura = acima da média.</p></div>
       <div class="card"><header><h3>Mais atrasados na cabeça</h3><span class="muted small">extrações sem sair</span></header><div id="atrasos"></div></div>
     </div>
   </section>
@@ -72,6 +79,7 @@
   </div>
 </main>
 <script src="assets/js/data.js"></script>
+<script src="assets/js/bichos-icones.js"></script>
 <script src="assets/js/stats.js"></script>
 <script src="assets/js/ui.js"></script>
 <script src="assets/js/artigos.js"></script>

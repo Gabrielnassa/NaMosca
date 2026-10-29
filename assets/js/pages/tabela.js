@@ -25,7 +25,7 @@
 
   function bichos() {
     const half = Math.ceil(NM.BICHOS.length / 2);
-    const cell = (b) => b ? `<td class="mono acc">${NM.pad(b.grupo, 2)}</td><td>${b.nome}</td><td class="mono">${b.dezenas.join(' · ')}</td>` : '<td></td><td></td><td></td>';
+    const cell = (b) => b ? `<td class="mono acc">${NM.pad(b.grupo, 2)}</td><td>${NM.bichoNome(b.grupo, false)}</td><td class="mono">${b.dezenas.join(' · ')}</td>` : '<td></td><td></td><td></td>';
     let html = '<thead><tr><th>G</th><th>Bicho</th><th>Dezenas</th><th>G</th><th>Bicho</th><th>Dezenas</th></tr></thead><tbody>';
     for (let i = 0; i < half; i++) html += `<tr id="g${i + 1}">${cell(NM.BICHOS[i])}${cell(NM.BICHOS[i + half])}</tr>`;
     $('#bichos').innerHTML = html + '</tbody>';

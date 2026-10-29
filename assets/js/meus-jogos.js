@@ -61,8 +61,8 @@
     const pts = serie.map((v, i) => `${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(' ');
     const grafico = `<div style="margin:4px 0 14px"><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="width:100%;height:150px;display:block" role="img" aria-label="Saldo acumulado">
       <line x1="0" x2="${W}" y1="${Y(0)}" y2="${Y(0)}" stroke="var(--line-2)" stroke-dasharray="4 4"/>
-      <polyline points="0,${Y(0)} ${pts} ${W},${Y(0)}" fill="#1d1d1d" stroke="none"/>
-      <polyline points="${pts}" fill="none" stroke="#fff" stroke-width="1.5" vector-effect="non-scaling-stroke"/></svg>
+      <polyline points="0,${Y(0)} ${pts} ${W},${Y(0)}" fill="var(--g50)" stroke="none"/>
+      <polyline points="${pts}" fill="none" stroke="var(--primary)" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>
       <div class="note" style="display:flex;justify-content:space-between"><span>${NM.fmtDate(r.porSorteio[0].data.slice(0, 10))}</span><span>saldo acumulado</span><span>${NM.fmtDate(r.porSorteio[r.n - 1].data.slice(0, 10))}</span></div></div>`;
     return `<div class="kpis" style="margin-bottom:12px">
       <div class="kpi"><div class="label">Sorteios testados</div><div class="value">${NM.num(r.n)}</div><div class="sub">desde ${NM.fmtDate(r.porSorteio[0].data.slice(0, 10))}</div></div>

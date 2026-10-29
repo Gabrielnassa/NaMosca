@@ -1,6 +1,6 @@
 /* Na Mosca — service worker: funciona offline, atualiza dados e avisa novos resultados. */
-const VERSAO = 'nm-v2';
-const BASE = ['./', './index.html', './resultados.html', './assets/css/style.css', './assets/js/data.js', './assets/js/stats.js', './assets/js/ui.js', './manifest.webmanifest', './assets/img/icon-192.png', './assets/img/logo/favicon.svg', './assets/fonts/tomorrow-latin-400-normal.woff2', './assets/fonts/tomorrow-latin-500-normal.woff2', './assets/fonts/inter-latin-400-normal.woff2', './assets/fonts/inter-latin-500-normal.woff2', './assets/fonts/inter-latin-600-normal.woff2'];
+const VERSAO = 'nm-v3';
+const BASE = ['./', './index.html', './resultados.html', './assets/css/style.css', './assets/js/data.js', './assets/js/stats.js', './assets/js/ui.js', './assets/js/bichos-icones.js', './assets/img/padrao-bichos.svg', './manifest.webmanifest', './assets/img/icon-192.png', './assets/img/logo/favicon.svg', './assets/fonts/tomorrow-latin-400-normal.woff2', './assets/fonts/tomorrow-latin-500-normal.woff2', './assets/fonts/inter-latin-400-normal.woff2', './assets/fonts/inter-latin-500-normal.woff2', './assets/fonts/inter-latin-600-normal.woff2'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(VERSAO).then((c) => c.addAll(BASE)).then(() => self.skipWaiting()));

@@ -3,12 +3,12 @@
   const state = { sorteio: '', banca: NM.getBanca(), dias: 90, ate: 1, sort: 'grupo', dir: 1 };
   let st, res;
 
-  // Rampa sequencial em escala de cinza (fundo do card → branco)
+  // Rampa sequencial em verde (fundo do card → verde da marca)
   function heatColor(t) {
     const a = 0.08 + 0.85 * Math.max(0, Math.min(1, t));
     return `color-mix(in srgb, var(--primary) ${Math.round(a * 100)}%, var(--panel))`;
   }
-  function inkFor(t) { return t > 0.55 ? '#000' : 'var(--text)'; }
+  function inkFor(t) { return t > 0.55 ? '#fff' : 'var(--text)'; }
 
   function compute() {
     const all = NM.loadResults(state.banca, 365);
@@ -28,7 +28,7 @@
       ['Menos frequente', frio, `${frio.freq} vezes (${NM.pct(frio.freq / st.total)})`],
       ['Maior atraso', atras, `${atras.atraso} extrações · recorde ${atras.maxAtraso}`],
       ['Mais “vencido”', venc, `atraso ${venc.vencimento.toFixed(1).replace('.', ',')}× a média`],
-    ].map(([l, b, s]) => `<div class="card tile"><div class="label">${l}</div><div class="value">${NM.pad(b.grupo, 2)} ${b.nome}</div><div class="sub">${s}</div></div>`).join('');
+    ].map(([l, b, s]) => `<div class="card tile"><div class="label">${l}</div><div class="value">${NM.bichoIc(b.grupo)}<span>${NM.pad(b.grupo, 2)} ${b.nome}</span></div><div class="sub">${s}</div></div>`).join('');
   }
 
   function freq() {
@@ -72,7 +72,7 @@
     const sel = [...t.slice(0, 5), ...t.slice(-5)];
     $('#tendencia').innerHTML = `<div class="table-wrap"><table class="data-table"><thead><tr><th>Bicho</th><th class="n">Últ. 30</th><th class="n">Período</th><th class="n">Variação</th></tr></thead><tbody>
       ${sel.map((x, i) => `${i === 5 ? '<tr><td colspan="4" class="muted small" style="text-align:center">esfriando ↓</td></tr>' : ''}
-      <tr><td>${NM.pad(x.grupo, 2)} ${x.nome}</td><td class="n">${NM.pct(x.recente)}</td><td class="n">${NM.pct(x.historico)}</td>
+      <tr><td>${NM.bichoNome(x.grupo)}</td><td class="n">${NM.pct(x.recente)}</td><td class="n">${NM.pct(x.historico)}</td>
       <td class="n" style="color:${x.delta >= 0 ? 'var(--up)' : 'var(--down)'}">${x.delta >= 0 ? '+' : '−'}${(Math.abs(x.delta) * 100).toFixed(1).replace('.', ',')} p.p.</td></tr>`).join('')}
       </tbody></table></div><p class="muted small" style="margin:8px 0 0">Esquentando no topo; esfriando embaixo.</p>`;
   }
@@ -82,7 +82,7 @@
     const stCab = NM.stats(res, { ate: 1 });
     const p = NM.puxada(stCab, g, 8);
     NM.hbars($('#puxada'), p.map((x) => ({
-      label: `${NM.pad(x.g, 2)} ${NM.bicho(x.g).nome}`, value: x.c,
+      label: `${NM.bichoSvg(x.g)}${NM.pad(x.g, 2)} ${NM.bicho(x.g).nome}`, value: x.c,
       tip: `${NM.pct(x.pct)} das vezes após ${NM.bicho(g).nome}`,
     })), { fmt: (v) => `${v}×` });
   }
@@ -94,7 +94,7 @@
     pct.forEach((r) => r.forEach((v) => (max = Math.max(max, v))));
     let html = `<div class="heat" style="grid-template-columns:130px repeat(7, minmax(44px,1fr));min-width:520px"><div></div>${cols.map((d) => `<div class="hh">${NM.DIAS[d].slice(0, 3)}</div>`).join('')}`;
     NM.BICHOS.forEach((b) => {
-      html += `<div class="hh" style="justify-content:flex-start">${NM.pad(b.grupo, 2)} ${b.nome}</div>`;
+      html += `<div class="hh" style="justify-content:flex-start">${NM.bichoSvg(b.grupo)}${NM.pad(b.grupo, 2)} ${b.nome}</div>`;
       cols.forEach((d) => {
         const v = pct[d][b.grupo], t = max ? v / max : 0;
         html += `<div class="hc" style="background:${heatColor(t)};color:${inkFor(t)}" data-tip="<b>${b.nome}</b> · ${NM.DIAS[d]}<br>${st.porDia[d][b.grupo]} vezes (${NM.pct(v)})">${st.porDia[d][b.grupo] || ''}</div>`;
@@ -186,7 +186,7 @@
     const max = Math.max(1, ...Object.values(c));
     let html = `<div class="heat" style="grid-template-columns:130px repeat(${exts.length}, minmax(44px,1fr));min-width:${130 + exts.length * 48}px"><div></div>${exts.map((x) => `<div class="hh">${x}</div>`).join('')}`;
     NM.BICHOS.forEach((b) => {
-      html += `<div class="hh" style="justify-content:flex-start">${NM.pad(b.grupo, 2)} ${b.nome}</div>`;
+      html += `<div class="hh" style="justify-content:flex-start">${NM.bichoSvg(b.grupo)}${NM.pad(b.grupo, 2)} ${b.nome}</div>`;
       exts.forEach((x) => { const v = c[x + '|' + b.grupo] || 0, t = v / max; html += `<div class="hc" style="background:${heatColor(t)};color:${inkFor(t)}" data-tip="<b>${b.nome}</b> no ${x}: ${v}×">${v || ''}</div>`; });
     });
     $('#horario').innerHTML = html + '</div>';

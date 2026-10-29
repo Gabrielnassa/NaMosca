@@ -81,7 +81,7 @@
     $('#cnt').textContent = `${total} marcada${total === 1 ? '' : 's'}${st.fix.size ? ` · ${st.fix.size} fixa${st.fix.size > 1 ? 's' : ''}` : ''}`;
     $('#bichos-mini').innerHTML = st.jogo === 'bicho' ? `<div class="field" style="margin-top:12px"><span>Marcar por bicho (4 dezenas)</span></div><div class="bichos-mini">${NM.BICHOS.map((b) => {
       const ds = b.dezenas.map(Number); const on = ds.every((d) => st.sel.has(d) || st.fix.has(d));
-      return `<button data-g="${b.grupo}" class="${on ? 'on' : ''}"><b>${NM.pad(b.grupo, 2)}</b>${b.nome}</button>`;
+      return `<button data-g="${b.grupo}" class="${on ? 'on' : ''}">${NM.bichoSvg(b.grupo)}<b>${NM.pad(b.grupo, 2)}</b>${b.nome}</button>`;
     }).join('')}</div>` : '';
     explica();
   }

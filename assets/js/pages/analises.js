@@ -16,7 +16,7 @@
 
     return `<article class="card" style="margin-bottom:18px">
       <div class="meta muted small"><span class="tag hot">Análise do dia</span> · ${NM.fmtDate(last.data)} · ${NM.esc(NM.banca(bancaId).nome)} · gerada automaticamente</div>
-      <h2 style="margin-top:8px">O dia em ${hoje.length} extrações: ${hoje.map((e) => NM.bicho(e.premios[0].grupo).emoji).join(' ')}</h2>
+      <h2 style="margin-top:8px">O dia em ${hoje.length} extrações: </h2><div class="chips" style="margin:-4px 0 14px">${hoje.map((e) => NM.chip(e.premios[0].grupo)).join('')}</div>
       <p>A cabeça de hoje trouxe ${hoje.map((e) => `<b>${NM.bicho(e.premios[0].grupo).nome}</b> no ${e.extracaoNome}`).join(', ')}.
       ${repetidos.length ? `Destaque para a repetição de <b>${[...new Set(repetidos)].map((g) => NM.bicho(g).nome).join(' e ')}</b> no mesmo dia.` : 'Nenhum bicho se repetiu na cabeça.'}</p>
       <div class="grid g3">

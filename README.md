@@ -60,15 +60,12 @@ página Cotações e ficam salvas no navegador de quem alterou. O PVV usa a meta
 
 ## Design e marca
 
-Visual "Precision Night Vision" (referência em [`docs/DESIGN_1.md`](docs/DESIGN_1.md), plano em [`docs/plano-redesign.md`](docs/plano-redesign.md)):
-
-- **Cores:** fundo preto `#000`; superfícies `#111` → `#1d1d1d` → `#262626` (sem sombras e sem gradientes); texto `#fff` / `#f1f1f1` / `#aaa` / `#999`.
-- **Acento único:** laranja `#ffa41c`, só no botão principal de cada tela e nos rótulos de seção. Exceção de contraste: o botão laranja usa texto preto (10,6:1), porque o branco daria só 2:1.
-- **Sinais de dados:** 1º prêmio por superfície `#262626`; status dos sorteios por forma (ponto cheio, vazado, cinza, tracejado); gráficos e mapas de calor em escala de cinza; verde `#7fd6a0` e vermelho `#ff8a80` só em resultado financeiro.
-- **Tipografia:** Tomorrow (títulos, rótulos, números) e Inter (texto), servidas do próprio site em `assets/fonts/` (licença SIL OFL 1.1).
-- **Formas:** raio de 8px em botões, cards e campos; nada de pílulas. Só tema escuro.
-- **Logo:** símbolo "mira de foco" (anel em quatro arcos com marcas de mira e o ponto laranja no centro — acertou na mosca) e o nome "NA MOSCA" em Tomorrow 500 espaçada. Fontes SVG em `assets/img/logo/` (`simbolo.svg`, `simbolo-pequeno.svg` para 16–24px, `logotipo-horizontal.svg`, `logotipo-empilhado.svg`, versões `-preto` para fundo claro e `favicon.svg`). A prancha com os três conceitos avaliados está em [`docs/logo/prancha-conceitos.png`](docs/logo/prancha-conceitos.png).
-- **Ícones:** `assets/img/icon-192.png`, `icon-512.png`, `icon-maskable-512.png` (com área de segurança), `apple-touch-icon.png`, `favicon-32.png` e a imagem de compartilhamento `og-image.png` (1200×630).
+- **Tema verde:** menu, rodapé e faixas de abertura em verde-escuro (`#0a3d2e`) com um padrão discreto de bichos; conteúdo em fundo claro (`#f2f6f3`) com cards brancos, para leitura fácil.
+- **Cores com função:** verde `#13804f` nas ações e destaques; dourado `#f2b705` no 1º prêmio, nos bichos mais frequentes e no botão principal da página inicial; vermelho só para perda e divergência.
+- **Os 25 bichos ilustrados** (traço em grade 24×24, sem emojis) em `assets/js/bichos-icones.js`: `NM.bichoSvg(grupo)` para HTML e `NM.bichoCanvas()` para a imagem de compartilhar. Base: [IconOven](https://iconoven.com/icons) (licença MIT); Avestruz e Pavão foram desenhados para o Na Mosca no mesmo traço.
+- **Tipografia:** Tomorrow (títulos, números) e Inter (texto), servidas em `assets/fonts/` (SIL OFL 1.1).
+- **Logo:** símbolo "mira de foco" com o ponto dourado no centro. SVGs em `assets/img/logo/` (branco, `-verde` e `-preto`; `favicon.svg` em fundo verde). A prancha dos conceitos avaliados está em [`docs/logo/prancha-conceitos.png`](docs/logo/prancha-conceitos.png).
+- **Ícones e compartilhamento:** `icon-192.png`, `icon-512.png`, `icon-maskable-512.png`, `apple-touch-icon.png`, `favicon-32.png`, `og-image.png` (1200×630) e `padrao-bichos.svg`.
 
 ## Aviso
 

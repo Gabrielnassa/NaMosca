@@ -47,9 +47,9 @@
     const X = (i) => (i / marcos) * W, Y = (y) => H - 8 - ((y - mn) / rg) * (H - 16);
     const banda = hi.map((y, i) => `${X(i)},${Y(y)}`).join(' ') + ' ' + lo.map((y, i) => `${X(marcos - i)},${Y(lo[marcos - i])}`).join(' ');
     $('#graf').innerHTML = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="width:100%;height:220px;display:block" role="img" aria-label="Saldo simulado">
-      <polygon points="${banda}" fill="#222"/>
+      <polygon points="${banda}" fill="var(--g100)"/>
       <line x1="0" x2="${W}" y1="${Y(0)}" y2="${Y(0)}" stroke="var(--line-2)" stroke-dasharray="4 4"/>
-      <polyline points="${med.map((y, i) => `${X(i)},${Y(y)}`).join(' ')}" fill="none" stroke="#fff" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>
+      <polyline points="${med.map((y, i) => `${X(i)},${Y(y)}`).join(' ')}" fill="none" stroke="var(--primary)" stroke-width="2.5" vector-effect="non-scaling-stroke"/></svg>
       <div class="note" style="display:flex;justify-content:space-between"><span>início</span><span>linha = cenário mediano · faixa = 90% dos cenários · tracejado = zero</span><span>${dias} dias</span></div>`;
 
     // distribuição final

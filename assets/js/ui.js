@@ -53,7 +53,7 @@
   const BOTTOM = [['index.html', 'Início', 'home'], ['resultados.html', 'Resultados', 'list'], ['fechamento.html', 'Fechamento', 'grid'], ['fechamento-pro.html', 'PRO', 'ticket'], ['estatisticas.html', 'Estatísticas', 'chart']];
 
   // símbolo "mira de foco": anel em quatro arcos + marcas de mira; o laranja só no ponto central (acertou na mosca)
-  const LOGO = `<svg class="logo-mark" viewBox="0 0 48 48" aria-hidden="true"><path d="M40.42 28.40A17 17 0 0 1 28.40 40.42M19.60 40.42A17 17 0 0 1 7.58 28.40M7.58 19.60A17 17 0 0 1 19.60 7.58M28.40 7.58A17 17 0 0 1 40.42 19.60" fill="none" stroke="currentColor" stroke-width="3"/><path d="M24 5.5V15.5M24 42.5V32.5M5.5 24H15.5M42.5 24H32.5" stroke="currentColor" stroke-width="3"/><circle cx="24" cy="24" r="3.5" fill="#ffa41c"/>
+  const LOGO = `<svg class="logo-mark" viewBox="0 0 48 48" aria-hidden="true"><path d="M40.42 28.40A17 17 0 0 1 28.40 40.42M19.60 40.42A17 17 0 0 1 7.58 28.40M7.58 19.60A17 17 0 0 1 19.60 7.58M28.40 7.58A17 17 0 0 1 40.42 19.60" fill="none" stroke="currentColor" stroke-width="3"/><path d="M24 5.5V15.5M24 42.5V32.5M5.5 24H15.5M42.5 24H32.5" stroke="currentColor" stroke-width="3"/><circle class="logo-dot" cx="24" cy="24" r="3.5"/>
 </svg>`;
   const BRAND = `<a class="brand" href="index.html" aria-label="Na Mosca — início">${LOGO}<span class="brand-word">Na Mosca<small>Resultados · fechamentos</small></span></a>`;
 
@@ -79,7 +79,11 @@
 
   NM.chip = (g, extra = '') => {
     const b = NM.bicho(g);
-    return `<span class="chip ${extra}" title="Grupo ${b.grupo} — ${b.nome} (${b.dezenas.join(', ')})"><span class="chip-g">${NM.pad(b.grupo, 2)}</span><span class="chip-n">${b.nome}</span></span>`;
+    return `<span class="chip ${extra}" title="Grupo ${b.grupo} — ${b.nome} (${b.dezenas.join(', ')})"><span class="bicho-ic">${NM.bichoSvg(b.grupo)}</span><span class="chip-n">${b.nome}</span><span class="chip-g">${NM.pad(b.grupo, 2)}</span></span>`;
+  };
+  /** Ícone do bicho num círculo (tamanho pelo CSS) e nome com ícone pequeno */
+  NM.bichoIc = (g) => `<span class="bicho-ic" title="${NM.bicho(g).nome}">${NM.bichoSvg(g)}</span>`;
+  NM.bichoNome = (g, comNum = true) => { const b = NM.bicho(g); return `<span class="bnome">${NM.bichoSvg(g)}${comNum ? NM.pad(g, 2) + ' ' : ''}${b.nome}</span>`;
   };
   NM.signed = (x, d = 1, suf = '') => `<span class="${x >= 0 ? 'up' : 'down'}">${x >= 0 ? '▲' : '▼'} ${NM.num(Math.abs(x), d)}${suf}</span>`;
 
@@ -106,7 +110,7 @@
     const p = ext.premios;
     const box = (x) => {
       const b = NM.bicho(x.grupo);
-      return `<div class="premio${x.posicao === 1 ? ' first' : ''}"><div class="pl">${x.posicao}º prêmio</div><div class="pm">${x.milhar}</div><div class="pb">${b.nome} <span>${NM.pad(b.grupo, 2)}</span></div></div>`;
+      return `<div class="premio${x.posicao === 1 ? ' first' : ''}"><div class="pl">${x.posicao}º prêmio</div><span class="bicho-ic">${NM.bichoSvg(b.grupo)}</span><div class="pm">${x.milhar}</div><div class="pb">${b.nome} <span>${NM.pad(b.grupo, 2)}</span></div></div>`;
     };
     const titulo = `${ext.hora ? ext.hora.replace(':', 'h') + ' · ' : ''}${NM.esc(ext.extracaoNome)}`;
     const extra = !compact && p.length > 5
@@ -139,7 +143,7 @@
       else if (!s.dias.includes(dow)) { cls = 'folga'; bx = 'não corre'; }
       else if (s.banca) {
         const e = res(s.banca).find((x) => x.data === dia && x.extracao === s.id);
-        if (e) { cls = 'saiu'; val = e.premios[0].milhar; bx = NM.bicho(e.premios[0].grupo).nome; }
+        if (e) { cls = 'saiu'; val = e.premios[0].milhar; bx = NM.bichoSvg(e.premios[0].grupo) + NM.bicho(e.premios[0].grupo).nome; }
         else if (dia === hoje && mins < h * 60 + m + 10) {
           cls = 'aguardando';
           const falta = h * 60 + m - mins;
@@ -311,26 +315,34 @@
   NM.imagemResultado = (ext) => {
     const W = 1080, H = 1080, c = document.createElement('canvas'); c.width = W; c.height = H;
     const g = c.getContext('2d');
-    g.fillStyle = '#000'; g.fillRect(0, 0, W, H);
+    // faixa verde com bichos ao fundo, corpo claro
+    g.fillStyle = '#f2f6f3'; g.fillRect(0, 0, W, H);
+    g.fillStyle = '#0a3d2e'; g.fillRect(0, 0, W, 300);
+    [[16, 760, 30, 120], [12, 900, 150, 110], [22, 640, 170, 90], [8, 960, 10, 80], [4, 520, 40, 70]].forEach(([gr, x, y, s]) => NM.bichoCanvas(g, gr, x, y, s, 'rgba(255,255,255,.08)'));
     // símbolo (48×48) desenhado a partir do mesmo traçado do SVG
-    g.save(); g.translate(80, 64); g.scale(56 / 48, 56 / 48);
+    g.save(); g.translate(80, 56); g.scale(56 / 48, 56 / 48);
     g.strokeStyle = '#fff'; g.lineWidth = 3; MIRA.forEach((d) => g.stroke(new Path2D(d)));
-    g.fillStyle = '#ffa41c'; g.beginPath(); g.arc(24, 24, 3.5, 0, Math.PI * 2); g.fill(); g.restore();
-    g.fillStyle = '#fff'; g.font = '500 30px Tomorrow, monospace';
+    g.fillStyle = '#f2b705'; g.beginPath(); g.arc(24, 24, 3.5, 0, Math.PI * 2); g.fill(); g.restore();
+    g.fillStyle = '#fff'; g.font = '500 30px Tomorrow, sans-serif';
     if ('letterSpacing' in g) g.letterSpacing = '5px';
-    g.fillText('NA MOSCA', 156, 104);
+    g.fillText('NA MOSCA', 156, 96);
     if ('letterSpacing' in g) g.letterSpacing = '0px';
-    g.fillStyle = '#fff'; g.font = '500 60px Tomorrow, monospace'; g.fillText(`${ext.extracaoNome} · ${ext.hora.replace(':', 'h')}`, 80, 226);
-    g.fillStyle = '#aaa'; g.font = '400 32px Inter, sans-serif'; g.fillText(`${NM.banca(ext.banca).nome} · ${NM.fmtDate(ext.data)}`, 80, 278);
+    g.fillStyle = '#fff'; g.font = '500 58px Tomorrow, sans-serif'; g.fillText(`${ext.extracaoNome} · ${ext.hora.replace(':', 'h')}`, 80, 206);
+    g.fillStyle = '#c4ddcf'; g.font = '400 32px Inter, sans-serif'; g.fillText(`${NM.banca(ext.banca).nome} · ${NM.fmtDate(ext.data)}`, 80, 256);
     ext.premios.slice(0, 7).forEach((p, i) => {
-      const y = 368 + i * 92, first = i === 0;
-      g.fillStyle = first ? '#262626' : '#111';
-      g.beginPath(); g.roundRect ? g.roundRect(70, y - 62, W - 140, 80, 8) : g.rect(70, y - 62, W - 140, 80); g.fill();
-      g.fillStyle = first ? '#fff' : '#999'; g.font = '500 28px Tomorrow, monospace'; g.fillText(`${p.posicao}º`, 100, y - 10);
-      g.fillStyle = first ? '#fff' : '#f1f1f1'; g.font = '500 50px Tomorrow, monospace'; g.fillText(p.milhar, 190, y - 4);
-      if (p.milhar.length === 4) { const b = NM.bicho(p.grupo); g.fillStyle = '#aaa'; g.font = '500 34px Inter, sans-serif'; g.textAlign = 'right'; g.fillText(`${b.nome} ${NM.pad(b.grupo, 2)}`, W - 100, y - 8); g.textAlign = 'left'; }
+      const y = 330 + i * 92, first = i === 0;
+      g.fillStyle = first ? '#fff7db' : '#ffffff'; g.strokeStyle = first ? '#f0d47a' : '#dfe8e2'; g.lineWidth = 2;
+      g.beginPath(); g.roundRect ? g.roundRect(70, y, W - 140, 80, 14) : g.rect(70, y, W - 140, 80); g.fill(); g.stroke();
+      g.fillStyle = first ? '#8a6200' : '#5f7067'; g.font = '600 26px Inter, sans-serif'; g.fillText(`${p.posicao}º`, 100, y + 50);
+      g.fillStyle = '#0b1f17'; g.font = '500 48px Tomorrow, sans-serif'; g.fillText(p.milhar, 250, y + 57);
+      if (p.milhar.length === 4) {
+        const b = NM.bicho(p.grupo);
+        g.fillStyle = first ? '#f2b705' : '#eaf7f0'; g.beginPath(); g.arc(196, y + 40, 28, 0, Math.PI * 2); g.fill();
+        NM.bichoCanvas(g, p.grupo, 175, y + 19, 42, first ? '#3b2a00' : '#0e5a3f');
+        g.fillStyle = '#46594f'; g.font = '500 32px Inter, sans-serif'; g.textAlign = 'right'; g.fillText(`${b.nome} ${NM.pad(b.grupo, 2)}`, W - 100, y + 52); g.textAlign = 'left';
+      }
     });
-    g.fillStyle = '#999'; g.font = '400 24px Tomorrow, monospace'; g.fillText('gabrielnassa.github.io/NaMosca', 80, H - 48);
+    g.fillStyle = '#13804f'; g.font = '500 24px Tomorrow, sans-serif'; g.fillText('gabrielnassa.github.io/NaMosca', 80, H - 40);
     return c;
   };
   document.addEventListener('click', (e) => {
@@ -359,12 +371,12 @@
     const bg = document.createElement('div'); bg.className = 'modal-bg'; bg.setAttribute('role', 'dialog'); bg.setAttribute('aria-modal', 'true');
     const draw = () => {
       const [t, txt, bts] = PASSOS[i];
-      bg.innerHTML = `<div class="modal">${LOGO}<h2 style="margin-top:14px">${t}</h2><p>${txt}</p><div class="btn-row">${bts.map((b, k) => `<button class="btn ${k ? 'btn-soft' : 'btn-primary'}" data-k="${k}">${b}</button>`).join('')}</div><div class="passos">${PASSOS.map((_, k) => `<i class="${k <= i ? 'on' : ''}"></i>`).join('')}</div></div>`;
+      bg.innerHTML = `<div class="modal"><div class="modal-top">${LOGO}<span>NA MOSCA</span></div><h2>${t}</h2><p>${txt}</p><div class="btn-row">${bts.map((b, k) => `<button class="btn ${k ? 'btn-soft' : 'btn-primary'}" data-k="${k}">${b}</button>`).join('')}</div><div class="passos">${PASSOS.map((_, k) => `<i class="${k <= i ? 'on' : ''}"></i>`).join('')}</div></div>`;
       bg.querySelector('button').focus();
     };
     bg.addEventListener('click', (e) => {
       const b = e.target.closest('button[data-k]'); if (!b) return;
-      if (i === 0 && b.dataset.k === '1') { bg.querySelector('.modal').innerHTML = `${LOGO}<h2 style="margin-top:14px">Acesso não permitido</h2><p>O Na Mosca é destinado apenas a maiores de 18 anos.</p>`; return; }
+      if (i === 0 && b.dataset.k === '1') { bg.querySelector('.modal').innerHTML = `<div class="modal-top">${LOGO}<span>NA MOSCA</span></div><h2>Acesso não permitido</h2><p>O Na Mosca é destinado apenas a maiores de 18 anos.</p>`; return; }
       if (i === 0) { try { localStorage.setItem('nm-18', '1'); } catch (er) {} }
       if (++i >= PASSOS.length) { bg.remove(); return; }
       draw();

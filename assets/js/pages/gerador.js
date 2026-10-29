@@ -14,7 +14,7 @@
 
   function picker() {
     $('#picker').innerHTML = NM.BICHOS.map((b) => `<button type="button" data-g="${b.grupo}" class="${sel[b.grupo] || ''}"
-      title="${b.nome}: ${b.dezenas.join(', ')}"><b>${NM.pad(b.grupo, 2)}</b>${b.nome}</button>`).join('');
+      title="${b.nome}: ${b.dezenas.join(', ')}">${NM.bichoSvg(b.grupo)}<b>${NM.pad(b.grupo, 2)}</b>${b.nome}</button>`).join('');
   }
 
   function fmtJogo(j) {

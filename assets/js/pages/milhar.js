@@ -109,7 +109,7 @@
     out.sort((x, y) => y.score - x.score);
     st.gerados = out.slice(0, Math.max(1, Math.min(500, Number($('#g-qtd').value) || 30)));
     $('#g-out').innerHTML = st.gerados.length ? `<p class="note" style="margin:0 0 10px">Dígitos usados — milhar: <b>${pos[0].join(' ')}</b> · centena: <b>${pos[1].join(' ')}</b> · dezena: <b>${pos[2].join(' ')}</b> · unidade: <b>${pos[3].join(' ')}</b> · ${out.length} combinações passaram nos filtros.</p>
-      <div class="jogos">${st.gerados.map((x, i) => `<div class="jogo"><span class="idx">${NM.pad(i + 1, 2)}</span><div><div class="nums">${x.m}</div><div class="small">${bichoDe(x.m).nome} · grupo ${NM.pad(bichoDe(x.m).grupo, 2)}</div></div></div>`).join('')}</div>`
+      <div class="jogos">${st.gerados.map((x, i) => `<div class="jogo"><span class="idx">${NM.pad(i + 1, 2)}</span>${NM.bichoIc(bichoDe(x.m).grupo)}<div><div class="nums">${x.m}</div><div class="small">${bichoDe(x.m).nome} · grupo ${NM.pad(bichoDe(x.m).grupo, 2)}</div></div></div>`).join('')}</div>`
       : '<p class="empty">Nenhuma milhar passou nos filtros — afrouxe algum deles</p>';
     try { sessionStorage.setItem('nm-milhares', st.gerados.map((x) => x.m).join('\n')); } catch (e) {}
   }
